@@ -1,0 +1,17 @@
+{
+  "name": "ظرفیت — دستیار تصمیم‌گیری مالی شخصی",
+  "short_name": "ظرفیت",
+  "description": "قبل از خرید، ببین توان واقعی تعهد مالی‌ات چقدر است",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#EFF2EB",
+  "theme_color": "#12261F",
+  "dir": "rtl",
+  "lang": "fa",
+  "icons": [
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" }
+  ]
+}
