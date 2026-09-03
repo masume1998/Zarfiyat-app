@@ -6,7 +6,7 @@
 <title>ظرفیت | دستیار تصمیم‌گیری مالی شخصی</title>
 
 <link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#12261F">
+<meta name="theme-color" content="#001F3F">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -18,20 +18,21 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@100..900&display=swap">
 <style>
   :root{
-    --ink:#12261F; --ink-soft:#3C4A40; --muted:#748076;
-    --paper:#EFF2EB; --paper-deep:#E4E9DF; --surface:#FFFFFF; --line:#DDE3D6;
-    --safe:#1E7355; --safe-soft:#E4F1EA;
-    --caution:#AD7A2E; --caution-soft:#F5ECDA;
+    --ink:#001F3F; --ink-soft:#2C4A6B; --muted:#6E7C8C;
+    --paper:#F6F7ED; --paper-deep:#EAECDD; --surface:#FFFFFF; --line:#DEE1D2;
+    --safe:#00804C; --safe-soft:#E1F0E6;
+    --caution:#8A7200; --caution-soft:#F7F3D2;
     --danger:#B3402A; --danger-soft:#F6E4DF;
-    --track:#E3E7DE;
-    --shadow: 0 18px 40px -18px rgba(18,38,31,.28);
+    --accent:#DBE64C; --accent2:#1E488F;
+    --track:#E3E6D6;
+    --shadow: 0 18px 40px -18px rgba(0,31,63,.28);
   }
   *{box-sizing:border-box; margin:0; padding:0;}
   html,body{height:100%;}
   body{
     font-family:'Vazirmatn', sans-serif;
-    background: radial-gradient(circle at 18% -10%, #DCE7DC 0%, transparent 55%),
-      radial-gradient(circle at 100% 110%, #E9E2D2 0%, transparent 45%), #DCE2D6;
+    background: radial-gradient(circle at 18% -10%, #E4E9DA 0%, transparent 55%),
+      radial-gradient(circle at 100% 110%, #DCE6EF 0%, transparent 45%), #DCE2D6;
     min-height:100vh; min-height:100dvh;
     display:flex; align-items:center; justify-content:center;
     padding:32px 16px; color:var(--ink);
@@ -44,7 +45,7 @@
   .device{
     width:100%; max-width:400px; height:840px; max-height:92vh;
     background:var(--paper); border-radius:44px; border:10px solid var(--ink);
-    box-shadow: var(--shadow), 0 0 0 2px rgba(18,38,31,.06);
+    box-shadow: var(--shadow), 0 0 0 2px rgba(0,31,63,.06);
     position:relative; overflow:hidden; display:flex; flex-direction:column;
   }
   .notch{ position:absolute; top:0; left:50%; transform:translateX(-50%);
@@ -69,6 +70,7 @@
   .section-title{ font-size:14px; font-weight:700; margin:22px 0 10px; display:flex; align-items:center; justify-content:space-between; }
   .section-title span.link{ font-size:12px; font-weight:600; color:var(--safe); cursor:pointer; }
   .muted{ color:var(--muted); }
+  .hint{ font-size:11px; color:var(--muted); margin-top:5px; line-height:1.6; }
 
   .btn{ display:flex; align-items:center; justify-content:center; gap:8px; width:100%; padding:15px;
     border-radius:100px; border:none; font-family:inherit; font-size:14.5px; font-weight:700; cursor:pointer; }
@@ -84,8 +86,8 @@
     width:100%; padding:13px 14px; border-radius:12px; border:1px solid var(--line);
     background:var(--surface); font-family:inherit; font-size:14px; color:var(--ink);
   }
-  .row-2{ display:flex; gap:10px; }
-  .row-2 > *{ flex:1; }
+  .row-2{ display:flex; gap:10px; } .row-2 > *{ flex:1; }
+  .row-3{ display:flex; gap:8px; } .row-3 > *{ flex:1; min-width:0; }
   .mb14{ margin-bottom:14px; } .mb18{ margin-bottom:18px; } .mb22{ margin-bottom:22px; }
 
   .chip{ padding:9px 14px; border-radius:100px; border:1.4px solid var(--line); background:var(--surface);
@@ -93,7 +95,7 @@
   .chip.selected{ border-color:var(--safe); background:var(--safe-soft); color:var(--safe); }
   .chip-grid{ display:flex; flex-wrap:wrap; gap:8px; }
 
-  .list-row{ display:flex; align-items:center; gap:12px; padding:13px 0; }
+  .list-row{ display:flex; align-items:center; gap:12px; padding:13px 0; cursor:pointer; }
   .list-row + .list-row{ border-top:1px dashed var(--line); }
   .list-row .emoji-badge{ width:38px; height:38px; border-radius:12px; background:var(--paper-deep);
     display:flex; align-items:center; justify-content:center; font-size:17px; flex:0 0 auto; }
@@ -101,10 +103,9 @@
   .list-row .title{ font-size:13.5px; font-weight:700; }
   .list-row .sub{ font-size:11.5px; color:var(--muted); margin-top:2px; }
   .list-row .amount{ font-size:13.5px; font-weight:800; }
-  .row-del{ width:26px; height:26px; border-radius:50%; background:var(--paper-deep); border:none;
-    display:flex; align-items:center; justify-content:center; color:var(--muted); font-size:13px; cursor:pointer; flex:0 0 auto;}
+  .row-del, .row-edit{ width:26px; height:26px; border-radius:50%; background:var(--paper-deep); border:none;
+    display:flex; align-items:center; justify-content:center; color:var(--muted); font-size:12px; cursor:pointer; flex:0 0 auto;}
 
-  /* stepper */
   .step-dots{ display:flex; gap:6px; margin-bottom:22px; justify-content:center; }
   .step-dots span{ width:26px; height:4px; border-radius:4px; background:var(--track); }
   .step-dots span.done{ background:var(--safe); }
@@ -114,7 +115,6 @@
   .step-actions{ position:sticky; bottom:0; background:linear-gradient(0deg,var(--paper) 65%,transparent);
     padding-top:16px; display:flex; gap:10px; }
 
-  /* gauge */
   .gauge-wrap{ display:flex; flex-direction:column; align-items:center; margin:10px 0 2px; position:relative; }
   .gauge-figure{ position:relative; width:200px; }
   .gauge-figure svg{ width:100%; display:block; }
@@ -138,12 +138,12 @@
   .segmented{ display:flex; background:var(--paper-deep); border-radius:100px; padding:3px; margin-bottom:18px; }
   .segmented button{ flex:1; border:none; background:transparent; padding:9px 6px; border-radius:100px;
     font-family:inherit; font-size:12px; font-weight:700; color:var(--muted); cursor:pointer; }
-  .segmented button.active{ background:var(--surface); color:var(--ink); box-shadow:0 2px 6px rgba(18,38,31,.08); }
+  .segmented button.active{ background:var(--surface); color:var(--ink); box-shadow:0 2px 6px rgba(0,31,63,.1); }
 
-  .waterfall-row{ display:flex; align-items:center; justify-content:space-between; padding:13px 0; }
+  .waterfall-row{ display:flex; align-items:center; justify-content:space-between; padding:13px 0; gap:10px; }
   .waterfall-row + .waterfall-row{ border-top:1px dashed var(--line); }
   .waterfall-row .l{ font-size:13px; font-weight:600; color:var(--ink-soft); display:flex; align-items:center; gap:8px;}
-  .waterfall-row .r{ font-size:14.5px; font-weight:800; }
+  .waterfall-row .r{ font-size:14.5px; font-weight:800; text-align:left; }
   .waterfall-row.total .r{ font-size:17px; }
   .waterfall-arrow{ text-align:center; color:var(--line); font-size:12px; }
 
@@ -168,26 +168,36 @@
     font-family:inherit; font-size:10px; font-weight:700; color:var(--muted); cursor:pointer; padding:4px 6px; }
   .nav-btn svg{ width:20px; height:20px; }
   .nav-btn.active{ color:var(--safe); }
-  .nav-fab{ width:52px; height:52px; border-radius:50%; background:var(--safe); color:#fff; display:flex;
+  .nav-fab{ width:52px; height:52px; border-radius:50%; background:var(--accent); color:var(--ink); display:flex;
     align-items:center; justify-content:center; border:none; margin-top:-30px;
-    box-shadow:0 10px 22px -6px rgba(30,115,85,.55); cursor:pointer; }
+    box-shadow:0 10px 22px -6px rgba(219,230,76,.7); cursor:pointer; }
   .nav-fab svg{ width:22px; height:22px; }
 
   .topbar{ display:flex; align-items:center; justify-content:space-between; margin-bottom:18px; }
   .icon-btn{ width:34px; height:34px; border-radius:50%; background:var(--surface); border:1px solid var(--line);
-    display:flex; align-items:center; justify-content:center; cursor:pointer; }
+    display:flex; align-items:center; justify-content:center; cursor:pointer; flex:0 0 auto; }
   .badge-necessity{ font-size:10px; font-weight:700; padding:3px 9px; border-radius:100px; }
   .badge-necessity.req{ background:var(--safe-soft); color:var(--safe); }
   .badge-necessity.semi{ background:var(--caution-soft); color:var(--caution); }
   .badge-necessity.optional{ background:var(--danger-soft); color:var(--danger); }
+  .badge-channel{ font-size:10px; font-weight:700; padding:3px 9px; border-radius:100px; background:var(--paper-deep); color:var(--ink-soft); }
 
-  .schedule-list{ margin-top:10px; }
-  .schedule-item{ display:flex; justify-content:space-between; font-size:12px; padding:7px 0; border-top:1px dashed var(--line); }
+  .schedule-swipe-wrap{ position:relative; overflow:hidden; border-radius:8px; margin-top:2px; }
+  .schedule-swipe-hint{ position:absolute; inset:0; background:var(--safe-soft); color:var(--safe);
+    display:flex; align-items:center; padding-right:14px; font-size:11px; font-weight:700; }
+  .schedule-item{ position:relative; z-index:1; background:var(--surface); display:flex; justify-content:space-between;
+    font-size:12px; padding:9px 8px; border-top:1px dashed var(--line); touch-action:pan-y; user-select:none; }
+  .schedule-item.paid-row{ background:var(--safe-soft); }
   .schedule-item .paid{ color:var(--muted); text-decoration:line-through; }
+  .schedule-item .check{ margin-left:6px; }
+
+  .due-banner{ background:var(--caution-soft); border-radius:16px; padding:14px 16px; margin-bottom:16px; }
+  .due-banner .row{ display:flex; justify-content:space-between; font-size:12px; padding:4px 0; color:var(--ink-soft); }
+  .due-banner .title{ font-size:12.5px; font-weight:800; color:var(--caution); margin-bottom:6px; }
 
   input[type="range"]{ -webkit-appearance:none; width:100%; height:6px; border-radius:100px; background:var(--track); outline:none; }
   input[type="range"]::-webkit-slider-thumb{ -webkit-appearance:none; width:20px; height:20px; border-radius:50%;
-    background:var(--safe); border:4px solid #fff; box-shadow:0 2px 8px rgba(30,115,85,.4); cursor:pointer; }
+    background:var(--safe); border:4px solid #fff; box-shadow:0 2px 8px rgba(0,128,76,.4); cursor:pointer; }
 </style>
 </head>
 <body>
@@ -196,68 +206,18 @@
   <div class="notch"></div>
   <div class="screens">
 
-    <!-- ================= ONBOARDING ================= -->
     <div class="screen active" id="screen-ob">
       <div id="ob-steps"></div>
     </div>
 
-    <!-- ================= HOME ================= -->
     <div class="screen" id="screen-home">
-      <div class="topbar">
-        <div class="icon-btn" data-nav="profile">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="8" r="3.4" stroke="#12261F" stroke-width="1.8"/><path d="M5 20c1.6-3.6 4.4-5.4 7-5.4S17.4 16.4 19 20" stroke="#12261F" stroke-width="1.8" stroke-linecap="round"/></svg>
-        </div>
-        <div style="display:flex; align-items:center; gap:8px;">
-          <b style="font-size:14px;">ظرفیت</b>
-          <div style="width:28px; height:28px; border-radius:9px; background:var(--ink); display:flex; align-items:center; justify-content:center;">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M4 15c2-6 6-9 8-9s6 3 8 9" stroke="#EFF2EB" stroke-width="2.2" stroke-linecap="round"/><circle cx="12" cy="15" r="1.6" fill="#EFF2EB"/></svg>
-          </div>
-        </div>
-      </div>
-
-      <div id="home-greeting" class="step-title" style="font-size:21px;"></div>
-      <div class="muted" style="font-size:13px; margin-bottom:18px;">قبل از خرج کردن، ببین این تصمیم چه اثری روی آینده‌ات داره</div>
-
-      <div class="card" style="background:linear-gradient(160deg,var(--ink) 0%, #1E3A2F 100%); border:none; color:#fff; position:relative;">
-        <div style="display:flex; justify-content:space-between; align-items:flex-start;">
-          <span id="home-status-chip" class="status-chip safe"><span class="dot"></span> امن</span>
-          <span class="eyebrow" style="color:rgba(255,255,255,.6); margin:0;">سقف امن اقساط این ماه</span>
-        </div>
-        <div class="gauge-wrap"><div class="gauge-figure" id="home-gauge"></div></div>
-        <div style="height:8px; border-radius:100px; background:rgba(255,255,255,.12); overflow:hidden; position:relative;">
-          <div id="home-progress-fill" style="height:100%; border-radius:100px;"></div>
-        </div>
-        <div style="display:flex; justify-content:space-between; margin-top:9px; font-size:11.5px; color:rgba(255,255,255,.68);">
-          <span>سقف: <b id="home-cap" class="num" style="color:#fff;"></b></span>
-          <span>اقساط این ماه: <b id="home-used" class="num" style="color:#fff;"></b></span>
-        </div>
-      </div>
-
-      <div class="section-title">وضعیت درآمد و هزینه</div>
-      <div class="card">
-        <div class="waterfall-row"><span class="l">💰 درآمد قابل‌اتکا</span><span class="r num" id="home-reliable"></span></div>
-        <div class="waterfall-row"><span class="l">🎲 درآمد متغیر (میانگین)</span><span class="r num" id="home-variable"></span></div>
-        <div class="waterfall-row"><span class="l">🧾 هزینه‌های ثابت</span><span class="r num" id="home-fixed"></span></div>
-        <div class="waterfall-row total"><span class="l">🟢 ظرفیت باقی‌مانده اقساط</span><span class="r num" id="home-remaining" style="color:var(--safe)"></span></div>
-      </div>
-
-      <div class="section-title">تعهدات ماه‌های آینده <span class="link" data-nav="plan">مشاهده تقویم</span></div>
-      <div class="month-strip" id="home-months"></div>
-
-      <button class="btn btn-primary" style="margin-top:22px;" id="home-cta">
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="#fff" stroke-width="2.4" stroke-linecap="round"/></svg>
-        قبل از خرید بررسی کن
-      </button>
+      <div id="home-content"></div>
     </div>
 
-    <!-- ================= COMMITMENTS ================= -->
     <div class="screen" id="screen-commitments">
-      <div class="topbar"><h2 style="font-size:18px;">تعهدات مالی</h2></div>
-      <div class="filter-row" id="commit-filters"></div>
-      <div id="commit-list"></div>
+      <div id="commitments-content"></div>
     </div>
 
-    <!-- ================= PLAN ================= -->
     <div class="screen" id="screen-plan">
       <div class="topbar"><h2 style="font-size:18px;">برنامه مالی</h2></div>
       <div class="segmented" id="plan-segmented">
@@ -270,13 +230,10 @@
       <div id="plan-cashflow" style="display:none;"></div>
     </div>
 
-    <!-- ================= PROFILE ================= -->
     <div class="screen" id="screen-profile">
-      <div class="topbar"><h2 style="font-size:18px;">پروفایل و تنظیمات</h2></div>
       <div id="profile-content"></div>
     </div>
 
-    <!-- ================= SIMULATOR ================= -->
     <div class="screen" id="screen-sim">
       <div id="sim-content"></div>
     </div>
@@ -295,7 +252,7 @@
       تعهدات
     </button>
     <button class="nav-fab" data-nav="sim">
-      <svg viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="#fff" stroke-width="2.4" stroke-linecap="round"/></svg>
+      <svg viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="#001F3F" stroke-width="2.4" stroke-linecap="round"/></svg>
     </button>
     <button class="nav-btn" data-nav="plan">
       <svg viewBox="0 0 24 24" fill="none"><rect x="4" y="5" width="16" height="15" rx="3" stroke="currentColor" stroke-width="1.8"/><path d="M4 10h16M8 3v4M16 3v4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
@@ -311,13 +268,8 @@
 <script>
 "use strict";
 
-/* =========================================================
-   1) JALALI (PERSIAN) CALENDAR ENGINE
-   Standard jalaali conversion algorithm (Julian-day based).
-========================================================= */
 function jdiv(a,b){ return Math.trunc(a/b); }
 function jmod(a,b){ return a - Math.trunc(a/b)*b; }
-
 function g2d(gy,gm,gd){
   let d = jdiv((gy + jdiv(gm-8,6) + 100100)*1461,4) + jdiv(153*jmod(gm+9,12)+2,5) + gd - 34840408;
   d = d - jdiv(jdiv(gy+100100+jdiv(gm-8,6),100)*3,4) + 752;
@@ -369,7 +321,7 @@ function d2j(jdn){
     k -= 186;
   } else {
     jy -= 1; k += 179;
-    if(r.leap === 1) k += 1;
+    if(jalCal(jy).leap === 1) k += 1;
   }
   jm = 7 + jdiv(k,30); jd = jmod(k,30) + 1;
   return {jy,jm,jd};
@@ -384,12 +336,9 @@ function jAddMonths(jy,jm,n){
 function jToday(){ const now = new Date(); return toJalaali(now.getFullYear(), now.getMonth()+1, now.getDate()); }
 
 const MONTH_NAMES = ['','فروردین','اردیبهشت','خرداد','تیر','مرداد','شهریور','مهر','آبان','آذر','دی','بهمن','اسفند'];
-function monthKey(jy,jm){ return jy*100+jm; }
-function fmtJDate(j){ return `${fa(j.jd)} ${MONTH_NAMES[j.jm]}`; }
+function fmtJDate(j){ return `${fa(j.jd)} ${MONTH_NAMES[j.jm]} ${fa(j.jy)}`; }
+function fmtJDateShort(j){ return `${fa(j.jd)} ${MONTH_NAMES[j.jm]}`; }
 
-/* =========================================================
-   2) NUMBER / TEXT HELPERS
-========================================================= */
 function fa(n){ return Math.round(n).toLocaleString('fa-IR'); }
 function toman(n){ return fa(n) + ' تومان'; }
 function parseFaNumber(str){
@@ -399,9 +348,52 @@ function parseFaNumber(str){
 }
 function uid(){ return 'id' + Math.random().toString(36).slice(2,10) + Date.now().toString(36); }
 
-/* =========================================================
-   3) STATIC DATA
-========================================================= */
+function attachAmountFormat(el){
+  if(!el || el._faFormatted) return;
+  el._faFormatted = true;
+  el.addEventListener('input', ()=>{
+    const digits = el.value.replace(/[۰-۹]/g, d=>'۰۱۲۳۴۵۶۷۸۹'.indexOf(d)).replace(/[^\d]/g,'');
+    el.value = digits ? parseInt(digits,10).toLocaleString('fa-IR') : '';
+  });
+}
+function wireAmountInputs(root){
+  (root || document).querySelectorAll('.amt-input').forEach(attachAmountFormat);
+}
+
+function jalaliPickerHTML(prefix, j){
+  const years = []; for(let y=j.jy-3; y<=j.jy+2; y++) years.push(y);
+  return `<div class="row-3">
+    <select class="input" id="${prefix}-d"></select>
+    <select class="input" id="${prefix}-m">
+      ${MONTH_NAMES.slice(1).map((n,i)=>`<option value="${i+1}" ${i+1===j.jm?'selected':''}>${n}</option>`).join('')}
+    </select>
+    <select class="input" id="${prefix}-y">
+      ${years.map(y=>`<option value="${y}" ${y===j.jy?'selected':''}>${fa(y)}</option>`).join('')}
+    </select>
+  </div>`;
+}
+function fillJalaliDays(prefix, keepDay){
+  const y = parseInt(document.getElementById(prefix+'-y').value,10);
+  const m = parseInt(document.getElementById(prefix+'-m').value,10);
+  const len = jMonthLength(y,m);
+  const daySel = document.getElementById(prefix+'-d');
+  const target = Math.min(keepDay || parseInt(daySel.value,10) || 1, len);
+  daySel.innerHTML = Array.from({length:len},(_,i)=>i+1)
+    .map(d=>`<option value="${d}" ${d===target?'selected':''}>${fa(d)}</option>`).join('');
+}
+function initJalaliPicker(prefix, j){
+  fillJalaliDays(prefix, j.jd);
+  document.getElementById(prefix+'-y').addEventListener('change', ()=>fillJalaliDays(prefix));
+  document.getElementById(prefix+'-m').addEventListener('change', ()=>fillJalaliDays(prefix));
+}
+function readJalaliPicker(prefix){
+  return {
+    jy: parseInt(document.getElementById(prefix+'-y').value,10),
+    jm: parseInt(document.getElementById(prefix+'-m').value,10),
+    jd: parseInt(document.getElementById(prefix+'-d').value,10)
+  };
+}
+
 const FIXED_CATEGORIES = [
   {key:'rent', label:'اجاره', emoji:'🏠'}, {key:'food', label:'غذا', emoji:'🍽️'},
   {key:'transport', label:'حمل‌ونقل', emoji:'🚌'}, {key:'bills', label:'قبض', emoji:'🧾'},
@@ -426,6 +418,8 @@ const SCHEDULE_LABELS = {
   start_of_next_month:'ابتدای ماه بعد', monthly_fixed_day:'ماهانه، روز ثابت',
   every_30_days:'هر ۳۰ روز', custom_interval:'فاصله سفارشی'
 };
+const CHANNELS = [ {key:'online', label:'🌐 اینترنتی', hint:'قسط اول همون موقع پرداخت می‌شه'},
+  {key:'in_person', label:'🏬 حضوری', hint:'هیچ قسطی موقع خرید پرداخت نمی‌شه'} ];
 const FREQUENCIES = [
   {key:'daily', label:'روزانه', factor:30}, {key:'weekly', label:'هفتگی', factor:4.345},
   {key:'monthly', label:'ماهانه', factor:1}, {key:'yearly', label:'سالانه', factor:1/12},
@@ -443,10 +437,8 @@ const NECESSITY = [
   {key:'req', label:'ضروری'}, {key:'semi', label:'نسبتاً ضروری'}, {key:'optional', label:'غیرضروری'}
 ];
 
-/* =========================================================
-   4) STATE
-========================================================= */
 const STORAGE_KEY = 'zarfiyat-financial-state-v1';
+const NOTIF_KEY_PREFIX = 'zarfiyat-notified-';
 
 function defaultState(){
   return {
@@ -458,57 +450,70 @@ function defaultState(){
     installmentCapPercent: 30,
     thresholds: { safe:30, caution:40 },
     commitments: [],
-    pendingSimulation: null
+    pendingSimulation: null,
+    notificationsEnabled: false
   };
 }
 let state = defaultState();
 
+function migrateCommitment(c){
+  if(!c.channel) c.channel = 'in_person';
+  if(!Array.isArray(c.paidFlags)){
+    const paidCount = typeof c.paid === 'number' ? c.paid : 0;
+    c.paidFlags = Array.from({length:c.installments}, (_,i)=> i<paidCount);
+  }
+  if(c.paidFlags.length !== c.installments){
+    const flags = Array.from({length:c.installments}, (_,i)=> !!c.paidFlags[i]);
+    c.paidFlags = flags;
+  }
+  delete c.paid;
+  return c;
+}
 function saveState(){
   try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }catch(e){}
 }
 function loadState(){
   try{
     const raw = localStorage.getItem(STORAGE_KEY);
-    if(raw){ state = Object.assign(defaultState(), JSON.parse(raw)); }
+    if(raw){
+      state = Object.assign(defaultState(), JSON.parse(raw));
+      state.commitments = (state.commitments||[]).map(migrateCommitment);
+    }
   }catch(e){ state = defaultState(); }
 }
 
-/* =========================================================
-   5) PAYMENT SCHEDULE ENGINE
-========================================================= */
-function generateSchedule(purchaseJ, installments, perInstallment, ruleType, intervalDays){
-  const entries = [];
+function scheduleEntryAt(purchaseJ, offset, ruleType, intervalDays, amount){
   if(ruleType === 'start_of_next_month'){
-    for(let i=0;i<installments;i++){
-      const t = jAddMonths(purchaseJ.jy, purchaseJ.jm, i+1);
-      entries.push({ jy:t.jy, jm:t.jm, jd:1, amount:perInstallment });
-    }
-  } else if(ruleType === 'monthly_fixed_day'){
-    const day = purchaseJ.jd;
-    for(let i=0;i<installments;i++){
-      const t = jAddMonths(purchaseJ.jy, purchaseJ.jm, i+1);
-      const clampedDay = Math.min(day, jMonthLength(t.jy,t.jm));
-      entries.push({ jy:t.jy, jm:t.jm, jd:clampedDay, amount:perInstallment });
-    }
-  } else { // every_30_days OR custom_interval
-    const step = ruleType === 'custom_interval' ? (intervalDays || 30) : 30;
-    const jdn0 = j2d(purchaseJ.jy, purchaseJ.jm, purchaseJ.jd);
-    for(let i=0;i<installments;i++){
-      const j = d2j(jdn0 + step*(i+1));
-      entries.push({ jy:j.jy, jm:j.jm, jd:j.jd, amount:perInstallment });
-    }
+    const t = jAddMonths(purchaseJ.jy, purchaseJ.jm, offset);
+    return { jy:t.jy, jm:t.jm, jd:1, amount };
+  }
+  if(ruleType === 'monthly_fixed_day'){
+    const t = jAddMonths(purchaseJ.jy, purchaseJ.jm, offset);
+    const day = Math.min(purchaseJ.jd, jMonthLength(t.jy,t.jm));
+    return { jy:t.jy, jm:t.jm, jd:day, amount };
+  }
+  const step = ruleType === 'custom_interval' ? (intervalDays || 30) : 30;
+  const jdn0 = j2d(purchaseJ.jy, purchaseJ.jm, purchaseJ.jd);
+  const j = d2j(jdn0 + step*offset);
+  return { jy:j.jy, jm:j.jm, jd:j.jd, amount };
+}
+function generateSchedule(purchaseJ, installments, perInstallment, ruleType, intervalDays, channel){
+  const entries = [];
+  let count = installments;
+  if(channel === 'online'){
+    entries.push({ jy:purchaseJ.jy, jm:purchaseJ.jm, jd:purchaseJ.jd, amount:perInstallment });
+    count = installments - 1;
+  }
+  for(let p=0; p<count; p++){
+    entries.push(scheduleEntryAt(purchaseJ, p+1, ruleType, intervalDays, perInstallment));
   }
   return entries;
 }
-
 function buildCommitmentSchedule(c){
-  const sched = generateSchedule(c.purchaseDate, c.installments, c.monthly, c.scheduleType, c.intervalDays);
-  return sched.map((e,i) => Object.assign({}, e, { paid: i < c.paid }));
+  const sched = generateSchedule(c.purchaseDate, c.installments, c.monthly, c.scheduleType, c.intervalDays, c.channel);
+  return sched.map((e,i) => Object.assign({}, e, { paid: !!(c.paidFlags && c.paidFlags[i]), index:i }));
 }
 
-/* =========================================================
-   6) DERIVED FINANCIAL CALCULATIONS
-========================================================= */
 function reliableMonthlyIncome(){
   return state.incomeSources.filter(s=>s.fixed).reduce((sum,s)=>{
     const f = FREQUENCIES.find(x=>x.key===s.frequency);
@@ -521,12 +526,8 @@ function variableMonthlyIncome(){
     return sum + s.amount * (f ? f.factor : 1);
   },0);
 }
-function totalFixedExpenses(){
-  return state.fixedExpenses.reduce((sum,e)=>sum+e.amount,0);
-}
-function cap(){
-  return Math.round(reliableMonthlyIncome() * state.installmentCapPercent / 100);
-}
+function totalFixedExpenses(){ return state.fixedExpenses.reduce((sum,e)=>sum+e.amount,0); }
+function cap(){ return Math.round(reliableMonthlyIncome() * state.installmentCapPercent / 100); }
 function statusFromPercent(pct){
   if(pct > 100) return 'danger';
   if(pct > state.thresholds.safe) return pct > state.thresholds.caution ? 'danger' : 'caution';
@@ -535,8 +536,6 @@ function statusFromPercent(pct){
 function statusMeta(s){
   return { safe:{emoji:'🟢',label:'امن'}, caution:{emoji:'🟡',label:'احتیاط'}, danger:{emoji:'🔴',label:'پرریسک'} }[s];
 }
-
-// all schedule entries across active commitments (each with commitment ref)
 function allEntries(includePending){
   const list = [];
   state.commitments.forEach(c=>{
@@ -545,7 +544,8 @@ function allEntries(includePending){
   if(includePending && state.pendingSimulation){
     generateSchedule(
       state.pendingSimulation.purchaseDate, state.pendingSimulation.installments,
-      state.pendingSimulation.monthly, state.pendingSimulation.scheduleType, state.pendingSimulation.intervalDays
+      state.pendingSimulation.monthly, state.pendingSimulation.scheduleType,
+      state.pendingSimulation.intervalDays, state.pendingSimulation.channel
     ).forEach(e=>list.push(e));
   }
   return list;
@@ -559,17 +559,27 @@ function nextMonths(n){
   for(let i=0;i<n;i++){ out.push(jAddMonths(t.jy,t.jm,i)); }
   return out;
 }
+function dueSoonEntries(withinDays){
+  const t = jToday();
+  const todayJdn = j2d(t.jy,t.jm,t.jd);
+  const list = [];
+  state.commitments.forEach(c=>{
+    buildCommitmentSchedule(c).forEach((e,i)=>{
+      if(e.paid) return;
+      const diff = j2d(e.jy,e.jm,e.jd) - todayJdn;
+      if(diff>=0 && diff<=withinDays) list.push({ commitment:c, entry:e, index:i, diff });
+    });
+  });
+  return list.sort((a,b)=>a.diff-b.diff);
+}
 
-/* =========================================================
-   7) SVG GAUGE
-========================================================= */
 function gaugeSVG(percent, trackColor){
   const p = Math.max(0, Math.min(100, percent));
   const r = 76, len = Math.PI*r;
   const offset = len * (1 - p/100);
-  let color = '#7CE3B8';
+  let color = '#3FBE85';
   if(percent > state.thresholds.caution || percent > 100) color = '#F3A28E';
-  else if(percent > state.thresholds.safe) color = '#F0C480';
+  else if(percent > state.thresholds.safe) color = '#DBE64C';
   return `<svg viewBox="0 0 200 108">
     <path d="M22 96 A ${r} ${r} 0 0 1 178 96" fill="none" stroke="${trackColor}" stroke-width="13" stroke-linecap="round"/>
     <path d="M22 96 A ${r} ${r} 0 0 1 178 96" fill="none" stroke="${color}" stroke-width="13" stroke-linecap="round"
@@ -577,9 +587,65 @@ function gaugeSVG(percent, trackColor){
   </svg>`;
 }
 
-/* =========================================================
-   8) TOAST + NAV
-========================================================= */
+function requestNotifications(){
+  if(!('Notification' in window)){ showToast('این مرورگر از نوتیفیکیشن پشتیبانی نمی‌کنه'); return; }
+  Notification.requestPermission().then(perm=>{
+    state.notificationsEnabled = perm === 'granted';
+    saveState();
+    showToast(perm==='granted' ? 'یادآوری اقساط فعال شد ✅' : 'اجازه داده نشد');
+    renderProfile();
+    checkDueNotifications();
+  });
+}
+function checkDueNotifications(){
+  if(!('Notification' in window) || Notification.permission !== 'granted') return;
+  const t = jToday();
+  const key = NOTIF_KEY_PREFIX + j2d(t.jy,t.jm,t.jd);
+  let already = [];
+  try{ already = JSON.parse(localStorage.getItem(key) || '[]'); }catch(e){}
+  dueSoonEntries(1).forEach(({commitment,entry,index,diff})=>{
+    const flagId = commitment.id+'-'+index;
+    if(already.includes(flagId)) return;
+    try{
+      new Notification('یادآوری قسط ظرفیت', {
+        body: `${commitment.name}: ${toman(entry.amount)} ${diff===0?'امروز':'فردا'} سررسید داره`
+      });
+    }catch(e){}
+    already.push(flagId);
+  });
+  try{ localStorage.setItem(key, JSON.stringify(already)); }catch(e){}
+}
+
+function togglePaid(commitmentId, idx){
+  const c = state.commitments.find(x=>x.id===commitmentId);
+  if(!c) return;
+  if(!Array.isArray(c.paidFlags)) c.paidFlags = Array(c.installments).fill(false);
+  c.paidFlags[idx] = !c.paidFlags[idx];
+  saveState();
+  showToast(c.paidFlags[idx] ? 'قسط پرداخت‌شده علامت خورد ✅' : 'به پرداخت‌نشده برگشت');
+  renderCommitments();
+}
+function attachSwipeHandlers(root){
+  root.querySelectorAll('.schedule-item[data-cid]').forEach(row=>{
+    let startX=0, dx=0, dragging=false;
+    const cid = row.dataset.cid, idx = parseInt(row.dataset.idx,10);
+    row.addEventListener('touchstart', e=>{ startX=e.touches[0].clientX; dragging=true; }, {passive:true});
+    row.addEventListener('touchmove', e=>{
+      if(!dragging) return;
+      dx = e.touches[0].clientX - startX;
+      if(dx<0) row.style.transform = `translateX(${Math.max(dx,-90)}px)`;
+    }, {passive:true});
+    row.addEventListener('touchend', ()=>{
+      dragging=false;
+      row.style.transition='transform .2s ease';
+      if(dx < -55) togglePaid(cid, idx);
+      row.style.transform='';
+      dx=0;
+      setTimeout(()=>{ row.style.transition=''; },200);
+    });
+  });
+}
+
 let toastTimer;
 function showToast(msg){
   const t = document.getElementById('toast');
@@ -593,19 +659,15 @@ function goTo(name){
   document.querySelectorAll('.nav-btn').forEach(b=>b.classList.toggle('active', b.dataset.nav===name));
   document.getElementById('screen-'+name).scrollTop = 0;
   if(name==='home') renderHome();
-  if(name==='commitments') renderCommitments();
+  if(name==='commitments'){ commitEditTarget = null; renderCommitments(); }
   if(name==='plan') renderPlan();
   if(name==='profile') renderProfile();
-  if(name==='sim') renderSimStart();
+  if(name==='sim'){ state.pendingSimulation = null; renderSimStart(); }
 }
 document.querySelectorAll('[data-nav]').forEach(el=>{
   el.addEventListener('click', ()=> goTo(el.dataset.nav));
 });
-document.getElementById('home-cta').addEventListener('click', ()=> goTo('sim'));
 
-/* =========================================================
-   9) ONBOARDING
-========================================================= */
 let obStep = 0;
 const OB_TOTAL = 6;
 const obDraft = {
@@ -615,19 +677,19 @@ const obDraft = {
 
 function obDots(){
   let html = '<div class="step-dots">';
-  for(let i=0;i<OB_TOTAL;i++){
-    html += `<span class="${i<obStep?'done':i===obStep?'now':''}"></span>`;
-  }
+  for(let i=0;i<OB_TOTAL;i++) html += `<span class="${i<obStep?'done':i===obStep?'now':''}"></span>`;
   return html + '</div>';
 }
 
 function renderOnboarding(){
   const el = document.getElementById('ob-steps');
+
   if(obStep === 0){
     el.innerHTML = `${obDots()}
       <div class="step-title">اول از همه، دوست داری چطور صدات کنیم؟</div>
       <div class="step-sub">این اسم تو داشبورد و پیام‌های اپ استفاده می‌شه.</div>
       <input class="input" id="ob-name" placeholder="مثلاً معصومه" value="${state.name||''}">
+      <div class="hint">همون اسمی که دوست داری تو سلام‌وعلیک‌های اپ ببینی</div>
       <div class="step-actions"><button class="btn btn-primary" id="ob-next">بعدی</button></div>`;
     document.getElementById('ob-next').onclick = ()=>{
       const v = document.getElementById('ob-name').value.trim();
@@ -642,9 +704,9 @@ function renderOnboarding(){
       <div class="step-sub">هر منبعی که داری اضافه کن. بین درآمد ثابت و متغیر فرق می‌ذاریم تا سقف اقساطت واقع‌بینانه باشه.</div>
       <div class="card mb18">
         <div class="field-label">نام منبع</div>
-        <input class="input mb14" id="inc-name" placeholder="مثلاً حقوق">
+        <input class="input mb14" id="inc-name" placeholder="مثلاً حقوق، فریلنسری، درآمد جانبی">
         <div class="row-2 mb14">
-          <div><div class="field-label">مبلغ</div><input class="input num" id="inc-amount" inputmode="numeric" placeholder="۶٬۰۰۰٬۰۰۰"></div>
+          <div><div class="field-label">مبلغ</div><input class="input amt-input num" id="inc-amount" inputmode="numeric" placeholder="مثلاً ۶٬۰۰۰٬۰۰۰"></div>
           <div><div class="field-label">دوره دریافت</div>
             <select class="input" id="inc-freq">${FREQUENCIES.map(f=>`<option value="${f.key}">${f.label}</option>`).join('')}</select>
           </div>
@@ -654,6 +716,7 @@ function renderOnboarding(){
           <div class="chip selected" data-fixed="1">✅ ثابت / قابل‌اتکا</div>
           <div class="chip" data-fixed="0">🎲 متغیر</div>
         </div>
+        <div class="hint mb14">درآمد ثابت پایه‌ی سقف اقساطته؛ درآمد متغیر فقط برای اطلاعه، روش حساب نمی‌شه</div>
         <button class="btn btn-ghost" id="inc-add">+ افزودن منبع درآمد</button>
       </div>
       <div id="inc-list"></div>
@@ -661,6 +724,7 @@ function renderOnboarding(){
         <button class="btn btn-ghost" id="ob-back" style="max-width:90px;">بازگشت</button>
         <button class="btn btn-primary" id="ob-next">بعدی</button>
       </div>`;
+    wireAmountInputs(el);
 
     let fixedSel = 1;
     el.querySelectorAll('[data-fixed]').forEach(c=>c.onclick=()=>{
@@ -714,22 +778,32 @@ function renderOnboarding(){
     function renderFxList(){
       document.getElementById('fx-list').innerHTML = obDraft.fixedExpenses.map(e=>{
         const c = FIXED_CATEGORIES.find(x=>x.key===e.category);
-        return `<div class="list-row">
+        return `<div class="list-row" data-editfx="${e.id}">
           <div class="emoji-badge">${c.emoji}</div>
           <div class="info"><div class="title">${c.label}</div></div>
           <div class="amount num">${toman(e.amount)}</div>
-          <button class="row-del" data-del="${e.id}">✕</button>
+          <button class="row-del" data-delfx="${e.id}">✕</button>
         </div>`;
       }).join('') || `<div class="muted" style="font-size:12.5px; text-align:center; padding:6px 0 14px;">هنوز هزینه‌ای اضافه نکردی</div>`;
-      document.querySelectorAll('[data-del]').forEach(b=>b.onclick=()=>{
-        obDraft.fixedExpenses = obDraft.fixedExpenses.filter(x=>x.id!==b.dataset.del);
+      document.querySelectorAll('[data-delfx]').forEach(b=>b.onclick=(ev)=>{
+        ev.stopPropagation();
+        obDraft.fixedExpenses = obDraft.fixedExpenses.filter(x=>x.id!==b.dataset.delfx);
         renderFxList();
       });
+      document.querySelectorAll('[data-editfx]').forEach(row=>row.addEventListener('click', ()=>{
+        const item = obDraft.fixedExpenses.find(x=>x.id===row.dataset.editfx);
+        const amountStr = prompt('مبلغ ماهانه جدید (تومان):', item.amount);
+        if(amountStr===null) return;
+        const amount = parseFaNumber(amountStr);
+        if(!amount) return;
+        item.amount = amount;
+        renderFxList();
+      }));
     }
     renderFxList();
     document.querySelectorAll('[data-cat]').forEach(chip=>{
       chip.onclick = ()=>{
-        const amountStr = prompt(`مبلغ ماهانه‌ی «${chip.textContent.trim()}» (تومان):`);
+        const amountStr = prompt(`مبلغ ماهانه‌ی «${chip.textContent.trim()}» (تومان، مثلاً ۲٬۵۰۰٬۰۰۰):`);
         if(amountStr === null) return;
         const amount = parseFaNumber(amountStr);
         if(!amount) return;
@@ -749,17 +823,23 @@ function renderOnboarding(){
       <div class="section-title">شخصی‌سازی درصدها</div>
       <div class="card mb18">
         <div class="row-2 mb14">
-          <div><div class="field-label">نیازها ٪</div><input class="input num" id="tp-needs" type="number"></div>
-          <div><div class="field-label">خواسته‌ها ٪</div><input class="input num" id="tp-wants" type="number"></div>
+          <div><div class="field-label">نیازها ٪</div><input class="input num" id="tp-needs" type="number" placeholder="مثلاً ۵۰">
+            <div class="hint num" id="tp-needs-amt"></div></div>
+          <div><div class="field-label">خواسته‌ها ٪</div><input class="input num" id="tp-wants" type="number" placeholder="مثلاً ۳۰">
+            <div class="hint num" id="tp-wants-amt"></div></div>
         </div>
         <div class="field-label">پس‌انداز ٪</div>
-        <input class="input num" id="tp-savings" type="number">
-        <div class="muted" id="tp-sum" style="font-size:11.5px; margin-top:8px;"></div>
+        <input class="input num" id="tp-savings" type="number" placeholder="مثلاً ۲۰">
+        <div class="hint num" id="tp-savings-amt"></div>
+        <div class="muted" id="tp-sum" style="font-size:11.5px; margin-top:10px;"></div>
       </div>
       <div class="step-actions">
         <button class="btn btn-ghost" id="ob-back" style="max-width:90px;">بازگشت</button>
         <button class="btn btn-primary" id="ob-next">بعدی</button>
       </div>`;
+    const reliable = obDraft.incomeSources.filter(s=>s.fixed).reduce((s,x)=>{
+      const f = FREQUENCIES.find(y=>y.key===x.frequency); return s + x.amount*(f?f.factor:1);
+    },0);
     function renderTechCards(){
       document.getElementById('tech-cards').innerHTML = TECHNIQUES.map(t=>`
         <div class="card mb14" data-tech="${t.key}" style="cursor:pointer; ${obDraft.technique.key===t.key?'border-color:var(--safe); background:var(--safe-soft);':''}">
@@ -779,9 +859,13 @@ function renderOnboarding(){
       updateSum();
     }
     function updateSum(){
-      const sum = (parseInt(document.getElementById('tp-needs').value)||0) +
-                  (parseInt(document.getElementById('tp-wants').value)||0) +
-                  (parseInt(document.getElementById('tp-savings').value)||0);
+      const needs = parseInt(document.getElementById('tp-needs').value)||0;
+      const wants = parseInt(document.getElementById('tp-wants').value)||0;
+      const savings = parseInt(document.getElementById('tp-savings').value)||0;
+      document.getElementById('tp-needs-amt').textContent = toman(reliable*needs/100);
+      document.getElementById('tp-wants-amt').textContent = toman(reliable*wants/100);
+      document.getElementById('tp-savings-amt').textContent = toman(reliable*savings/100);
+      const sum = needs+wants+savings;
       const elSum = document.getElementById('tp-sum');
       elSum.textContent = sum===100 ? `مجموع: ${fa(sum)}٪ ✅` : `مجموع: ${fa(sum)}٪ — بهتره ۱۰۰٪ بشه`;
       elSum.style.color = sum===100 ? 'var(--safe)' : 'var(--danger)';
@@ -814,15 +898,15 @@ function renderOnboarding(){
           <span class="field-label" style="margin:0;">سقف اقساط</span>
         </div>
         <input type="range" min="10" max="70" step="5" value="${obDraft.capPercent}" id="cap-slider">
-        <div class="muted num" style="font-size:12px; margin-top:10px;">سقف محاسبه‌شده: <b id="cap-amount"></b></div>
+        <div class="muted num" style="font-size:12px; margin-top:10px;">سقف محاسبه‌شده (تومان): <b id="cap-amount"></b></div>
       </div>
       <div class="section-title">آستانه‌های وضعیت (قابل تغییر)</div>
       <div class="card mb18">
         <div class="row-2">
-          <div><div class="field-label">🟢 امن تا</div><input class="input num" type="number" id="th-safe" value="${obDraft.thresholds.safe}"></div>
-          <div><div class="field-label">🟡 احتیاط تا</div><input class="input num" type="number" id="th-caution" value="${obDraft.thresholds.caution}"></div>
+          <div><div class="field-label">🟢 امن تا</div><input class="input num" type="number" id="th-safe" value="${obDraft.thresholds.safe}" placeholder="مثلاً ۳۰"></div>
+          <div><div class="field-label">🟡 احتیاط تا</div><input class="input num" type="number" id="th-caution" value="${obDraft.thresholds.caution}" placeholder="مثلاً ۴۰"></div>
         </div>
-        <div class="muted" style="font-size:11.5px; margin-top:8px;">بیشتر از آستانه‌ی احتیاط = 🔴 پرریسک</div>
+        <div class="hint">بیشتر از آستانه‌ی احتیاط = 🔴 پرریسک</div>
       </div>
       <div class="step-actions">
         <button class="btn btn-ghost" id="ob-back" style="max-width:90px;">بازگشت</button>
@@ -854,15 +938,16 @@ function renderOnboarding(){
         <button class="btn btn-ghost" id="ob-back" style="max-width:90px;">بازگشت</button>
         <button class="btn btn-primary" id="ob-finish">پایان و رفتن به داشبورد</button>
       </div>`;
-    renderCommitmentForm(document.getElementById('cm-form'), (c)=>{
+    renderCommitmentForm(document.getElementById('cm-form'), null, (c)=>{
       obDraft.commitments.push(c); renderCmList();
     });
     function renderCmList(){
       document.getElementById('cm-list').innerHTML = obDraft.commitments.map(c=>{
         const t = COMMITMENT_TYPES.find(x=>x.key===c.type);
+        const paidCount = c.paidFlags.filter(Boolean).length;
         return `<div class="list-row">
           <div class="emoji-badge">${t.emoji}</div>
-          <div class="info"><div class="title">${c.name}</div><div class="sub">${fa(c.paid)}/${fa(c.installments)} قسط · ${toman(c.monthly)}</div></div>
+          <div class="info"><div class="title">${c.name}</div><div class="sub">${fa(paidCount)}/${fa(c.installments)} قسط · ${toman(c.monthly)}</div></div>
           <button class="row-del" data-del="${c.id}">✕</button>
         </div>`;
       }).join('') || `<div class="muted" style="font-size:12.5px; text-align:center; padding:6px 0 14px;">هنوز تعهدی اضافه نکردی</div>`;
@@ -888,41 +973,60 @@ function renderOnboarding(){
   }
 }
 
-/* reusable commitment add-form (used in onboarding + commitments tab) */
-function renderCommitmentForm(container, onAdd){
+function renderCommitmentForm(container, existing, onSave){
+  const isEdit = !!existing;
   const today = jToday();
-  const todayGregorian = new Date();
-  const isoToday = todayGregorian.toISOString().slice(0,10);
+  const startDate = isEdit ? existing.purchaseDate : today;
   container.innerHTML = `
     <div class="field-label">نام تعهد</div>
-    <input class="input mb14" id="cf-name" placeholder="مثلاً گوشی، وام بانک، چک اجاره">
+    <input class="input mb14" id="cf-name" placeholder="مثلاً گوشی، وام بانک، چک اجاره" value="${isEdit?existing.name:''}">
     <div class="field-label">نوع</div>
     <div class="chip-grid mb14" id="cf-types">
-      ${COMMITMENT_TYPES.map(t=>`<div class="chip" data-type="${t.key}">${t.emoji} ${t.label}</div>`).join('')}
+      ${COMMITMENT_TYPES.map(t=>`<div class="chip ${isEdit&&existing.type===t.key?'selected':''}" data-type="${t.key}">${t.emoji} ${t.label}</div>`).join('')}
     </div>
     <div class="row-2 mb14">
-      <div><div class="field-label">مبلغ کل</div><input class="input num" id="cf-total" inputmode="numeric" placeholder="۴٬۰۰۰٬۰۰۰"></div>
-      <div><div class="field-label">تعداد اقساط</div><input class="input num" id="cf-installments" type="number" value="4"></div>
+      <div><div class="field-label">مبلغ کل (تومان)</div><input class="input amt-input num" id="cf-total" inputmode="numeric" placeholder="مثلاً ۴٬۰۰۰٬۰۰۰" value="${isEdit?fa(existing.total):''}"></div>
+      <div><div class="field-label">تعداد اقساط</div><input class="input num" id="cf-installments" type="number" min="1" value="${isEdit?existing.installments:4}" placeholder="مثلاً ۴"></div>
     </div>
-    <div class="row-2 mb14">
-      <div><div class="field-label">اقساط پرداخت‌شده</div><input class="input num" id="cf-paid" type="number" value="0"></div>
-      <div><div class="field-label">تاریخ خرید/شروع</div><input class="input date-field" id="cf-date" type="date" value="${isoToday}"></div>
+    <div class="field-label">نحوه خرید</div>
+    <div class="chip-grid mb14" id="cf-channel">
+      ${CHANNELS.map(ch=>`<div class="chip ${(isEdit?existing.channel:'in_person')===ch.key?'selected':''}" data-channel="${ch.key}">${ch.label}</div>`).join('')}
     </div>
+    <div class="hint mb14" id="cf-channel-hint"></div>
+    ${!isEdit ? `
+    <div class="field-label">چند قسط قبلاً پرداخت شده؟</div>
+    <input class="input num mb14" id="cf-paid" type="number" min="0" value="0" placeholder="مثلاً ۰">
+    <div class="hint mb14">اگه این تعهد از قبل شروع شده و چند قسطش رو دادی، اینجا وارد کن</div>` : ''}
+    <div class="field-label">تاریخ خرید/شروع</div>
+    ${jalaliPickerHTML('cf-date', startDate)}
+    <div class="mb14"></div>
     <div class="field-label">سرویس / نوع زمان‌بندی</div>
     <select class="input mb14" id="cf-provider">
-      ${PROVIDERS.map(p=>`<option value="${p.key}">${p.label} — ${SCHEDULE_LABELS[p.rule]}</option>`).join('')}
+      ${PROVIDERS.map(p=>`<option value="${p.key}" ${isEdit&&existing.scheduleType===p.rule?'selected':''}>${p.label} — ${SCHEDULE_LABELS[p.rule]}</option>`).join('')}
     </select>
     <div id="cf-interval-wrap" style="display:none;" class="mb14">
       <div class="field-label">فاصله بین اقساط (روز)</div>
-      <input class="input num" id="cf-interval" type="number" value="30">
+      <input class="input num" id="cf-interval" type="number" value="${isEdit?(existing.intervalDays||30):30}" placeholder="مثلاً ۳۰">
     </div>
     <div class="field-label">ضرورت</div>
     <div class="chip-grid mb14" id="cf-necessity">
-      ${NECESSITY.map(n=>`<div class="chip" data-nec="${n.key}">${n.label}</div>`).join('')}
+      ${NECESSITY.map(n=>`<div class="chip ${(isEdit?existing.necessity:'req')===n.key?'selected':''}" data-nec="${n.key}">${n.label}</div>`).join('')}
     </div>
-    <button class="btn btn-ghost" id="cf-add">+ افزودن تعهد</button>
+    <button class="btn ${isEdit?'btn-primary':'btn-ghost'}" id="cf-add">${isEdit?'ذخیره تغییرات':'+ افزودن تعهد'}</button>
   `;
-  let selType = 'bnpl', selNec = 'req';
+  wireAmountInputs(container);
+  initJalaliPicker('cf-date', startDate);
+
+  let selType = isEdit ? existing.type : 'bnpl';
+  let selNec = isEdit ? existing.necessity : 'req';
+  let selChannel = isEdit ? existing.channel : 'in_person';
+
+  function updateChannelHint(){
+    const ch = CHANNELS.find(c=>c.key===selChannel);
+    container.querySelector('#cf-channel-hint').textContent = ch.hint;
+  }
+  updateChannelHint();
+
   container.querySelectorAll('[data-type]').forEach(c=>c.onclick=()=>{
     container.querySelectorAll('[data-type]').forEach(x=>x.classList.remove('selected'));
     c.classList.add('selected'); selType = c.dataset.type;
@@ -931,135 +1035,258 @@ function renderCommitmentForm(container, onAdd){
     container.querySelectorAll('[data-nec]').forEach(x=>x.classList.remove('selected'));
     c.classList.add('selected'); selNec = c.dataset.nec;
   });
+  container.querySelectorAll('[data-channel]').forEach(c=>c.onclick=()=>{
+    container.querySelectorAll('[data-channel]').forEach(x=>x.classList.remove('selected'));
+    c.classList.add('selected'); selChannel = c.dataset.channel;
+    updateChannelHint();
+  });
   container.querySelector('#cf-provider').addEventListener('change', e=>{
     const p = PROVIDERS.find(x=>x.key===e.target.value);
     container.querySelector('#cf-interval-wrap').style.display = p.rule==='custom_interval' ? 'block':'none';
   });
+  if(isEdit){
+    const p = PROVIDERS.find(x=>x.rule===existing.scheduleType);
+    if(p && p.rule==='custom_interval') container.querySelector('#cf-interval-wrap').style.display='block';
+  }
+
   container.querySelector('#cf-add').onclick = ()=>{
     const name = container.querySelector('#cf-name').value.trim();
     const total = parseFaNumber(container.querySelector('#cf-total').value);
-    const installments = parseInt(container.querySelector('#cf-installments').value,10) || 1;
-    const paid = Math.min(parseInt(container.querySelector('#cf-paid').value,10) || 0, installments);
-    const dateStr = container.querySelector('#cf-date').value;
+    const installments = Math.max(1, parseInt(container.querySelector('#cf-installments').value,10) || 1);
     const providerKey = container.querySelector('#cf-provider').value;
     const provider = PROVIDERS.find(p=>p.key===providerKey);
     const interval = parseInt(container.querySelector('#cf-interval').value,10) || 30;
+    const purchaseDate = readJalaliPicker('cf-date');
     if(!name || !total){ showToast('نام و مبلغ کل رو وارد کن'); return; }
-    const d = dateStr ? new Date(dateStr) : new Date();
-    const purchaseDate = toJalaali(d.getFullYear(), d.getMonth()+1, d.getDate());
     const monthly = Math.round(total / installments);
-    onAdd({
-      id: uid(), name, type: selType, total, installments, paid, monthly,
+
+    let paidFlags;
+    if(isEdit){
+      paidFlags = existing.paidFlags.length===installments
+        ? existing.paidFlags
+        : Array.from({length:installments}, (_,i)=> !!existing.paidFlags[i]);
+    } else {
+      const paidCount = Math.min(parseInt(container.querySelector('#cf-paid').value,10) || 0, installments);
+      paidFlags = Array.from({length:installments}, (_,i)=> i<paidCount);
+      if(selChannel==='online' && installments>0) paidFlags[0] = true;
+    }
+
+    onSave({
+      id: isEdit ? existing.id : uid(), name, type: selType, total, installments, monthly,
       provider: provider.label, scheduleType: provider.rule, intervalDays: interval,
-      purchaseDate, necessity: selNec
+      purchaseDate, necessity: selNec, channel: selChannel, paidFlags
     });
-    container.querySelector('#cf-name').value=''; container.querySelector('#cf-total').value='';
   };
 }
 
-/* =========================================================
-   10) HOME
-========================================================= */
 function renderHome(){
-  document.getElementById('home-greeting').textContent = `سلام ${state.name || ''} 👋`;
+  const c = cap();
   const t = jToday();
   const used = commitmentForMonth(t.jy, t.jm, false);
-  const c = cap();
   const pct = c>0 ? Math.round((used/c)*100) : 0;
   const st = statusFromPercent(pct);
   const sm = statusMeta(st);
+  const due = dueSoonEntries(3);
+
+  const el = document.getElementById('home-content');
+  el.innerHTML = `
+    <div class="topbar">
+      <div class="icon-btn" data-nav="profile">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="8" r="3.4" stroke="#001F3F" stroke-width="1.8"/><path d="M5 20c1.6-3.6 4.4-5.4 7-5.4S17.4 16.4 19 20" stroke="#001F3F" stroke-width="1.8" stroke-linecap="round"/></svg>
+      </div>
+      <div style="display:flex; align-items:center; gap:8px;">
+        <b style="font-size:14px;">ظرفیت</b>
+        <div style="width:28px; height:28px; border-radius:9px; background:var(--ink); display:flex; align-items:center; justify-content:center;">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M4 15c2-6 6-9 8-9s6 3 8 9" stroke="#F6F7ED" stroke-width="2.2" stroke-linecap="round"/><circle cx="12" cy="15" r="1.6" fill="#DBE64C"/></svg>
+        </div>
+      </div>
+    </div>
+
+    <div class="step-title" style="font-size:21px;">سلام ${state.name || ''} 👋</div>
+    <div class="muted" style="font-size:13px; margin-bottom:18px;">قبل از خرج کردن، ببین این تصمیم چه اثری روی آینده‌ات داره</div>
+
+    ${due.length ? `<div class="due-banner">
+      <div class="title">⏰ اقساط نزدیک</div>
+      ${due.slice(0,3).map(d=>`<div class="row"><span>${d.commitment.name} — ${fmtJDateShort(d.entry)}</span><span class="num">${toman(d.entry.amount)}</span></div>`).join('')}
+    </div>` : ''}
+
+    <div class="card" style="background:linear-gradient(160deg,var(--ink) 0%, var(--accent2) 100%); border:none; color:#fff; position:relative;">
+      <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+        <span id="home-status-chip" class="status-chip safe"><span class="dot"></span> امن</span>
+        <span class="eyebrow" style="color:rgba(255,255,255,.6); margin:0;">سقف امن اقساط این ماه</span>
+      </div>
+      <div class="gauge-wrap"><div class="gauge-figure" id="home-gauge"></div></div>
+      <div style="height:8px; border-radius:100px; background:rgba(255,255,255,.14); overflow:hidden; position:relative;">
+        <div id="home-progress-fill" style="height:100%; border-radius:100px;"></div>
+      </div>
+      <div style="display:flex; justify-content:space-between; margin-top:9px; font-size:11.5px; color:rgba(255,255,255,.7);">
+        <span>سقف: <b id="home-cap" class="num" style="color:#fff;"></b></span>
+        <span>اقساط این ماه: <b id="home-used" class="num" style="color:#fff;"></b></span>
+      </div>
+    </div>
+
+    <div class="section-title">وضعیت درآمد و هزینه</div>
+    <div class="card">
+      <div class="waterfall-row"><span class="l">💰 درآمد قابل‌اتکا</span><span class="r num">${toman(reliableMonthlyIncome())}</span></div>
+      <div class="waterfall-row"><span class="l">🎲 درآمد متغیر (میانگین)</span><span class="r num">${toman(variableMonthlyIncome())}</span></div>
+      <div class="waterfall-row"><span class="l">🧾 هزینه‌های ثابت</span><span class="r num">${toman(totalFixedExpenses())}</span></div>
+      <div class="waterfall-row total"><span class="l">🟢 ظرفیت باقی‌مانده اقساط</span><span class="r num" style="color:var(--safe)">${toman(Math.max(0,c-used))}</span></div>
+    </div>
+
+    <div class="section-title">تعهدات ماه‌های آینده <span class="link" data-nav="plan">مشاهده تقویم</span></div>
+    <div class="month-strip" id="home-months"></div>
+
+    <button class="btn btn-primary" style="margin-top:22px;" id="home-cta">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="#fff" stroke-width="2.4" stroke-linecap="round"/></svg>
+      قبل از خرید بررسی کن
+    </button>
+  `;
+  el.querySelectorAll('[data-nav]').forEach(b=>b.addEventListener('click', ()=>goTo(b.dataset.nav)));
+  document.getElementById('home-cta').addEventListener('click', ()=> goTo('sim'));
 
   document.getElementById('home-gauge').innerHTML = gaugeSVG(pct, 'rgba(255,255,255,.14)') +
-    `<div class="gauge-center"><div class="big" style="color:#fff;">${fa(pct)}٪</div><div class="small" style="color:rgba(255,255,255,.55);">از سقف مصرف شده</div></div>`;
+    `<div class="gauge-center"><div class="big" style="color:#fff;">${fa(pct)}٪</div><div class="small" style="color:rgba(255,255,255,.6);">از سقف مصرف شده</div></div>`;
   const chip = document.getElementById('home-status-chip');
-  chip.className = 'status-chip ' + (st==='safe'?'safe':st==='caution'?'caution':'danger');
-  chip.style.background = st==='safe'?'rgba(124,227,184,.18)': st==='caution'?'rgba(240,196,128,.2)':'rgba(243,162,142,.2)';
-  chip.style.color = st==='safe'?'#7CE3B8': st==='caution'?'#F0C480':'#F3A28E';
+  chip.style.background = st==='safe'?'rgba(63,190,133,.2)': st==='caution'?'rgba(219,230,76,.25)':'rgba(243,162,142,.22)';
+  chip.style.color = st==='safe'?'#7CE3B8': st==='caution'?'#F1F3A0':'#F3A28E';
   chip.innerHTML = `<span class="dot"></span> ${sm.emoji} ${sm.label}`;
 
   const fillEl = document.getElementById('home-progress-fill');
   fillEl.style.width = Math.min(100,pct) + '%';
-  fillEl.style.background = st==='safe'?'#7CE3B8': st==='caution'?'#F0C480':'#F3A28E';
-
+  fillEl.style.background = st==='safe'?'#3FBE85': st==='caution'?'#DBE64C':'#F3A28E';
   document.getElementById('home-cap').textContent = fa(c);
   document.getElementById('home-used').textContent = fa(used);
-  document.getElementById('home-reliable').textContent = toman(reliableMonthlyIncome());
-  document.getElementById('home-variable').textContent = toman(variableMonthlyIncome());
-  document.getElementById('home-fixed').textContent = toman(totalFixedExpenses());
-  document.getElementById('home-remaining').textContent = toman(Math.max(0, c-used));
 
   const months = nextMonths(4);
   document.getElementById('home-months').innerHTML = months.map(m=>{
     const val = commitmentForMonth(m.jy,m.jm,false);
     const p = c>0 ? Math.min(100,(val/c)*100) : 0;
     const s = statusFromPercent(p);
-    const color = s==='safe'?'var(--safe)':s==='caution'?'var(--caution)':'var(--danger)';
+    const color = s==='safe'?'var(--safe)':s==='caution'?'#B08A00':'var(--danger)';
     return `<div class="month-pill">
       <div class="mname">${MONTH_NAMES[m.jm]}</div>
       <div class="mbar"><div class="mbar-fill" style="width:${p}%; background:${color}"></div></div>
       <div class="mval num">${fa(val)}</div>
     </div>`;
   }).join('');
+
+  checkDueNotifications();
 }
 
-/* =========================================================
-   11) COMMITMENTS TAB
-========================================================= */
 let commitFilter = 'all';
-function renderCommitments(){
-  const filters = [{key:'all',label:'همه'}].concat(COMMITMENT_TYPES.map(t=>({key:t.key,label:t.emoji+' '+t.label})));
-  document.getElementById('commit-filters').innerHTML = filters.map(f=>
-    `<div class="filter-chip ${commitFilter===f.key?'selected':''}" data-f="${f.key}">${f.label}</div>`).join('');
-  document.querySelectorAll('#commit-filters [data-f]').forEach(el=>el.onclick=()=>{
-    commitFilter = el.dataset.f; renderCommitments();
-  });
+let commitEditTarget = null;
 
+function renderCommitments(){
+  const el = document.getElementById('commitments-content');
+
+  if(commitEditTarget !== null){
+    const isEdit = commitEditTarget !== 'new';
+    el.innerHTML = `
+      <div class="topbar">
+        <div class="icon-btn" id="cm-back"><svg width="13" height="13" viewBox="0 0 24 24" fill="none"><path d="M15 6l-6 6 6 6" stroke="#001F3F" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        <h2 style="font-size:17px;">${isEdit ? 'ویرایش تعهد' : 'تعهد جدید'}</h2>
+      </div>
+      <div id="cm-edit-form"></div>
+    `;
+    document.getElementById('cm-back').onclick = ()=>{ commitEditTarget=null; renderCommitments(); };
+    renderCommitmentForm(document.getElementById('cm-edit-form'), isEdit?commitEditTarget:null, (c)=>{
+      if(isEdit){
+        const idx = state.commitments.findIndex(x=>x.id===c.id);
+        if(idx>-1) state.commitments[idx] = c;
+      } else {
+        state.commitments.unshift(c);
+      }
+      saveState();
+      commitEditTarget = null;
+      showToast(isEdit ? 'تغییرات ذخیره شد ✅' : 'تعهد اضافه شد ✅');
+      renderCommitments();
+    });
+    return;
+  }
+
+  const filters = [{key:'all',label:'همه'}].concat(COMMITMENT_TYPES.map(t=>({key:t.key,label:t.emoji+' '+t.label})));
   const list = state.commitments.filter(c => commitFilter==='all' ? true : c.type===commitFilter);
   const c = cap();
-  document.getElementById('commit-list').innerHTML = list.map(cm=>{
-    const t = COMMITMENT_TYPES.find(x=>x.key===cm.type);
-    const nec = NECESSITY.find(n=>n.key===cm.necessity);
-    const necClass = cm.necessity==='req'?'req':cm.necessity==='semi'?'semi':'optional';
-    const schedule = buildCommitmentSchedule(cm);
-    const remaining = schedule.filter(e=>!e.paid).length;
-    const next = schedule.find(e=>!e.paid);
-    const impactPct = c>0 ? Math.round((cm.monthly/c)*100) : 0;
-    return `<div class="card" style="margin-bottom:12px; cursor:pointer;" data-open="${cm.id}">
-      <div style="display:flex; align-items:center; gap:12px;">
-        <div class="emoji-badge">${t.emoji}</div>
-        <div class="info" style="flex:1;">
-          <div class="title">${cm.name}</div>
-          <div class="sub">${cm.provider} · ${fa(cm.installments-remaining)}/${fa(cm.installments)} قسط پرداخت‌شده</div>
-        </div>
-        <div style="text-align:left;">
-          <div class="amount num">${toman(cm.monthly)}</div>
-          <span class="badge-necessity ${necClass}">${nec.label}</span>
-        </div>
-      </div>
-      <div class="schedule-list" id="sched-${cm.id}" style="display:none;">
-        <div class="waterfall-row"><span class="l">مبلغ کل</span><span class="r num">${toman(cm.total)}</span></div>
-        <div class="waterfall-row"><span class="l">اثر روی ظرفیت ماهانه</span><span class="r num">${fa(impactPct)}٪</span></div>
-        <div class="waterfall-row"><span class="l">پرداخت بعدی</span><span class="r">${next ? fmtJDate(next) : '—'}</span></div>
-        <div class="field-label" style="margin-top:10px;">همه‌ی اقساط</div>
-        ${schedule.map((e,i)=>`<div class="schedule-item">
-          <span class="${e.paid?'paid':''}">قسط ${fa(i+1)} — ${fmtJDate(e)}</span>
-          <span class="num ${e.paid?'paid':''}">${fa(e.amount)}</span>
-        </div>`).join('')}
-      </div>
-    </div>`;
-  }).join('') || `<div class="muted" style="text-align:center; padding:40px 0; font-size:13px;">تعهدی در این دسته نیست</div>`;
 
-  document.querySelectorAll('[data-open]').forEach(card=>{
-    card.addEventListener('click', ()=>{
-      const s = document.getElementById('sched-'+card.dataset.open);
-      s.style.display = s.style.display==='none' ? 'block' : 'none';
+  el.innerHTML = `
+    <div class="topbar">
+      <h2 style="font-size:18px;">تعهدات مالی</h2>
+      <div class="icon-btn" id="cm-new"><svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="#001F3F" stroke-width="2.2" stroke-linecap="round"/></svg></div>
+    </div>
+    <div class="filter-row" id="commit-filters">
+      ${filters.map(f=>`<div class="filter-chip ${commitFilter===f.key?'selected':''}" data-f="${f.key}">${f.label}</div>`).join('')}
+    </div>
+    <div id="commit-list">
+      ${list.map(cm=>{
+        const t = COMMITMENT_TYPES.find(x=>x.key===cm.type);
+        const nec = NECESSITY.find(n=>n.key===cm.necessity);
+        const necClass = cm.necessity==='req'?'req':cm.necessity==='semi'?'semi':'optional';
+        const channelInfo = CHANNELS.find(ch=>ch.key===cm.channel);
+        const schedule = buildCommitmentSchedule(cm);
+        const paidCount = schedule.filter(e=>e.paid).length;
+        const next = schedule.find(e=>!e.paid);
+        const impactPct = c>0 ? Math.round((cm.monthly/c)*100) : 0;
+        return `<div class="card" style="margin-bottom:12px;">
+          <div style="display:flex; align-items:center; gap:10px; cursor:pointer;" data-open="${cm.id}">
+            <div class="emoji-badge">${t.emoji}</div>
+            <div class="info" style="flex:1;">
+              <div class="title">${cm.name}</div>
+              <div class="sub">${cm.provider} · ${fa(paidCount)}/${fa(cm.installments)} قسط پرداخت‌شده</div>
+            </div>
+            <div style="text-align:left;">
+              <div class="amount num">${toman(cm.monthly)}</div>
+              <span class="badge-necessity ${necClass}">${nec.label}</span>
+            </div>
+          </div>
+          <div style="display:flex; gap:8px; margin-top:10px;">
+            <span class="badge-channel">${channelInfo.label}</span>
+            <span style="flex:1;"></span>
+            <button class="row-edit" data-editcm="${cm.id}">✏️</button>
+            <button class="row-del" data-delcm="${cm.id}">✕</button>
+          </div>
+          <div class="schedule-list" id="sched-${cm.id}" style="display:none; margin-top:10px;">
+            <div class="waterfall-row"><span class="l">مبلغ کل</span><span class="r num">${toman(cm.total)}</span></div>
+            <div class="waterfall-row"><span class="l">اثر روی ظرفیت ماهانه</span><span class="r num">${fa(impactPct)}٪</span></div>
+            <div class="waterfall-row"><span class="l">پرداخت بعدی</span><span class="r">${next ? fmtJDate(next) : '—'}</span></div>
+            <div class="field-label" style="margin-top:10px;">همه‌ی اقساط — بکش به چپ یا بزن تا تیک بخوره</div>
+            ${schedule.map((e,i)=>`<div class="schedule-swipe-wrap">
+              <div class="schedule-swipe-hint">✓ پرداخت شد</div>
+              <div class="schedule-item ${e.paid?'paid-row':''}" data-cid="${cm.id}" data-idx="${i}">
+                <span class="${e.paid?'paid':''}"><span class="check">${e.paid?'☑️':'⬜️'}</span>قسط ${fa(i+1)} — ${fmtJDate(e)}</span>
+                <span class="num ${e.paid?'paid':''}">${fa(e.amount)}</span>
+              </div>
+            </div>`).join('')}
+          </div>
+        </div>`;
+      }).join('') || `<div class="muted" style="text-align:center; padding:40px 0; font-size:13px;">تعهدی در این دسته نیست</div>`}
+    </div>
+  `;
+
+  document.getElementById('cm-new').onclick = ()=>{ commitEditTarget='new'; renderCommitments(); };
+  document.querySelectorAll('#commit-filters [data-f]').forEach(chip=>chip.onclick=()=>{
+    commitFilter = chip.dataset.f; renderCommitments();
+  });
+  document.querySelectorAll('[data-open]').forEach(row=>{
+    row.addEventListener('click', ()=>{
+      const s = document.getElementById('sched-'+row.dataset.open);
+      const willShow = s.style.display==='none';
+      s.style.display = willShow ? 'block':'none';
+      if(willShow) attachSwipeHandlers(s);
     });
   });
+  document.querySelectorAll('[data-editcm]').forEach(b=>b.addEventListener('click', (ev)=>{
+    ev.stopPropagation();
+    commitEditTarget = state.commitments.find(c=>c.id===b.dataset.editcm);
+    renderCommitments();
+  }));
+  document.querySelectorAll('[data-delcm]').forEach(b=>b.addEventListener('click', (ev)=>{
+    ev.stopPropagation();
+    if(!confirm('این تعهد حذف بشه؟')) return;
+    state.commitments = state.commitments.filter(c=>c.id!==b.dataset.delcm);
+    saveState(); renderCommitments();
+  }));
 }
 
-/* =========================================================
-   12) PLAN TAB (technique / calendar / cashflow)
-========================================================= */
 document.querySelectorAll('#plan-segmented button').forEach(btn=>{
   btn.addEventListener('click', ()=>{
     document.querySelectorAll('#plan-segmented button').forEach(b=>b.classList.remove('active'));
@@ -1070,11 +1297,7 @@ document.querySelectorAll('#plan-segmented button').forEach(btn=>{
   });
 });
 
-function renderPlan(){
-  renderPlanTechnique();
-  renderPlanCalendar();
-  renderPlanCashflow();
-}
+function renderPlan(){ renderPlanTechnique(); renderPlanCalendar(); renderPlanCashflow(); }
 
 function renderPlanTechnique(){
   const tech = TECHNIQUES.find(t=>t.key===state.technique.key) || TECHNIQUES[TECHNIQUES.length-1];
@@ -1125,7 +1348,7 @@ function renderPlanCashflow(){
   const available = Math.round(income - fixed - installments - savings);
   document.getElementById('plan-cashflow').innerHTML = `
     <div class="card">
-      <div class="eyebrow">جریان نقدی ${MONTH_NAMES[t.jm]}</div>
+      <div class="eyebrow">جریان نقدی ${MONTH_NAMES[t.jm]} ${fa(t.jy)}</div>
       <div class="waterfall-row"><span class="l">💰 درآمد</span><span class="r num">${toman(income)}</span></div>
       <div class="waterfall-arrow">↓</div>
       <div class="waterfall-row"><span class="l">🧾 هزینه‌های ثابت</span><span class="r num">-${fa(fixed)}</span></div>
@@ -1139,20 +1362,24 @@ function renderPlanCashflow(){
     </div>`;
 }
 
-/* =========================================================
-   13) PROFILE TAB
-========================================================= */
+let profileEditIncome = null;
+let profileEditFixed = null;
+
 function renderProfile(){
   const el = document.getElementById('profile-content');
   el.innerHTML = `
+    <div class="topbar"><h2 style="font-size:18px;">پروفایل و تنظیمات</h2></div>
+
     <div class="field-label">نام</div>
-    <input class="input mb18" id="pf-name" value="${state.name}">
+    <input class="input mb18" id="pf-name" value="${state.name}" placeholder="مثلاً معصومه">
 
     <div class="section-title">منابع درآمد <span class="link" id="pf-add-income">+ افزودن</span></div>
     <div id="pf-income-list"></div>
+    <div id="pf-income-form" class="card mb18" style="display:none;"></div>
 
     <div class="section-title">هزینه‌های ثابت <span class="link" id="pf-add-fixed">+ افزودن</span></div>
     <div id="pf-fixed-list"></div>
+    <div id="pf-fixed-form" class="card mb18" style="display:none;"></div>
 
     <div class="section-title">سقف اقساط و آستانه‌ها</div>
     <div class="card mb18">
@@ -1161,9 +1388,10 @@ function renderProfile(){
         <span class="field-label" style="margin:0;">درصد سقف اقساط</span>
       </div>
       <input type="range" min="10" max="70" step="5" id="pf-cap-slider" value="${state.installmentCapPercent}">
+      <div class="hint num" id="pf-cap-amt"></div>
       <div class="row-2" style="margin-top:14px;">
-        <div><div class="field-label">🟢 امن تا</div><input class="input num" type="number" id="pf-th-safe" value="${state.thresholds.safe}"></div>
-        <div><div class="field-label">🟡 احتیاط تا</div><input class="input num" type="number" id="pf-th-caution" value="${state.thresholds.caution}"></div>
+        <div><div class="field-label">🟢 امن تا</div><input class="input num" type="number" id="pf-th-safe" value="${state.thresholds.safe}" placeholder="مثلاً ۳۰"></div>
+        <div><div class="field-label">🟡 احتیاط تا</div><input class="input num" type="number" id="pf-th-caution" value="${state.thresholds.caution}" placeholder="مثلاً ۴۰"></div>
       </div>
     </div>
 
@@ -1173,11 +1401,24 @@ function renderProfile(){
         ${TECHNIQUES.map(t=>`<option value="${t.key}" ${state.technique.key===t.key?'selected':''}>${t.label}</option>`).join('')}
       </select>
       <div class="row-2 mb14">
-        <div><div class="field-label">نیازها ٪</div><input class="input num" type="number" id="pf-p-needs" value="${state.technique.p.needs}"></div>
-        <div><div class="field-label">خواسته‌ها ٪</div><input class="input num" type="number" id="pf-p-wants" value="${state.technique.p.wants}"></div>
+        <div><div class="field-label">نیازها ٪</div><input class="input num" type="number" id="pf-p-needs" value="${state.technique.p.needs}" placeholder="۵۰">
+          <div class="hint num" id="pf-p-needs-amt"></div></div>
+        <div><div class="field-label">خواسته‌ها ٪</div><input class="input num" type="number" id="pf-p-wants" value="${state.technique.p.wants}" placeholder="۳۰">
+          <div class="hint num" id="pf-p-wants-amt"></div></div>
       </div>
       <div class="field-label">پس‌انداز ٪</div>
-      <input class="input num" type="number" id="pf-p-savings" value="${state.technique.p.savings}">
+      <input class="input num" type="number" id="pf-p-savings" value="${state.technique.p.savings}" placeholder="۲۰">
+      <div class="hint num" id="pf-p-savings-amt"></div>
+    </div>
+
+    <div class="section-title">یادآوری اقساط</div>
+    <div class="card mb18">
+      <div class="waterfall-row">
+        <span class="l">🔔 نوتیفیکیشن سررسید قسط</span>
+        <span class="r" style="font-size:12.5px; color:${state.notificationsEnabled?'var(--safe)':'var(--muted)'}">${state.notificationsEnabled?'فعال':'غیرفعال'}</span>
+      </div>
+      <div class="hint mb14">وقتی اپ رو باز می‌کنی، اگه قسطی برای امروز/فردا داشته باشی نوتیف می‌گیری. یه هشدار داخل صفحه‌ی خانه هم همیشه هست.</div>
+      <button class="btn btn-ghost" id="pf-enable-notif">${state.notificationsEnabled?'غیرفعال‌سازی':'فعال‌سازی یادآوری'}</button>
     </div>
 
     <button class="btn btn-primary mb18" id="pf-save">ذخیره تغییرات</button>
@@ -1187,51 +1428,143 @@ function renderProfile(){
   function renderIncomeList(){
     document.getElementById('pf-income-list').innerHTML = state.incomeSources.map(s=>{
       const f = FREQUENCIES.find(x=>x.key===s.frequency);
-      return `<div class="list-row"><div class="emoji-badge">${s.fixed?'✅':'🎲'}</div>
+      return `<div class="list-row" data-editinc="${s.id}"><div class="emoji-badge">${s.fixed?'✅':'🎲'}</div>
         <div class="info"><div class="title">${s.name}</div><div class="sub">${f.label} · ${s.fixed?'ثابت':'متغیر'}</div></div>
         <div class="amount num">${toman(s.amount)}</div>
         <button class="row-del" data-delinc="${s.id}">✕</button></div>`;
     }).join('') || `<div class="muted" style="font-size:12px; padding:8px 0;">هیچ منبعی ثبت نشده</div>`;
-    document.querySelectorAll('[data-delinc]').forEach(b=>b.onclick=()=>{
+    document.querySelectorAll('[data-delinc]').forEach(b=>b.onclick=(ev)=>{
+      ev.stopPropagation();
       state.incomeSources = state.incomeSources.filter(s=>s.id!==b.dataset.delinc);
       saveState(); renderIncomeList();
     });
+    document.querySelectorAll('[data-editinc]').forEach(row=>row.addEventListener('click', ()=>{
+      profileEditIncome = state.incomeSources.find(s=>s.id===row.dataset.editinc);
+      renderIncomeForm();
+    }));
   }
+
+  function renderIncomeForm(){
+    const wrap = document.getElementById('pf-income-form');
+    if(profileEditIncome===null){ wrap.style.display='none'; wrap.innerHTML=''; return; }
+    const isEdit = profileEditIncome !== 'new';
+    const s = isEdit ? profileEditIncome : {name:'', amount:'', frequency:'monthly', fixed:true};
+    wrap.style.display = 'block';
+    wrap.innerHTML = `
+      <div class="field-label">نام منبع</div>
+      <input class="input mb14" id="if-name" placeholder="مثلاً حقوق" value="${s.name}">
+      <div class="row-2 mb14">
+        <div><div class="field-label">مبلغ</div><input class="input amt-input num" id="if-amount" inputmode="numeric" placeholder="مثلاً ۶٬۰۰۰٬۰۰۰" value="${s.amount?fa(s.amount):''}"></div>
+        <div><div class="field-label">دوره</div><select class="input" id="if-freq">${FREQUENCIES.map(f=>`<option value="${f.key}" ${s.frequency===f.key?'selected':''}>${f.label}</option>`).join('')}</select></div>
+      </div>
+      <div class="chip-grid mb14" id="if-fixed">
+        <div class="chip ${s.fixed?'selected':''}" data-fixed="1">✅ ثابت</div>
+        <div class="chip ${!s.fixed?'selected':''}" data-fixed="0">🎲 متغیر</div>
+      </div>
+      <div class="row-2">
+        <button class="btn btn-primary" id="if-save">${isEdit?'ذخیره':'افزودن'}</button>
+        <button class="btn btn-ghost" id="if-cancel">انصراف</button>
+      </div>`;
+    wireAmountInputs(wrap);
+    let fx = s.fixed ? 1 : 0;
+    wrap.querySelectorAll('[data-fixed]').forEach(c=>c.onclick=()=>{
+      wrap.querySelectorAll('[data-fixed]').forEach(x=>x.classList.remove('selected'));
+      c.classList.add('selected'); fx = parseInt(c.dataset.fixed,10);
+    });
+    wrap.querySelector('#if-cancel').onclick = ()=>{ profileEditIncome=null; renderIncomeForm(); };
+    wrap.querySelector('#if-save').onclick = ()=>{
+      const name = wrap.querySelector('#if-name').value.trim();
+      const amount = parseFaNumber(wrap.querySelector('#if-amount').value);
+      const frequency = wrap.querySelector('#if-freq').value;
+      if(!name || !amount){ showToast('نام و مبلغ رو وارد کن'); return; }
+      if(isEdit){
+        Object.assign(profileEditIncome, {name, amount, frequency, fixed: fx===1});
+      } else {
+        state.incomeSources.push({id:uid(), name, amount, frequency, fixed: fx===1});
+      }
+      saveState(); profileEditIncome=null; renderIncomeList(); renderIncomeForm();
+    };
+  }
+
   function renderFixedList(){
     document.getElementById('pf-fixed-list').innerHTML = state.fixedExpenses.map(e=>{
-      const c = FIXED_CATEGORIES.find(x=>x.key===e.category);
-      return `<div class="list-row"><div class="emoji-badge">${c.emoji}</div>
-        <div class="info"><div class="title">${c.label}</div></div>
+      const cat = FIXED_CATEGORIES.find(x=>x.key===e.category);
+      return `<div class="list-row" data-editfx="${e.id}"><div class="emoji-badge">${cat.emoji}</div>
+        <div class="info"><div class="title">${cat.label}</div></div>
         <div class="amount num">${toman(e.amount)}</div>
         <button class="row-del" data-delfx="${e.id}">✕</button></div>`;
     }).join('') || `<div class="muted" style="font-size:12px; padding:8px 0;">هیچ هزینه‌ای ثبت نشده</div>`;
-    document.querySelectorAll('[data-delfx]').forEach(b=>b.onclick=()=>{
+    document.querySelectorAll('[data-delfx]').forEach(b=>b.onclick=(ev)=>{
+      ev.stopPropagation();
       state.fixedExpenses = state.fixedExpenses.filter(e=>e.id!==b.dataset.delfx);
       saveState(); renderFixedList();
     });
+    document.querySelectorAll('[data-editfx]').forEach(row=>row.addEventListener('click', ()=>{
+      profileEditFixed = state.fixedExpenses.find(e=>e.id===row.dataset.editfx);
+      renderFixedForm();
+    }));
   }
-  renderIncomeList(); renderFixedList();
 
-  document.getElementById('pf-add-income').onclick = ()=>{
-    const name = prompt('نام منبع درآمد:'); if(!name) return;
-    const amount = parseFaNumber(prompt('مبلغ (تومان):')); if(!amount) return;
-    const fixed = confirm('این درآمد ثابت/قابل‌اتکاست؟ (Cancel = متغیره)');
-    state.incomeSources.push({id:uid(), name, amount, frequency:'monthly', fixed});
-    saveState(); renderIncomeList(); renderHome();
-  };
-  document.getElementById('pf-add-fixed').onclick = ()=>{
-    const cat = prompt('دسته (rent, food, transport, bills, internet, insurance, tuition, subscriptions, family, other):','other');
-    const found = FIXED_CATEGORIES.find(c=>c.key===cat) || FIXED_CATEGORIES.find(c=>c.key==='other');
-    const amount = parseFaNumber(prompt('مبلغ ماهانه (تومان):')); if(!amount) return;
-    state.fixedExpenses.push({id:uid(), category:found.key, amount});
-    saveState(); renderFixedList(); renderHome();
-  };
+  function renderFixedForm(){
+    const wrap = document.getElementById('pf-fixed-form');
+    if(profileEditFixed===null){ wrap.style.display='none'; wrap.innerHTML=''; return; }
+    const isEdit = profileEditFixed !== 'new';
+    const e = isEdit ? profileEditFixed : {category:'other', amount:''};
+    wrap.style.display = 'block';
+    wrap.innerHTML = `
+      <div class="field-label">دسته</div>
+      <select class="input mb14" id="ff-cat">${FIXED_CATEGORIES.map(c=>`<option value="${c.key}" ${e.category===c.key?'selected':''}>${c.emoji} ${c.label}</option>`).join('')}</select>
+      <div class="field-label">مبلغ ماهانه</div>
+      <input class="input amt-input num mb14" id="ff-amount" inputmode="numeric" placeholder="مثلاً ۲٬۵۰۰٬۰۰۰" value="${e.amount?fa(e.amount):''}">
+      <div class="row-2">
+        <button class="btn btn-primary" id="ff-save">${isEdit?'ذخیره':'افزودن'}</button>
+        <button class="btn btn-ghost" id="ff-cancel">انصراف</button>
+      </div>`;
+    wireAmountInputs(wrap);
+    wrap.querySelector('#ff-cancel').onclick = ()=>{ profileEditFixed=null; renderFixedForm(); };
+    wrap.querySelector('#ff-save').onclick = ()=>{
+      const category = wrap.querySelector('#ff-cat').value;
+      const amount = parseFaNumber(wrap.querySelector('#ff-amount').value);
+      if(!amount){ showToast('مبلغ رو وارد کن'); return; }
+      if(isEdit){ Object.assign(profileEditFixed, {category, amount}); }
+      else { state.fixedExpenses.push({id:uid(), category, amount}); }
+      saveState(); profileEditFixed=null; renderFixedList(); renderFixedForm();
+    };
+  }
+
+  renderIncomeList(); renderIncomeForm();
+  renderFixedList(); renderFixedForm();
+
+  document.getElementById('pf-add-income').onclick = ()=>{ profileEditIncome='new'; renderIncomeForm(); };
+  document.getElementById('pf-add-fixed').onclick = ()=>{ profileEditFixed='new'; renderFixedForm(); };
 
   function updateCapLabel(){
-    document.getElementById('pf-cap-val').textContent = fa(document.getElementById('pf-cap-slider').value) + '٪';
+    const pct = parseInt(document.getElementById('pf-cap-slider').value,10);
+    document.getElementById('pf-cap-val').textContent = fa(pct) + '٪';
+    document.getElementById('pf-cap-amt').textContent = toman(reliableMonthlyIncome()*pct/100);
   }
   updateCapLabel();
   document.getElementById('pf-cap-slider').addEventListener('input', updateCapLabel);
+
+  function updateTechAmounts(){
+    const income = reliableMonthlyIncome();
+    const needs = parseInt(document.getElementById('pf-p-needs').value)||0;
+    const wants = parseInt(document.getElementById('pf-p-wants').value)||0;
+    const savings = parseInt(document.getElementById('pf-p-savings').value)||0;
+    document.getElementById('pf-p-needs-amt').textContent = toman(income*needs/100);
+    document.getElementById('pf-p-wants-amt').textContent = toman(income*wants/100);
+    document.getElementById('pf-p-savings-amt').textContent = toman(income*savings/100);
+  }
+  updateTechAmounts();
+  ['pf-p-needs','pf-p-wants','pf-p-savings'].forEach(id=>document.getElementById(id).addEventListener('input', updateTechAmounts));
+
+  document.getElementById('pf-enable-notif').onclick = ()=>{
+    if(state.notificationsEnabled){
+      state.notificationsEnabled = false; saveState(); renderProfile();
+    } else {
+      requestNotifications();
+    }
+  };
 
   document.getElementById('pf-save').onclick = ()=>{
     state.name = document.getElementById('pf-name').value.trim() || state.name;
@@ -1255,47 +1588,55 @@ function renderProfile(){
   };
 }
 
-/* =========================================================
-   14) SIMULATOR
-========================================================= */
 function renderSimStart(){
-  const today = new Date().toISOString().slice(0,10);
+  const today = jToday();
   const el = document.getElementById('sim-content');
   el.innerHTML = `
     <div class="topbar">
-      <div class="icon-btn" data-nav="home"><svg width="13" height="13" viewBox="0 0 24 24" fill="none"><path d="M6 6l12 12M18 6L6 18" stroke="#12261F" stroke-width="2" stroke-linecap="round"/></svg></div>
+      <div class="icon-btn" data-nav="home"><svg width="13" height="13" viewBox="0 0 24 24" fill="none"><path d="M6 6l12 12M18 6L6 18" stroke="#001F3F" stroke-width="2" stroke-linecap="round"/></svg></div>
       <h2 style="font-size:17px;">قبل از خرید بررسی کن</h2>
     </div>
     <div class="field-label">قیمت کالا</div>
     <div class="card mb18" style="text-align:center;">
-      <input class="input num" id="sm-price" inputmode="numeric" placeholder="۳٬۰۰۰٬۰۰۰"
+      <input class="input amt-input num" id="sm-price" inputmode="numeric" placeholder="مثلاً ۳٬۰۰۰٬۰۰۰"
         style="border:none; text-align:center; font-size:28px; font-weight:800; padding:6px;">
       <div class="muted" style="font-size:12px;">تومان</div>
     </div>
-    <div class="field-label">تعداد اقساط</div>
-    <div class="chip-grid mb18" id="sm-installments">
-      ${[1,3,4,6,12].map(n=>`<div class="chip ${n===4?'selected':''}" data-n="${n}">${n===1?'نقدی':fa(n)+' قسط'}</div>`).join('')}
+    <div class="field-label">تعداد اقساط (۱ = نقدی)</div>
+    <input class="input mb18" id="sm-installments" type="number" min="1" value="4" placeholder="مثلاً ۴">
+    <div class="field-label">نحوه خرید</div>
+    <div class="chip-grid mb14" id="sm-channel">
+      ${CHANNELS.map((ch,i)=>`<div class="chip ${i===1?'selected':''}" data-channel="${ch.key}">${ch.label}</div>`).join('')}
     </div>
+    <div class="hint mb18" id="sm-channel-hint"></div>
     <div class="field-label">سرویس / زمان‌بندی</div>
     <select class="input mb14" id="sm-provider">
       ${PROVIDERS.map(p=>`<option value="${p.key}">${p.label} — ${SCHEDULE_LABELS[p.rule]}</option>`).join('')}
     </select>
     <div id="sm-interval-wrap" style="display:none;" class="mb18">
       <div class="field-label">فاصله بین اقساط (روز)</div>
-      <input class="input num" id="sm-interval" type="number" value="30">
+      <input class="input num" id="sm-interval" type="number" value="30" placeholder="مثلاً ۳۰">
     </div>
     <div class="field-label">تاریخ خرید</div>
-    <input class="input date-field mb18" id="sm-date" type="date" value="${today}">
+    ${jalaliPickerHTML('sm-date', today)}
+    <div class="mb18"></div>
     <div class="field-label">این خرید چقدر ضروریه؟</div>
     <div class="chip-grid mb22" id="sm-necessity">
       ${NECESSITY.map((n,i)=>`<div class="chip ${i===0?'selected':''}" data-nec="${n.key}">${n.label}</div>`).join('')}
     </div>
     <button class="btn btn-primary" id="sm-check">بررسی خرید</button>
   `;
-  let selN = 4, selNec = 'req';
-  el.querySelectorAll('[data-n]').forEach(c=>c.onclick=()=>{
-    el.querySelectorAll('[data-n]').forEach(x=>x.classList.remove('selected'));
-    c.classList.add('selected'); selN = parseInt(c.dataset.n,10);
+  wireAmountInputs(el);
+  initJalaliPicker('sm-date', today);
+
+  let selNec = 'req', selChannel = 'in_person';
+  function updateChannelHint(){
+    document.getElementById('sm-channel-hint').textContent = CHANNELS.find(c=>c.key===selChannel).hint;
+  }
+  updateChannelHint();
+  el.querySelectorAll('[data-channel]').forEach(c=>c.onclick=()=>{
+    el.querySelectorAll('[data-channel]').forEach(x=>x.classList.remove('selected'));
+    c.classList.add('selected'); selChannel = c.dataset.channel; updateChannelHint();
   });
   el.querySelectorAll('[data-nec]').forEach(c=>c.onclick=()=>{
     el.querySelectorAll('[data-nec]').forEach(x=>x.classList.remove('selected'));
@@ -1308,17 +1649,16 @@ function renderSimStart(){
   document.getElementById('sm-check').onclick = ()=>{
     const price = parseFaNumber(document.getElementById('sm-price').value);
     if(!price){ showToast('قیمت کالا رو وارد کن'); return; }
+    const installments = Math.max(1, parseInt(document.getElementById('sm-installments').value,10) || 1);
     const providerKey = document.getElementById('sm-provider').value;
     const provider = PROVIDERS.find(p=>p.key===providerKey);
     const interval = parseInt(document.getElementById('sm-interval').value,10) || 30;
-    const dateStr = document.getElementById('sm-date').value;
-    const d = dateStr ? new Date(dateStr) : new Date();
-    const purchaseDate = toJalaali(d.getFullYear(), d.getMonth()+1, d.getDate());
-    const monthly = selN===1 ? 0 : Math.round(price/selN);
+    const purchaseDate = readJalaliPicker('sm-date');
+    const monthly = installments===1 ? 0 : Math.round(price/installments);
     state.pendingSimulation = {
-      price, installments: selN, monthly, provider: provider.label,
-      scheduleType: selN===1 ? null : provider.rule, intervalDays: interval,
-      purchaseDate, necessity: selNec
+      price, installments, monthly, provider: provider.label,
+      scheduleType: installments===1 ? null : provider.rule, intervalDays: interval,
+      purchaseDate, necessity: selNec, channel: selChannel
     };
     renderSimResult();
   };
@@ -1333,7 +1673,7 @@ function renderSimResult(){
   let scheduleEntries = [];
   let worst = { pct:0, jy:0, jm:0, val:0 };
   if(!isCash){
-    scheduleEntries = generateSchedule(p.purchaseDate, p.installments, p.monthly, p.scheduleType, p.intervalDays);
+    scheduleEntries = generateSchedule(p.purchaseDate, p.installments, p.monthly, p.scheduleType, p.intervalDays, p.channel);
     const months = nextMonths(Math.max(6, p.installments+1));
     months.forEach(m=>{
       const existing = commitmentForMonth(m.jy,m.jm,false);
@@ -1350,7 +1690,7 @@ function renderSimResult(){
 
   el.innerHTML = `
     <div class="topbar">
-      <div class="icon-btn" id="sm-back"><svg width="13" height="13" viewBox="0 0 24 24" fill="none"><path d="M15 6l-6 6 6 6" stroke="#12261F" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      <div class="icon-btn" id="sm-back"><svg width="13" height="13" viewBox="0 0 24 24" fill="none"><path d="M15 6l-6 6 6 6" stroke="#001F3F" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
       <h2 style="font-size:17px;">نتیجه بررسی</h2>
     </div>
 
@@ -1370,12 +1710,13 @@ function renderSimResult(){
     <div class="card mb18">
       <div class="waterfall-row"><span class="l">قسط ماهانه</span><span class="r num">${toman(p.monthly)}</span></div>
       <div class="waterfall-row"><span class="l">سقف اقساط</span><span class="r num">${toman(c)}</span></div>
+      <div class="waterfall-row"><span class="l">نحوه خرید</span><span class="r">${CHANNELS.find(ch=>ch.key===p.channel).label}</span></div>
       <div class="waterfall-row"><span class="l">سرویس / زمان‌بندی</span><span class="r">${SCHEDULE_LABELS[p.scheduleType]}</span></div>
     </div>
 
     <div class="section-title">زمان‌بندی اقساط</div>
     <div class="card mb18">
-      ${scheduleEntries.map((e,i)=>`<div class="schedule-item"><span>قسط ${fa(i+1)} — ${fmtJDate(e)}</span><span class="num">${fa(e.amount)}</span></div>`).join('')}
+      ${scheduleEntries.map((e,i)=>`<div class="schedule-item" style="border-top:${i===0?'none':'1px dashed var(--line)'}"><span>قسط ${fa(i+1)} — ${fmtJDate(e)}</span><span class="num">${fa(e.amount)}</span></div>`).join('')}
     </div>
 
     <div class="section-title">اثر روی ماه‌های آینده</div>
@@ -1386,7 +1727,7 @@ function renderSimResult(){
         const total = existing+withNew;
         const pct = c>0 ? Math.min(100,(total/c)*100) : 0;
         const s2 = statusFromPercent(pct);
-        const color = s2==='safe'?'var(--safe)':s2==='caution'?'var(--caution)':'var(--danger)';
+        const color = s2==='safe'?'var(--safe)':s2==='caution'?'#B08A00':'var(--danger)';
         return `<div class="month-pill"><div class="mname">${MONTH_NAMES[m.jm]}</div>
           <div class="mbar"><div class="mbar-fill" style="width:${pct}%; background:${color}"></div></div>
           <div class="mval num">${fa(total)}</div></div>`;
@@ -1409,10 +1750,12 @@ function renderSimResult(){
   };
   document.getElementById('sm-confirm').onclick = ()=>{
     if(!isCash){
+      const paidFlags = Array(p.installments).fill(false);
+      if(p.channel==='online') paidFlags[0] = true;
       state.commitments.unshift({
-        id: uid(), name:'خرید جدید', type:'bnpl', total:p.price, installments:p.installments, paid:0,
+        id: uid(), name:'خرید جدید', type:'bnpl', total:p.price, installments:p.installments,
         monthly:p.monthly, provider:p.provider, scheduleType:p.scheduleType, intervalDays:p.intervalDays,
-        purchaseDate:p.purchaseDate, necessity:p.necessity
+        purchaseDate:p.purchaseDate, necessity:p.necessity, channel:p.channel, paidFlags
       });
     }
     state.pendingSimulation = null;
@@ -1422,9 +1765,6 @@ function renderSimResult(){
   };
 }
 
-/* =========================================================
-   15) INIT
-========================================================= */
 loadState();
 if(state.onboarded){
   document.getElementById('bottom-nav').style.display = 'flex';
