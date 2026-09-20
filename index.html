@@ -564,9 +564,12 @@ function statusMeta(s){
   return { safe:{emoji:'🟢',label:'امن'}, caution:{emoji:'🟡',label:'احتیاط'}, danger:{emoji:'🔴',label:'پرریسک'} }[s];
 }
 function allEntries(includePending){
+  // A month's committed capacity is everything scheduled to be due in that month,
+  // whether it's already been checked off as paid or not — paying it doesn't
+  // shrink the month's obligation, it was still budgeted/spent from that month.
   const list = [];
   state.commitments.forEach(c=>{
-    buildCommitmentSchedule(c).forEach(e=>{ if(!e.paid) list.push(e); });
+    buildCommitmentSchedule(c).forEach(e=>{ list.push(e); });
   });
   if(includePending && state.pendingSimulation){
     generateSchedule(
@@ -650,7 +653,10 @@ function togglePaid(commitmentId, idx){
   c.paidFlags[idx] = !c.paidFlags[idx];
   saveState();
   showToast(c.paidFlags[idx] ? 'قسط پرداخت‌شده علامت خورد ✅' : 'به پرداخت‌نشده برگشت');
-  renderCommitments();
+  // refresh whichever screen is currently showing this toggle (Home's due-soon
+  // list or the Commitments tab both use the same swipe/tap mechanism)
+  if(document.getElementById('screen-home').classList.contains('active')) renderHome();
+  if(document.getElementById('screen-commitments').classList.contains('active')) renderCommitments();
 }
 function attachSwipeHandlers(root){
   // Swipe-left marks a row paid; a plain tap is also a valid fallback in case
@@ -1036,11 +1042,9 @@ function renderCommitmentForm(container, existing, onSave){
     <div class="field-label">مبلغ هر قسط (تومان)</div>
     <input class="input amt-input num mb6" id="cf-per-installment" inputmode="numeric" placeholder="اگه کل مبلغ رو نمی‌دونی، فقط همینو پر کن">
     <div class="hint mb14">هر کدوم از این دو مبلغ (کل یا هر قسط) رو که بدونی کافیه؛ اون یکی خودش حساب می‌شه</div>
-    <div id="cf-fee-section" style="display:none;">
-      <div class="field-label">سود / کارمزد کل (اختیاری)</div>
-      <input class="input amt-input num mb14" id="cf-fee" inputmode="numeric" placeholder="مثلاً ۵۰۰٬۰۰۰" value="${isEdit&&existing.fee?fa(existing.fee):''}">
-      <div class="hint mb14">این مبلغ به کل بدهی اضافه و روی قسط‌ها پخش می‌شه</div>
-    </div>
+    <div class="field-label">سود / کارمزد کل (اختیاری)</div>
+    <input class="input amt-input num mb14" id="cf-fee" inputmode="numeric" placeholder="مثلاً ۵۰۰٬۰۰۰" value="${isEdit&&existing.fee?fa(existing.fee):''}">
+    <div class="hint mb14">این مبلغ به کل بدهی اضافه و روی قسط‌ها پخش می‌شه — برای وام/قرض معمولاً سود بانکیه، برای بقیه هر کارمزدی که سرویس می‌گیره</div>
     <div id="cf-channel-section">
       <div class="field-label">نحوه خرید</div>
       <div class="chip-grid mb14" id="cf-channel">
@@ -1055,10 +1059,15 @@ function renderCommitmentForm(container, existing, onSave){
     <div class="field-label">تاریخ خرید/شروع</div>
     ${jalaliPickerHTML('cf-date', startDate)}
     <div class="mb14"></div>
-    <div class="field-label">سرویس / نوع زمان‌بندی</div>
+    <div class="field-label">پلتفرم / سرویس</div>
     <select class="input mb14" id="cf-provider">
-      ${PROVIDERS.map(p=>`<option value="${p.key}" ${isEdit&&existing.scheduleType===p.rule?'selected':''}>${p.label} — ${SCHEDULE_LABELS[p.rule]}</option>`).join('')}
+      ${PROVIDERS.map(p=>`<option value="${p.key}" ${isEdit&&existing.providerKey===p.key?'selected':''}>${p.label}</option>`).join('')}
     </select>
+    <div class="field-label">نوع زمان‌بندی اقساط</div>
+    <select class="input mb14" id="cf-scheduletype">
+      ${Object.keys(SCHEDULE_LABELS).map(k=>`<option value="${k}" ${isEdit&&existing.scheduleType===k?'selected':''}>${SCHEDULE_LABELS[k]}</option>`).join('')}
+    </select>
+    <div class="hint mb14">پلتفرم فقط برای شناسایی خودته؛ زمان‌بندی واقعی رو خودت جدا مشخص می‌کنی — چون ممکنه دو خرید از یه پلتفرم، قانون پرداخت متفاوتی داشته باشن</div>
     <div id="cf-interval-wrap" style="display:none;" class="mb14">
       <div class="field-label">فاصله بین اقساط (روز)</div>
       <input class="input num" id="cf-interval" type="number" value="${isEdit?(existing.intervalDays||30):30}" placeholder="مثلاً ۳۰">
@@ -1077,14 +1086,13 @@ function renderCommitmentForm(container, existing, onSave){
   let selChannel = isEdit ? existing.channel : 'in_person';
 
   // channel (online/in-person) only makes sense for purchase-like commitments;
-  // loans/debts/checks/personal debt don't have an "upfront installment" concept
+  // loans/debts/checks/personal debt don't have an "upfront installment" concept.
+  // Platform, schedule rule, and fee are otherwise fully independent choices —
+  // picking a platform just pre-fills a sensible schedule default, it doesn't lock it.
   const CHANNEL_LESS_TYPES = ['loan','debt','personal','check'];
-  const FEE_TYPES = ['loan','debt'];
   function updateTypeDependentSections(){
     const channelSection = container.querySelector('#cf-channel-section');
-    const feeSection = container.querySelector('#cf-fee-section');
     channelSection.style.display = CHANNEL_LESS_TYPES.includes(selType) ? 'none' : 'block';
-    feeSection.style.display = FEE_TYPES.includes(selType) ? 'block' : 'none';
     if(CHANNEL_LESS_TYPES.includes(selType)) selChannel = 'in_person';
   }
 
@@ -1135,12 +1143,17 @@ function renderCommitmentForm(container, existing, onSave){
     updateChannelHint();
   });
   container.querySelector('#cf-provider').addEventListener('change', e=>{
+    // helpful default only — does not force the schedule type
     const p = PROVIDERS.find(x=>x.key===e.target.value);
-    container.querySelector('#cf-interval-wrap').style.display = p.rule==='custom_interval' ? 'block':'none';
+    if(p) container.querySelector('#cf-scheduletype').value = p.rule;
+    container.querySelector('#cf-interval-wrap').style.display =
+      container.querySelector('#cf-scheduletype').value==='custom_interval' ? 'block':'none';
   });
-  if(isEdit){
-    const p = PROVIDERS.find(x=>x.rule===existing.scheduleType);
-    if(p && p.rule==='custom_interval') container.querySelector('#cf-interval-wrap').style.display='block';
+  container.querySelector('#cf-scheduletype').addEventListener('change', e=>{
+    container.querySelector('#cf-interval-wrap').style.display = e.target.value==='custom_interval' ? 'block':'none';
+  });
+  if(isEdit && existing.scheduleType==='custom_interval'){
+    container.querySelector('#cf-interval-wrap').style.display='block';
   }
 
   container.querySelector('#cf-add').onclick = ()=>{
@@ -1149,9 +1162,10 @@ function renderCommitmentForm(container, existing, onSave){
     let total = parseFaNumber(container.querySelector('#cf-total').value);
     const perInstallment = parseFaNumber(container.querySelector('#cf-per-installment').value);
     if(!total && perInstallment) total = perInstallment * installments; // only knew the per-installment amount
-    const fee = FEE_TYPES.includes(selType) ? parseFaNumber(container.querySelector('#cf-fee').value) : 0;
+    const fee = parseFaNumber(container.querySelector('#cf-fee').value);
     const providerKey = container.querySelector('#cf-provider').value;
     const provider = PROVIDERS.find(p=>p.key===providerKey);
+    const scheduleType = container.querySelector('#cf-scheduletype').value;
     const interval = parseInt(container.querySelector('#cf-interval').value,10) || 30;
     const purchaseDate = readJalaliPicker(container, 'cf-date');
     if(!name || !total){ showToast('نام رو و حداقل یکی از دو مبلغ (کل یا هر قسط) رو وارد کن'); return; }
@@ -1170,7 +1184,7 @@ function renderCommitmentForm(container, existing, onSave){
 
     onSave({
       id: isEdit ? existing.id : uid(), name, type: selType, total, fee, installments, monthly,
-      provider: provider.label, scheduleType: provider.rule, intervalDays: interval,
+      provider: provider.label, providerKey: provider.key, scheduleType, intervalDays: interval,
       purchaseDate, necessity: selNec, channel: selChannel, paidFlags
     });
   };
@@ -1234,8 +1248,16 @@ function renderHome(){
     <div class="muted" style="font-size:13px; margin-bottom:18px;">قبل از خرج کردن، ببین این تصمیم چه اثری روی آینده‌ات داره</div>
 
     ${due.length ? `<div class="due-banner">
-      <div class="title">⏰ اقساط نزدیک</div>
-      ${due.slice(0,3).map(d=>`<div class="row"><span>${d.commitment.name} — ${fmtJDateShort(d.entry)}</span><span class="num">${toman(d.entry.amount)}</span></div>`).join('')}
+      <div class="title">⏰ اقساط نزدیک — بکش به چپ یا بزن تا تیک بخوره</div>
+      <div id="home-due-list">
+        ${due.slice(0,3).map(d=>`<div class="schedule-swipe-wrap">
+          <div class="schedule-swipe-hint">✓ پرداخت شد</div>
+          <div class="schedule-item" data-cid="${d.commitment.id}" data-idx="${d.index}" style="border-top:none; background:transparent;">
+            <span>${d.commitment.name} — ${fmtJDateShort(d.entry)}</span>
+            <span class="num">${toman(d.entry.amount)}</span>
+          </div>
+        </div>`).join('')}
+      </div>
     </div>` : ''}
 
     <div class="capacity-carousel" id="capacity-carousel">
@@ -1268,11 +1290,15 @@ function renderHome(){
     dots.forEach((d,i)=>d.classList.toggle('active', i===idx));
   });
 
+  const homeDueList = document.getElementById('home-due-list');
+  if(homeDueList) attachSwipeHandlers(homeDueList);
+
   checkDueNotifications();
 }
 
 let commitFilter = 'all';
 let commitEditTarget = null;
+let commitSort = 'due'; // 'due' = nearest payment first (default), 'recent' = most recently added first
 
 function renderCommitments(){
   const el = document.getElementById('commitments-content');
@@ -1281,7 +1307,7 @@ function renderCommitments(){
     const isEdit = commitEditTarget !== 'new';
     el.innerHTML = `
       <div class="topbar">
-        <div class="icon-btn" id="cm-back"><svg width="13" height="13" viewBox="0 0 24 24" fill="none"><path d="M15 6l-6 6 6 6" stroke="#001F3F" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        <div class="icon-btn" id="cm-back"><svg width="13" height="13" viewBox="0 0 24 24" fill="none"><path d="M9 6l6 6-6 6" stroke="#001F3F" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
         <h2 style="font-size:17px;">${isEdit ? 'ویرایش تعهد' : 'تعهد جدید'}</h2>
       </div>
       <div id="cm-edit-form"></div>
@@ -1311,8 +1337,25 @@ function renderCommitments(){
   }
 
   const filters = [{key:'all',label:'همه'}].concat(COMMITMENT_TYPES.map(t=>({key:t.key,label:t.emoji+' '+t.label})));
-  const list = state.commitments.filter(c => commitFilter==='all' ? true : c.type===commitFilter);
   const c = cap();
+
+  // attach each commitment's next unpaid due date so we can sort by it
+  const decorated = state.commitments
+    .filter(cm => commitFilter==='all' ? true : cm.type===commitFilter)
+    .map(cm=>{
+      const schedule = buildCommitmentSchedule(cm);
+      const next = schedule.find(e=>!e.paid);
+      return { cm, schedule, nextJdn: next ? j2d(next.jy,next.jm,next.jd) : Infinity };
+    });
+
+  if(commitSort === 'due'){
+    decorated.sort((a,b)=> a.nextJdn - b.nextJdn); // nearest payment first, fully-paid ones sink to the bottom
+  }
+  // 'recent' sort needs no extra work — state.commitments is already newest-first (unshift on add)
+
+  const list = decorated.map(d=>d.cm);
+  const scheduleByCommitment = {};
+  decorated.forEach(d=>{ scheduleByCommitment[d.cm.id] = d.schedule; });
 
   el.innerHTML = `
     <div class="topbar">
@@ -1322,13 +1365,20 @@ function renderCommitments(){
     <div class="filter-row" id="commit-filters">
       ${filters.map(f=>`<div class="filter-chip ${commitFilter===f.key?'selected':''}" data-f="${f.key}">${f.label}</div>`).join('')}
     </div>
+    <div class="row-2 mb14">
+      <div style="flex:none; align-self:center;" class="field-label">مرتب‌سازی:</div>
+      <select class="input" id="commit-sort" style="max-width:200px;">
+        <option value="due" ${commitSort==='due'?'selected':''}>نزدیک‌ترین سررسید</option>
+        <option value="recent" ${commitSort==='recent'?'selected':''}>آخرین اضافه‌شده</option>
+      </select>
+    </div>
     <div id="commit-list">
       ${list.map(cm=>{
         const t = COMMITMENT_TYPES.find(x=>x.key===cm.type);
         const nec = NECESSITY.find(n=>n.key===cm.necessity);
         const necClass = cm.necessity==='req'?'req':cm.necessity==='semi'?'semi':'optional';
         const channelInfo = CHANNELS.find(ch=>ch.key===cm.channel);
-        const schedule = buildCommitmentSchedule(cm);
+        const schedule = scheduleByCommitment[cm.id];
         const paidCount = schedule.filter(e=>e.paid).length;
         const next = schedule.find(e=>!e.paid);
         const impactPct = c>0 ? Math.round((cm.monthly/c)*100) : 0;
@@ -1343,6 +1393,7 @@ function renderCommitments(){
               <div class="amount num">${toman(cm.monthly)}</div>
               <span class="badge-necessity ${necClass}">${nec.label}</span>
             </div>
+            <svg class="expand-chevron" id="chev-${cm.id}" width="14" height="14" viewBox="0 0 24 24" fill="none" style="flex:0 0 auto; transition:transform .2s;"><path d="M6 9l6 6 6-6" stroke="#6E7C8C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
           </div>
           <div style="display:flex; gap:8px; margin-top:10px;">
             <span class="badge-channel">${channelInfo.label}</span>
@@ -1369,14 +1420,19 @@ function renderCommitments(){
   `;
 
   document.getElementById('cm-new').onclick = ()=>{ commitEditTarget='new'; renderCommitments(); };
+  document.getElementById('commit-sort').addEventListener('change', e=>{
+    commitSort = e.target.value; renderCommitments();
+  });
   document.querySelectorAll('#commit-filters [data-f]').forEach(chip=>chip.onclick=()=>{
     commitFilter = chip.dataset.f; renderCommitments();
   });
   document.querySelectorAll('[data-open]').forEach(row=>{
     row.addEventListener('click', ()=>{
       const s = document.getElementById('sched-'+row.dataset.open);
+      const chev = document.getElementById('chev-'+row.dataset.open);
       const willShow = s.style.display==='none';
       s.style.display = willShow ? 'block':'none';
+      chev.style.transform = willShow ? 'rotate(180deg)' : '';
       if(willShow) attachSwipeHandlers(s);
     });
   });
@@ -1762,14 +1818,20 @@ function renderSimStart(){
       ${CHANNELS.map((ch,i)=>`<div class="chip ${i===1?'selected':''}" data-channel="${ch.key}">${ch.label}</div>`).join('')}
     </div>
     <div class="hint mb18" id="sm-channel-hint"></div>
-    <div class="field-label">سرویس / زمان‌بندی</div>
+    <div class="field-label">پلتفرم / سرویس</div>
     <select class="input mb14" id="sm-provider">
-      ${PROVIDERS.map(p=>`<option value="${p.key}">${p.label} — ${SCHEDULE_LABELS[p.rule]}</option>`).join('')}
+      ${PROVIDERS.map(p=>`<option value="${p.key}">${p.label}</option>`).join('')}
+    </select>
+    <div class="field-label">نوع زمان‌بندی اقساط</div>
+    <select class="input mb14" id="sm-scheduletype">
+      ${Object.keys(SCHEDULE_LABELS).map(k=>`<option value="${k}">${SCHEDULE_LABELS[k]}</option>`).join('')}
     </select>
     <div id="sm-interval-wrap" style="display:none;" class="mb18">
       <div class="field-label">فاصله بین اقساط (روز)</div>
       <input class="input num" id="sm-interval" type="number" value="30" placeholder="مثلاً ۳۰">
     </div>
+    <div class="field-label">سود / کارمزد (اختیاری)</div>
+    <input class="input amt-input num mb18" id="sm-fee" inputmode="numeric" placeholder="مثلاً ۱۰۰٬۰۰۰">
     <div class="field-label">تاریخ خرید</div>
     ${jalaliPickerHTML('sm-date', today)}
     <div class="mb18"></div>
@@ -1784,12 +1846,14 @@ function renderSimStart(){
 
   function updateMonthlyPreview(){
     const price = parseFaNumber(document.getElementById('sm-price').value);
+    const fee = parseFaNumber(document.getElementById('sm-fee').value);
     const n = Math.max(1, parseInt(document.getElementById('sm-installments').value,10) || 1);
     document.getElementById('sm-monthly-preview').textContent =
-      n===1 ? 'خرید نقدی — بدون قسط' : `قسط ماهانه: ${toman(Math.round(price/n))}`;
+      n===1 ? 'خرید نقدی — بدون قسط' : `قسط ماهانه: ${toman(Math.round((price+fee)/n))}`;
   }
   document.getElementById('sm-price').addEventListener('input', updateMonthlyPreview);
   document.getElementById('sm-installments').addEventListener('input', updateMonthlyPreview);
+  document.getElementById('sm-fee').addEventListener('input', updateMonthlyPreview);
   updateMonthlyPreview();
 
   let selNec = 'req', selChannel = 'in_person';
@@ -1806,8 +1870,14 @@ function renderSimStart(){
     c.classList.add('selected'); selNec = c.dataset.nec;
   });
   document.getElementById('sm-provider').addEventListener('change', e=>{
+    // helpful default only — does not force the schedule type
     const p = PROVIDERS.find(x=>x.key===e.target.value);
-    document.getElementById('sm-interval-wrap').style.display = p.rule==='custom_interval' ? 'block':'none';
+    if(p) document.getElementById('sm-scheduletype').value = p.rule;
+    document.getElementById('sm-interval-wrap').style.display =
+      document.getElementById('sm-scheduletype').value==='custom_interval' ? 'block':'none';
+  });
+  document.getElementById('sm-scheduletype').addEventListener('change', e=>{
+    document.getElementById('sm-interval-wrap').style.display = e.target.value==='custom_interval' ? 'block':'none';
   });
   document.getElementById('sm-check').onclick = ()=>{
     const name = document.getElementById('sm-name').value.trim();
@@ -1817,12 +1887,14 @@ function renderSimStart(){
     const installments = Math.max(1, parseInt(document.getElementById('sm-installments').value,10) || 1);
     const providerKey = document.getElementById('sm-provider').value;
     const provider = PROVIDERS.find(p=>p.key===providerKey);
+    const scheduleType = document.getElementById('sm-scheduletype').value;
     const interval = parseInt(document.getElementById('sm-interval').value,10) || 30;
+    const fee = parseFaNumber(document.getElementById('sm-fee').value);
     const purchaseDate = readJalaliPicker(el, 'sm-date');
-    const monthly = installments===1 ? 0 : Math.round(price/installments);
+    const monthly = installments===1 ? 0 : Math.round((price+fee)/installments);
     state.pendingSimulation = {
-      name, price, installments, monthly, provider: provider.label,
-      scheduleType: installments===1 ? null : provider.rule, intervalDays: interval,
+      name, price, fee, installments, monthly, provider: provider.label,
+      scheduleType: installments===1 ? null : scheduleType, intervalDays: interval,
       purchaseDate, necessity: selNec, channel: selChannel
     };
     renderSimResult();
@@ -1855,7 +1927,7 @@ function renderSimResult(){
 
   el.innerHTML = `
     <div class="topbar">
-      <div class="icon-btn" id="sm-back"><svg width="13" height="13" viewBox="0 0 24 24" fill="none"><path d="M15 6l-6 6 6 6" stroke="#001F3F" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      <div class="icon-btn" id="sm-back"><svg width="13" height="13" viewBox="0 0 24 24" fill="none"><path d="M9 6l6 6-6 6" stroke="#001F3F" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
       <h2 style="font-size:17px;">نتیجه بررسی: ${p.name}</h2>
     </div>
 
