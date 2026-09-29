@@ -633,12 +633,14 @@ function checkDueNotifications(){
   const key = NOTIF_KEY_PREFIX + j2d(t.jy,t.jm,t.jd);
   let already = [];
   try{ already = JSON.parse(localStorage.getItem(key) || '[]'); }catch(e){}
-  dueSoonEntries(1).forEach(({commitment,entry,index,diff})=>{
+  // 5-day advance window, but no alarm ON the due date itself — only a heads-up beforehand
+  dueSoonEntries(5).forEach(({commitment,entry,index,diff})=>{
+    if(diff === 0) return;
     const flagId = commitment.id+'-'+index;
     if(already.includes(flagId)) return;
     try{
       new Notification('یادآوری قسط ظرفیت', {
-        body: `${commitment.name}: ${toman(entry.amount)} ${diff===0?'امروز':'فردا'} سررسید داره`
+        body: `${commitment.name}: ${toman(entry.amount)} تا ${fa(diff)} روز دیگه سررسید داره`
       });
     }catch(e){}
     already.push(flagId);
@@ -1042,9 +1044,11 @@ function renderCommitmentForm(container, existing, onSave){
     <div class="field-label">مبلغ هر قسط (تومان)</div>
     <input class="input amt-input num mb6" id="cf-per-installment" inputmode="numeric" placeholder="اگه کل مبلغ رو نمی‌دونی، فقط همینو پر کن">
     <div class="hint mb14">هر کدوم از این دو مبلغ (کل یا هر قسط) رو که بدونی کافیه؛ اون یکی خودش حساب می‌شه</div>
-    <div class="field-label">سود / کارمزد کل (اختیاری)</div>
-    <input class="input amt-input num mb14" id="cf-fee" inputmode="numeric" placeholder="مثلاً ۵۰۰٬۰۰۰" value="${isEdit&&existing.fee?fa(existing.fee):''}">
-    <div class="hint mb14">این مبلغ به کل بدهی اضافه و روی قسط‌ها پخش می‌شه — برای وام/قرض معمولاً سود بانکیه، برای بقیه هر کارمزدی که سرویس می‌گیره</div>
+    <div class="row-2 mb14">
+      <div><div class="field-label">سود (٪ از کل مبلغ)</div><input class="input num" id="cf-interest-pct" type="number" min="0" placeholder="مثلاً ۱۸" value="${isEdit&&existing.interestPercent?existing.interestPercent:''}"></div>
+      <div><div class="field-label">کارمزد ثابت (تومان)</div><input class="input amt-input num" id="cf-fee" inputmode="numeric" placeholder="مثلاً ۵۰۰٬۰۰۰" value="${isEdit&&existing.fee?fa(existing.fee):''}"></div>
+    </div>
+    <div class="hint mb14" id="cf-interest-preview">این دو تا (سود درصدی + کارمزد ثابت) به کل بدهی اضافه و روی قسط‌ها پخش می‌شن — برای وام/قرض معمولاً سود بانکیه، برای بقیه هر کارمزدی که سرویس می‌گیره</div>
     <div id="cf-channel-section">
       <div class="field-label">نحوه خرید</div>
       <div class="chip-grid mb14" id="cf-channel">
@@ -1126,7 +1130,27 @@ function renderCommitmentForm(container, existing, onSave){
       const per = parseFaNumber(perEl.value);
       if(per) totalEl.value = fa(per*n);
     }
+    updateInterestPreview();
   });
+
+  const interestPctEl = container.querySelector('#cf-interest-pct');
+  const feeEl = container.querySelector('#cf-fee');
+  function updateInterestPreview(){
+    const total = parseFaNumber(totalEl.value) || (parseFaNumber(perEl.value) * Math.max(1, parseInt(installmentsEl.value,10)||1));
+    const n = Math.max(1, parseInt(installmentsEl.value,10) || 1);
+    const pct = parseFloat(interestPctEl.value) || 0;
+    const fee = parseFaNumber(feeEl.value);
+    const interestAmount = Math.round(total * pct / 100);
+    const finalMonthly = total ? Math.round((total + interestAmount + fee) / n) : 0;
+    container.querySelector('#cf-interest-preview').textContent = total
+      ? `قسط نهایی با احتساب سود و کارمزد: ${toman(finalMonthly)}${pct||fee ? ` (سود: ${toman(interestAmount)}، کارمزد: ${toman(fee)})` : ''}`
+      : 'این دو تا (سود درصدی + کارمزد ثابت) به کل بدهی اضافه و روی قسط‌ها پخش می‌شن';
+  }
+  totalEl.addEventListener('input', updateInterestPreview);
+  perEl.addEventListener('input', updateInterestPreview);
+  interestPctEl.addEventListener('input', updateInterestPreview);
+  feeEl.addEventListener('input', updateInterestPreview);
+  updateInterestPreview();
 
   container.querySelectorAll('[data-type]').forEach(c=>c.onclick=()=>{
     container.querySelectorAll('[data-type]').forEach(x=>x.classList.remove('selected'));
@@ -1162,14 +1186,16 @@ function renderCommitmentForm(container, existing, onSave){
     let total = parseFaNumber(container.querySelector('#cf-total').value);
     const perInstallment = parseFaNumber(container.querySelector('#cf-per-installment').value);
     if(!total && perInstallment) total = perInstallment * installments; // only knew the per-installment amount
+    const interestPercent = parseFloat(container.querySelector('#cf-interest-pct').value) || 0;
     const fee = parseFaNumber(container.querySelector('#cf-fee').value);
+    const interestAmount = Math.round(total * interestPercent / 100);
     const providerKey = container.querySelector('#cf-provider').value;
     const provider = PROVIDERS.find(p=>p.key===providerKey);
     const scheduleType = container.querySelector('#cf-scheduletype').value;
     const interval = parseInt(container.querySelector('#cf-interval').value,10) || 30;
     const purchaseDate = readJalaliPicker(container, 'cf-date');
     if(!name || !total){ showToast('نام رو و حداقل یکی از دو مبلغ (کل یا هر قسط) رو وارد کن'); return; }
-    const monthly = Math.round((total + fee) / installments);
+    const monthly = Math.round((total + interestAmount + fee) / installments);
 
     let paidFlags;
     if(isEdit){
@@ -1183,7 +1209,7 @@ function renderCommitmentForm(container, existing, onSave){
     }
 
     onSave({
-      id: isEdit ? existing.id : uid(), name, type: selType, total, fee, installments, monthly,
+      id: isEdit ? existing.id : uid(), name, type: selType, total, interestPercent, fee, installments, monthly,
       provider: provider.label, providerKey: provider.key, scheduleType, intervalDays: interval,
       purchaseDate, necessity: selNec, channel: selChannel, paidFlags
     });
@@ -1227,7 +1253,7 @@ function renderHome(){
   const c = cap();
   const t = jToday();
   const used = commitmentForMonth(t.jy, t.jm, false);
-  const due = dueSoonEntries(3);
+  const due = dueSoonEntries(5);
   const months = nextMonths(6);
 
   const el = document.getElementById('home-content');
@@ -1250,7 +1276,7 @@ function renderHome(){
     ${due.length ? `<div class="due-banner">
       <div class="title">⏰ اقساط نزدیک — بکش به چپ یا بزن تا تیک بخوره</div>
       <div id="home-due-list">
-        ${due.slice(0,3).map(d=>`<div class="schedule-swipe-wrap">
+        ${due.slice(0,5).map(d=>`<div class="schedule-swipe-wrap">
           <div class="schedule-swipe-hint">✓ پرداخت شد</div>
           <div class="schedule-item" data-cid="${d.commitment.id}" data-idx="${d.index}" style="border-top:none; background:transparent;">
             <span>${d.commitment.name} — ${fmtJDateShort(d.entry)}</span>
@@ -1403,6 +1429,7 @@ function renderCommitments(){
           </div>
           <div class="schedule-list" id="sched-${cm.id}" style="display:none; margin-top:10px;">
             <div class="waterfall-row"><span class="l">مبلغ کل</span><span class="r num">${toman(cm.total)}</span></div>
+            ${(cm.interestPercent || cm.fee) ? `<div class="waterfall-row"><span class="l">سود/کارمزد</span><span class="r num">${cm.interestPercent?fa(cm.interestPercent)+'٪ + ':''}${toman(cm.fee||0)}</span></div>` : ''}
             <div class="waterfall-row"><span class="l">اثر روی ظرفیت ماهانه</span><span class="r num">${fa(impactPct)}٪</span></div>
             <div class="waterfall-row"><span class="l">پرداخت بعدی</span><span class="r">${next ? fmtJDate(next) : '—'}</span></div>
             <div class="field-label" style="margin-top:10px;">همه‌ی اقساط — بکش به چپ یا بزن تا تیک بخوره</div>
@@ -1830,8 +1857,10 @@ function renderSimStart(){
       <div class="field-label">فاصله بین اقساط (روز)</div>
       <input class="input num" id="sm-interval" type="number" value="30" placeholder="مثلاً ۳۰">
     </div>
-    <div class="field-label">سود / کارمزد (اختیاری)</div>
-    <input class="input amt-input num mb18" id="sm-fee" inputmode="numeric" placeholder="مثلاً ۱۰۰٬۰۰۰">
+    <div class="row-2 mb18">
+      <div><div class="field-label">سود (٪ اختیاری)</div><input class="input num" id="sm-interest-pct" type="number" min="0" placeholder="مثلاً ۱۸"></div>
+      <div><div class="field-label">کارمزد ثابت (اختیاری)</div><input class="input amt-input num" id="sm-fee" inputmode="numeric" placeholder="مثلاً ۱۰۰٬۰۰۰"></div>
+    </div>
     <div class="field-label">تاریخ خرید</div>
     ${jalaliPickerHTML('sm-date', today)}
     <div class="mb18"></div>
@@ -1846,14 +1875,17 @@ function renderSimStart(){
 
   function updateMonthlyPreview(){
     const price = parseFaNumber(document.getElementById('sm-price').value);
+    const pct = parseFloat(document.getElementById('sm-interest-pct').value) || 0;
     const fee = parseFaNumber(document.getElementById('sm-fee').value);
     const n = Math.max(1, parseInt(document.getElementById('sm-installments').value,10) || 1);
+    const interestAmount = Math.round(price * pct / 100);
     document.getElementById('sm-monthly-preview').textContent =
-      n===1 ? 'خرید نقدی — بدون قسط' : `قسط ماهانه: ${toman(Math.round((price+fee)/n))}`;
+      n===1 ? 'خرید نقدی — بدون قسط' : `قسط ماهانه: ${toman(Math.round((price+interestAmount+fee)/n))}`;
   }
   document.getElementById('sm-price').addEventListener('input', updateMonthlyPreview);
   document.getElementById('sm-installments').addEventListener('input', updateMonthlyPreview);
   document.getElementById('sm-fee').addEventListener('input', updateMonthlyPreview);
+  document.getElementById('sm-interest-pct').addEventListener('input', updateMonthlyPreview);
   updateMonthlyPreview();
 
   let selNec = 'req', selChannel = 'in_person';
@@ -1889,11 +1921,13 @@ function renderSimStart(){
     const provider = PROVIDERS.find(p=>p.key===providerKey);
     const scheduleType = document.getElementById('sm-scheduletype').value;
     const interval = parseInt(document.getElementById('sm-interval').value,10) || 30;
+    const interestPercent = parseFloat(document.getElementById('sm-interest-pct').value) || 0;
     const fee = parseFaNumber(document.getElementById('sm-fee').value);
+    const interestAmount = Math.round(price * interestPercent / 100);
     const purchaseDate = readJalaliPicker(el, 'sm-date');
-    const monthly = installments===1 ? 0 : Math.round((price+fee)/installments);
+    const monthly = installments===1 ? 0 : Math.round((price+interestAmount+fee)/installments);
     state.pendingSimulation = {
-      name, price, fee, installments, monthly, provider: provider.label,
+      name, price, interestPercent, fee, installments, monthly, provider: provider.label,
       scheduleType: installments===1 ? null : scheduleType, intervalDays: interval,
       purchaseDate, necessity: selNec, channel: selChannel
     };
@@ -1946,6 +1980,7 @@ function renderSimResult(){
     ${!isCash ? `
     <div class="card mb18">
       <div class="waterfall-row"><span class="l">قسط ماهانه</span><span class="r num">${toman(p.monthly)}</span></div>
+      ${(p.interestPercent || p.fee) ? `<div class="waterfall-row"><span class="l">سود/کارمزد لحاظ‌شده</span><span class="r num">${p.interestPercent?fa(p.interestPercent)+'٪ + ':''}${toman(p.fee||0)}</span></div>` : ''}
       <div class="waterfall-row"><span class="l">سقف اقساط</span><span class="r num">${toman(c)}</span></div>
       <div class="waterfall-row"><span class="l">نحوه خرید</span><span class="r">${CHANNELS.find(ch=>ch.key===p.channel).label}</span></div>
       <div class="waterfall-row"><span class="l">سرویس / زمان‌بندی</span><span class="r">${SCHEDULE_LABELS[p.scheduleType]}</span></div>
@@ -1996,9 +2031,9 @@ function renderSimResult(){
       const paidFlags = Array(p.installments).fill(false);
       if(p.channel==='online') paidFlags[0] = true;
       state.commitments.unshift({
-        id: uid(), name:p.name, type:'bnpl', total:p.price, installments:p.installments,
-        monthly:p.monthly, provider:p.provider, scheduleType:p.scheduleType, intervalDays:p.intervalDays,
-        purchaseDate:p.purchaseDate, necessity:p.necessity, channel:p.channel, paidFlags
+        id: uid(), name:p.name, type:'bnpl', total:p.price, interestPercent:p.interestPercent||0, fee:p.fee||0,
+        installments:p.installments, monthly:p.monthly, provider:p.provider, scheduleType:p.scheduleType,
+        intervalDays:p.intervalDays, purchaseDate:p.purchaseDate, necessity:p.necessity, channel:p.channel, paidFlags
       });
     }
     state.pendingSimulation = null;
