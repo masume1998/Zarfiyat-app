@@ -161,6 +161,11 @@
     background:var(--ink); color:#fff; padding:12px 20px; border-radius:100px; font-size:12px; font-weight:700;
     opacity:0; pointer-events:none; transition:.25s; z-index:50; white-space:nowrap; }
   .toast.show{ opacity:1; transform:translateX(-50%) translateY(0); }
+  .toast.has-action{ display:flex; align-items:center; gap:14px; white-space:normal; max-width:calc(100% - 24px); }
+  .toast.show.has-action{ pointer-events:auto; }
+  .toast .toast-undo{ background:var(--accent); color:var(--ink); border:none; border-radius:100px; padding:6px 14px;
+    font-family:inherit; font-size:12px; font-weight:800; cursor:pointer; flex:0 0 auto; }
+  .toast .toast-undo:focus-visible{ outline:2px solid #fff; outline-offset:2px; }
 
   .bottom-nav{ position:relative; z-index:20; background:var(--surface); border-top:1px solid var(--line);
     display:flex; align-items:center; justify-content:space-around; padding:10px 8px 16px; }
@@ -182,9 +187,40 @@
   .badge-necessity.optional{ background:var(--danger-soft); color:var(--danger); }
   .badge-channel{ font-size:10px; font-weight:700; padding:3px 9px; border-radius:100px; background:var(--paper-deep); color:var(--ink-soft); }
 
-  .schedule-swipe-wrap{ position:relative; overflow:hidden; border-radius:8px; margin-top:2px; }
-  .schedule-swipe-hint{ position:absolute; inset:0; background:var(--safe-soft); color:var(--safe);
-    display:flex; align-items:center; padding-right:14px; font-size:11px; font-weight:700; }
+  /* ---- installment rows: swipe-left to mark paid (reveal tracks --p = 0..1 drag progress) ---- */
+  .inst-wrap{ position:relative; overflow:hidden; border-radius:12px; margin-top:6px; }
+  .inst-reveal{ position:absolute; inset:0; display:flex; align-items:center; gap:8px; padding-inline-start:16px;
+    background:var(--safe-soft); color:var(--safe); font-size:12px; font-weight:800;
+    opacity:calc(.35 + var(--p,0)*.65); }
+  .inst-reveal .inst-check{ width:24px; height:24px; border-radius:50%; display:inline-flex; align-items:center;
+    justify-content:center; border:2px solid var(--safe); font-size:13px; line-height:1;
+    transform:scale(calc(.7 + var(--p,0)*.3)); opacity:calc(.3 + var(--p,0)*.7); }
+  .inst-wrap.ready .inst-check{ background:var(--safe); color:#fff; }
+  .inst-reveal .inst-label{ opacity:var(--p,0); }
+  .inst-card{ position:relative; z-index:1; display:flex; align-items:center; gap:10px; padding:10px 12px;
+    background:var(--surface); border:1px solid var(--line); border-radius:12px;
+    touch-action:pan-y; user-select:none; -webkit-user-select:none; cursor:grab; }
+  .inst-wrap.dragging .inst-card{ cursor:grabbing; }
+  .inst-text{ flex:1; min-width:0; }
+  .inst-title{ font-size:12.5px; font-weight:700; line-height:1.6; }
+  .inst-amount{ font-size:12.5px; font-weight:800; white-space:nowrap; }
+  .inst-btn{ width:32px; height:32px; border-radius:50%; flex:0 0 auto; border:1.5px solid var(--line);
+    background:var(--surface); color:var(--muted); font-size:14px; cursor:pointer; font-family:inherit;
+    display:flex; align-items:center; justify-content:center; }
+  .inst-btn:hover{ border-color:var(--safe); color:var(--safe); }
+  .inst-btn:focus-visible{ outline:2px solid var(--safe); outline-offset:2px; }
+  .inst-wrap.is-paid .inst-card{ background:var(--safe-soft); border-color:transparent; cursor:default; }
+  .inst-wrap.is-paid .inst-title, .inst-wrap.is-paid .inst-amount{ color:var(--muted); }
+  .inst-wrap.inst-enter{ animation:instEnter .26s ease-out; }
+  @keyframes instEnter{ from{ opacity:0; transform:translateY(8px); } to{ opacity:1; transform:none; } }
+  .inst-section-title{ font-size:12px; font-weight:800; color:var(--ink-soft); margin:14px 0 2px;
+    display:flex; justify-content:space-between; align-items:baseline; gap:8px; }
+  .inst-progress{ height:6px; border-radius:100px; background:var(--track); overflow:hidden; margin:6px 0 2px; }
+  .inst-progress-fill{ height:100%; background:var(--safe); border-radius:100px; transition:width .3s ease; }
+  @media (prefers-reduced-motion: reduce){
+    .inst-wrap.inst-enter{ animation:none; }
+    .inst-card, .inst-wrap, .inst-progress-fill{ transition:none !important; }
+  }
   .schedule-item{ position:relative; z-index:1; background:var(--surface); display:flex; justify-content:space-between;
     font-size:12px; padding:9px 8px; border-top:1px dashed var(--line); touch-action:pan-y; user-select:none; }
   .schedule-item.paid-row{ background:var(--safe-soft); }
@@ -248,7 +284,7 @@
 
   </div>
 
-  <div class="toast" id="toast"></div>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
   <div class="bottom-nav" id="bottom-nav" style="display:none;">
     <button class="nav-btn active" data-nav="home">
@@ -648,53 +684,188 @@ function checkDueNotifications(){
   try{ localStorage.setItem(key, JSON.stringify(already)); }catch(e){}
 }
 
-function togglePaid(commitmentId, idx){
-  const c = state.commitments.find(x=>x.id===commitmentId);
-  if(!c) return;
-  if(!Array.isArray(c.paidFlags)) c.paidFlags = Array(c.installments).fill(false);
-  c.paidFlags[idx] = !c.paidFlags[idx];
-  saveState();
-  showToast(c.paidFlags[idx] ? 'قسط پرداخت‌شده علامت خورد ✅' : 'به پرداخت‌نشده برگشت');
-  // refresh whichever screen is currently showing this toggle (Home's due-soon
-  // list or the Commitments tab both use the same swipe/tap mechanism)
+/* =========================================================
+   MARKING INSTALLMENTS PAID — swipe left / ✓ button / undo
+   This is a manual self-report: it flips paidFlags[idx] in the real state and
+   persists it. It does NOT verify any bank transaction.
+========================================================= */
+const swipeBusy = new Set();            // "cid:idx" currently animating out — repeated gestures are ignored
+let lastMovedInstallment = null;        // lets the row animate into its new list after the re-render
+const expandedCommitments = new Set();  // keeps expanded commitment cards open across re-renders
+let homeCarouselIndex = 0;
+
+function prefersReducedMotion(){
+  return !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+}
+
+function refreshAfterPaidChange(){
   if(document.getElementById('screen-home').classList.contains('active')) renderHome();
   if(document.getElementById('screen-commitments').classList.contains('active')) renderCommitments();
 }
+
+// explicit set (never a blind toggle) so double triggers / late undo taps are harmless
+function setPaid(commitmentId, idx, value, opts){
+  opts = opts || {};
+  const c = state.commitments.find(x=>x.id===commitmentId);
+  if(!c || idx < 0 || idx >= c.installments) return false;   // commitment deleted/edited meanwhile
+  if(!Array.isArray(c.paidFlags) || c.paidFlags.length !== c.installments){
+    c.paidFlags = Array.from({length:c.installments}, (_,i)=> !!(c.paidFlags && c.paidFlags[i]));
+  }
+  if(!!c.paidFlags[idx] === value) return false;             // already in that state
+  c.paidFlags[idx] = value;
+  saveState();
+  if(opts.moved) lastMovedInstallment = { cid: commitmentId, idx };
+  refreshAfterPaidChange();
+  if(value && opts.withUndo){
+    showUndoToast('قسط به‌عنوان پرداخت‌شده علامت خورد', ()=> setPaid(commitmentId, idx, false, { moved:true }));
+  } else {
+    showToast(value ? 'قسط به‌عنوان پرداخت‌شده علامت خورد' : 'قسط به پرداخت‌نشده برگشت');
+  }
+  return true;
+}
+
+function installmentRowHTML(cid, idx, entry, opts){
+  opts = opts || {};
+  const paid = !!opts.paid;
+  const label = opts.label || `قسط ${fa(idx+1)} — ${fmtJDate(entry)}`;
+  const actionText = paid ? 'بازگردانی به پرداخت‌نشده' : 'علامت‌گذاری به‌عنوان پرداخت‌شده';
+  return `<div class="inst-wrap ${paid?'is-paid':''}" role="listitem" data-cid="${cid}" data-idx="${idx}" ${paid?'':'data-swipe'}>
+    ${paid ? '' : `<div class="inst-reveal" aria-hidden="true"><span class="inst-check">✓</span><span class="inst-label">پرداخت‌شده</span></div>`}
+    <div class="inst-card">
+      <div class="inst-text"><div class="inst-title">${label}</div></div>
+      <div class="inst-amount num">${toman(entry.amount)}</div>
+      <button type="button" class="inst-btn" data-action="${paid?'restore':'pay'}" title="${actionText}" aria-label="${actionText}: ${label}">${paid?'↩':'✓'}</button>
+    </div>
+  </div>`;
+}
+
+function completeSwipe(wrap, card, cid, idx){
+  const key = cid+':'+idx;
+  if(swipeBusy.has(key)) return;
+  swipeBusy.add(key);
+  const finish = ()=>{
+    swipeBusy.delete(key);
+    setPaid(cid, idx, true, { withUndo:true, moved:true });
+  };
+  if(prefersReducedMotion()){ finish(); return; }
+  const h = wrap.offsetHeight;
+  card.style.transition = 'transform .22s ease-in, opacity .22s ease-in';
+  card.style.transform = `translateX(-${wrap.offsetWidth + 20}px)`;
+  card.style.opacity = '0';
+  setTimeout(()=>{                       // collapse the gap once the card has left
+    wrap.style.maxHeight = h + 'px';
+    void wrap.offsetHeight;
+    wrap.style.transition = 'max-height .18s ease, margin .18s ease';
+    wrap.style.maxHeight = '0px';
+    wrap.style.marginTop = '0px';
+  }, 200);
+  setTimeout(finish, 400);
+}
+
 function attachSwipeHandlers(root){
-  // Swipe-left marks a row paid; a plain tap is also a valid fallback in case
-  // touch gestures don't register on a given device/browser. `triggered` guards
-  // against the click that mobile browsers fire right after touchend, so a
-  // successful swipe doesn't get double-counted as an extra tap-toggle.
-  root.querySelectorAll('.schedule-item[data-cid]').forEach(row=>{
-    let startX=0, dx=0, dragging=false, triggered=false;
-    const cid = row.dataset.cid, idx = parseInt(row.dataset.idx,10);
-    row.addEventListener('touchstart', e=>{ startX=e.touches[0].clientX; dragging=true; triggered=false; }, {passive:true});
-    row.addEventListener('touchmove', e=>{
-      if(!dragging) return;
-      dx = e.touches[0].clientX - startX;
-      if(dx<0) row.style.transform = `translateX(${Math.max(dx,-90)}px)`;
-    }, {passive:true});
-    row.addEventListener('touchend', ()=>{
-      dragging=false;
-      row.style.transition='transform .2s ease';
-      if(dx < -55){ togglePaid(cid, idx); triggered=true; }
-      row.style.transform='';
-      dx=0;
-      setTimeout(()=>{ row.style.transition=''; },200);
+  root.querySelectorAll('.inst-wrap[data-swipe]').forEach(wrap=>{
+    if(wrap._swipeBound) return;
+    wrap._swipeBound = true;
+    const card = wrap.querySelector('.inst-card');
+    const cid = wrap.dataset.cid, idx = parseInt(wrap.dataset.idx,10);
+    let startX=0, startY=0, dx=0, tracking=false, locked=false, pid=null;
+    // deliberately generous so short swipes / scrolling can't complete by accident
+    const threshold = ()=> Math.max(80, Math.min(120, wrap.offsetWidth * 0.35));
+    const paint = (p, ready)=>{
+      wrap.style.setProperty('--p', p.toFixed(3));
+      // interpolate surface (#fff) -> safe-soft (#E1F0E6) as the swipe progresses
+      card.style.background = `rgb(${Math.round(255-30*p)},${Math.round(255-15*p)},${Math.round(255-25*p)})`;
+      wrap.classList.toggle('ready', !!ready);
+    };
+    const resetCard = ()=>{
+      card.style.transition = prefersReducedMotion() ? 'none' : 'transform .18s ease-out, background .18s ease-out';
+      card.style.transform = '';
+      paint(0, false);
+      wrap.classList.remove('dragging');
+    };
+    card.addEventListener('pointerdown', e=>{
+      if(e.pointerType === 'mouse' && e.button !== 0) return;
+      if(e.target.closest && e.target.closest('.inst-btn')) return;   // the button has its own action
+      if(swipeBusy.has(cid+':'+idx)) return;
+      tracking = true; locked = false; dx = 0; pid = e.pointerId;
+      startX = e.clientX; startY = e.clientY;
+      card.style.transition = 'none';
     });
-    row.addEventListener('click', ()=>{
-      if(triggered){ triggered=false; return; }
-      togglePaid(cid, idx);
+    card.addEventListener('pointermove', e=>{
+      if(!tracking || e.pointerId !== pid) return;
+      const mx = e.clientX - startX, my = e.clientY - startY;
+      if(!locked){
+        if(Math.abs(my) > 10 && Math.abs(my) > Math.abs(mx)){ tracking = false; return; }  // vertical scroll wins
+        if(Math.abs(mx) > 8 && Math.abs(mx) > Math.abs(my) * 1.5){
+          locked = true; wrap.classList.add('dragging');
+          try{ card.setPointerCapture(pid); }catch(_){}
+        } else return;
+      }
+      dx = Math.min(0, mx);                       // only leftward movement is tracked
+      const p = Math.min(1, Math.abs(dx) / threshold());
+      card.style.transform = `translateX(${dx}px)`;
+      paint(p, p >= 1);
+    });
+    const end = (e, cancelled)=>{
+      if(!tracking || (e && e.pointerId !== pid)) return;
+      tracking = false;
+      try{ card.releasePointerCapture(pid); }catch(_){}
+      if(!locked) return;                          // it was a tap or a vertical scroll — nothing to do
+      const done = !cancelled && Math.abs(dx) >= threshold();
+      locked = false; dx = 0;
+      if(done) completeSwipe(wrap, card, cid, idx); else resetCard();
+    };
+    card.addEventListener('pointerup', e=>end(e, false));
+    card.addEventListener('pointercancel', e=>end(e, true));
+  });
+}
+
+// swipe handlers + the accessible ✓ / ↩ buttons for every installment row inside `root`
+function wireInstallmentRows(root){
+  attachSwipeHandlers(root);
+  root.querySelectorAll('.inst-btn[data-action]').forEach(btn=>{
+    if(btn._bound) return;
+    btn._bound = true;
+    btn.addEventListener('click', ev=>{
+      ev.stopPropagation();
+      const wrap = btn.closest('.inst-wrap');
+      const cid = wrap.dataset.cid, idx = parseInt(wrap.dataset.idx,10);
+      if(btn.dataset.action === 'pay') completeSwipe(wrap, wrap.querySelector('.inst-card'), cid, idx);
+      else setPaid(cid, idx, false, { moved:true });
     });
   });
+}
+
+function animateMovedInstallment(root){
+  if(!lastMovedInstallment) return;
+  const { cid, idx } = lastMovedInstallment;
+  lastMovedInstallment = null;
+  if(prefersReducedMotion()) return;
+  const el = root.querySelector(`.inst-wrap[data-cid="${cid}"][data-idx="${idx}"]`);
+  if(el) el.classList.add('inst-enter');
 }
 
 let toastTimer;
 function showToast(msg, duration){
   const t = document.getElementById('toast');
+  t.classList.remove('has-action');
   t.textContent = msg; t.classList.add('show');
   clearTimeout(toastTimer);
   toastTimer = setTimeout(()=>t.classList.remove('show'), duration || 2300);
+}
+function showUndoToast(msg, onUndo){
+  const t = document.getElementById('toast');
+  t.classList.add('has-action');
+  t.innerHTML = '<span class="toast-msg"></span><button type="button" class="toast-undo">بازگردانی</button>';
+  t.querySelector('.toast-msg').textContent = msg;
+  t.querySelector('.toast-undo').onclick = ()=>{
+    clearTimeout(toastTimer);
+    t.classList.remove('show');
+    onUndo();
+  };
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(()=>t.classList.remove('show'), 5500);
 }
 function worstMonthStatus(monthsAhead){
   const c = cap();
@@ -711,7 +882,7 @@ function goTo(name){
   document.getElementById('screen-'+name).classList.add('active');
   document.querySelectorAll('.nav-btn').forEach(b=>b.classList.toggle('active', b.dataset.nav===name));
   document.getElementById('screen-'+name).scrollTop = 0;
-  if(name==='home') renderHome();
+  if(name==='home'){ homeCarouselIndex = 0; renderHome(); }
   if(name==='commitments'){ commitEditTarget = null; renderCommitments(); }
   if(name==='plan') renderPlan();
   if(name==='profile') renderProfile();
@@ -1274,15 +1445,9 @@ function renderHome(){
     <div class="muted" style="font-size:13px; margin-bottom:18px;">قبل از خرج کردن، ببین این تصمیم چه اثری روی آینده‌ات داره</div>
 
     ${due.length ? `<div class="due-banner">
-      <div class="title">⏰ اقساط نزدیک — بکش به چپ یا بزن تا تیک بخوره</div>
-      <div id="home-due-list">
-        ${due.slice(0,5).map(d=>`<div class="schedule-swipe-wrap">
-          <div class="schedule-swipe-hint">✓ پرداخت شد</div>
-          <div class="schedule-item" data-cid="${d.commitment.id}" data-idx="${d.index}" style="border-top:none; background:transparent;">
-            <span>${d.commitment.name} — ${fmtJDateShort(d.entry)}</span>
-            <span class="num">${toman(d.entry.amount)}</span>
-          </div>
-        </div>`).join('')}
+      <div class="title">⏰ اقساط نزدیک — بکش به چپ یا دکمه‌ی ✓ رو بزن</div>
+      <div id="home-due-list" role="list">
+        ${due.slice(0,5).map(d=>installmentRowHTML(d.commitment.id, d.index, d.entry, { label: `${d.commitment.name} — ${fmtJDateShort(d.entry)}` })).join('')}
       </div>
     </div>` : ''}
 
@@ -1311,13 +1476,21 @@ function renderHome(){
 
   const carousel = document.getElementById('capacity-carousel');
   const dots = document.querySelectorAll('#carousel-dots span');
+  const syncDots = idx => dots.forEach((d,i)=>d.classList.toggle('active', i===idx));
   carousel.addEventListener('scroll', ()=>{
-    const idx = Math.round(carousel.scrollLeft / carousel.clientWidth);
-    dots.forEach((d,i)=>d.classList.toggle('active', i===idx));
+    // scrollLeft is negative in RTL, hence Math.abs
+    const idx = Math.round(Math.abs(carousel.scrollLeft) / (carousel.clientWidth || 1));
+    homeCarouselIndex = idx;
+    syncDots(idx);
   });
+  // keep the month the user was looking at when a swipe/undo re-renders Home
+  if(homeCarouselIndex > 0 && carousel.children[homeCarouselIndex]){
+    carousel.children[homeCarouselIndex].scrollIntoView({ behavior:'auto', inline:'center', block:'nearest' });
+    syncDots(homeCarouselIndex);
+  }
 
-  const homeDueList = document.getElementById('home-due-list');
-  if(homeDueList) attachSwipeHandlers(homeDueList);
+  wireInstallmentRows(el);
+  animateMovedInstallment(el);
 
   checkDueNotifications();
 }
@@ -1328,6 +1501,7 @@ let commitSort = 'due'; // 'due' = nearest payment first (default), 'recent' = m
 
 function renderCommitments(){
   const el = document.getElementById('commitments-content');
+  const prevScroll = document.getElementById('screen-commitments').scrollTop;
 
   if(commitEditTarget !== null){
     const isEdit = commitEditTarget !== 'new';
@@ -1408,6 +1582,11 @@ function renderCommitments(){
         const paidCount = schedule.filter(e=>e.paid).length;
         const next = schedule.find(e=>!e.paid);
         const impactPct = c>0 ? Math.round((cm.monthly/c)*100) : 0;
+        const expanded = expandedCommitments.has(cm.id);
+        const unpaidHTML = schedule.map((e,i)=> e.paid ? '' : installmentRowHTML(cm.id, i, e)).join('');
+        const paidHTML = schedule.map((e,i)=> e.paid ? installmentRowHTML(cm.id, i, e, { paid:true }) : '').join('');
+        const unpaidCount = cm.installments - paidCount;
+        const pctPaid = cm.installments ? Math.round(paidCount / cm.installments * 100) : 0;
         return `<div class="card" style="margin-bottom:12px;">
           <div style="display:flex; align-items:center; gap:10px; cursor:pointer;" data-open="${cm.id}">
             <div class="emoji-badge">${t.emoji}</div>
@@ -1419,7 +1598,7 @@ function renderCommitments(){
               <div class="amount num">${toman(cm.monthly)}</div>
               <span class="badge-necessity ${necClass}">${nec.label}</span>
             </div>
-            <svg class="expand-chevron" id="chev-${cm.id}" width="14" height="14" viewBox="0 0 24 24" fill="none" style="flex:0 0 auto; transition:transform .2s;"><path d="M6 9l6 6 6-6" stroke="#6E7C8C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            <svg class="expand-chevron" id="chev-${cm.id}" width="14" height="14" viewBox="0 0 24 24" fill="none" style="flex:0 0 auto; transition:transform .2s; transform:${expanded?'rotate(180deg)':'none'};"><path d="M6 9l6 6 6-6" stroke="#6E7C8C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
           </div>
           <div style="display:flex; gap:8px; margin-top:10px;">
             <span class="badge-channel">${channelInfo.label}</span>
@@ -1427,19 +1606,17 @@ function renderCommitments(){
             <button class="row-edit" data-editcm="${cm.id}">✏️</button>
             <button class="row-del" data-delcm="${cm.id}">✕</button>
           </div>
-          <div class="schedule-list" id="sched-${cm.id}" style="display:none; margin-top:10px;">
+          <div class="schedule-list" id="sched-${cm.id}" style="display:${expanded?'block':'none'}; margin-top:10px;">
             <div class="waterfall-row"><span class="l">مبلغ کل</span><span class="r num">${toman(cm.total)}</span></div>
             ${(cm.interestPercent || cm.fee) ? `<div class="waterfall-row"><span class="l">سود/کارمزد</span><span class="r num">${cm.interestPercent?fa(cm.interestPercent)+'٪ + ':''}${toman(cm.fee||0)}</span></div>` : ''}
             <div class="waterfall-row"><span class="l">اثر روی ظرفیت ماهانه</span><span class="r num">${fa(impactPct)}٪</span></div>
             <div class="waterfall-row"><span class="l">پرداخت بعدی</span><span class="r">${next ? fmtJDate(next) : '—'}</span></div>
-            <div class="field-label" style="margin-top:10px;">همه‌ی اقساط — بکش به چپ یا بزن تا تیک بخوره</div>
-            ${schedule.map((e,i)=>`<div class="schedule-swipe-wrap">
-              <div class="schedule-swipe-hint">✓ پرداخت شد</div>
-              <div class="schedule-item ${e.paid?'paid-row':''}" data-cid="${cm.id}" data-idx="${i}">
-                <span class="${e.paid?'paid':''}"><span class="check">${e.paid?'☑️':'⬜️'}</span>قسط ${fa(i+1)} — ${fmtJDate(e)}</span>
-                <span class="num ${e.paid?'paid':''}">${fa(e.amount)}</span>
-              </div>
-            </div>`).join('')}
+            <div class="inst-section-title"><span>پیشرفت پرداخت</span><span class="num">${fa(paidCount)} از ${fa(cm.installments)}</span></div>
+            <div class="inst-progress" role="progressbar" aria-valuemin="0" aria-valuemax="${cm.installments}" aria-valuenow="${paidCount}"><div class="inst-progress-fill" style="width:${pctPaid}%"></div></div>
+            <div class="inst-section-title"><span>اقساط پرداخت‌نشده (${fa(unpaidCount)})</span><span class="muted" style="font-weight:600;">بکش به چپ یا دکمه‌ی ✓</span></div>
+            <div role="list">${unpaidHTML || '<div class="hint" style="margin:8px 0;">همه‌ی اقساط علامت‌گذاری شده‌اند ✅</div>'}</div>
+            ${paidCount ? `<div class="inst-section-title"><span>اقساط پرداخت‌شده (${fa(paidCount)})</span></div><div role="list">${paidHTML}</div>` : ''}
+            <div class="hint" style="margin-top:10px;">علامت‌گذاری دستیه و تأیید تراکنش بانکی نیست.</div>
           </div>
         </div>`;
       }).join('') || `<div class="muted" style="text-align:center; padding:40px 0; font-size:13px;">تعهدی در این دسته نیست</div>`}
@@ -1460,9 +1637,12 @@ function renderCommitments(){
       const willShow = s.style.display==='none';
       s.style.display = willShow ? 'block':'none';
       chev.style.transform = willShow ? 'rotate(180deg)' : '';
-      if(willShow) attachSwipeHandlers(s);
+      if(willShow) expandedCommitments.add(row.dataset.open); else expandedCommitments.delete(row.dataset.open);
     });
   });
+  wireInstallmentRows(el);
+  animateMovedInstallment(el);
+  document.getElementById('screen-commitments').scrollTop = prevScroll;
   document.querySelectorAll('[data-editcm]').forEach(b=>b.addEventListener('click', (ev)=>{
     ev.stopPropagation();
     commitEditTarget = state.commitments.find(c=>c.id===b.dataset.editcm);
