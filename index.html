@@ -242,6 +242,18 @@
   input[type="range"]{ -webkit-appearance:none; width:100%; height:6px; border-radius:100px; background:var(--track); outline:none; }
   input[type="range"]::-webkit-slider-thumb{ -webkit-appearance:none; width:20px; height:20px; border-radius:50%;
     background:var(--safe); border:4px solid #fff; box-shadow:0 2px 8px rgba(0,128,76,.4); cursor:pointer; }
+
+  /* ---- purchase advisor (local-only, no server / no API) ---- */
+  .advisor-list{ list-style:none; margin:0 0 12px; padding:0; }
+  .advisor-list li{ font-size:12.5px; line-height:1.8; color:var(--ink-soft); padding-inline-start:18px; position:relative; margin-bottom:6px; }
+  .advisor-list li::before{ content:'•'; position:absolute; inset-inline-start:4px; color:var(--safe); font-weight:800; }
+  .advisor-alt-title{ font-size:12.5px; font-weight:800; margin:12px 0 8px; }
+  .advisor-alt{ display:block; width:100%; text-align:start; background:var(--paper); border:1px solid var(--line); border-radius:14px; padding:12px 14px; margin-bottom:8px; cursor:pointer; font-family:inherit; }
+  .advisor-alt:active{ transform:scale(.98); }
+  .advisor-alt-label{ display:block; font-size:13px; font-weight:800; color:var(--ink); margin-bottom:3px; }
+  .advisor-alt-sub{ display:block; font-size:11.5px; line-height:1.7; color:var(--muted); }
+  .advisor-how{ margin-top:10px; font-size:12px; color:var(--muted); }
+  .advisor-how summary{ cursor:pointer; font-weight:700; color:var(--ink-soft); }
 </style>
 </head>
 <body>
@@ -2115,7 +2127,161 @@ function renderSimStart(){
   };
 }
 
+
+/* ---- Purchase advisor: rule-based, local-only ----
+   Uses only data already on this device: reliable income, fixed
+   expenses, savings %, installment cap + thresholds, existing
+   commitments, and the pending simulation. No fetch, no API key,
+   nothing leaves the device. It answers in plain Persian WHY,
+   and proposes computed alternatives that re-run the same sim. */
+function adviceWorstForSchedule(entries, horizonMonths){
+  const c = cap();
+  let worst = { pct:0, jy:0, jm:0, val:0 };
+  const months = nextMonths(Math.max(6, horizonMonths || 6));
+  months.forEach(m=>{
+    const existing = commitmentForMonth(m.jy, m.jm, false);
+    const withNew = entries.filter(e=>e.jy===m.jy && e.jm===m.jm).reduce((s,e)=>s+e.amount, 0);
+    const total = existing + withNew;
+    const pct = c>0 ? (total/c)*100 : 0;
+    if(pct > worst.pct) worst = { pct, jy:m.jy, jm:m.jm, val: total };
+  });
+  return worst;
+}
+function buildPurchaseAdvice(p, scheduleEntries, worst, capVal, status, isCash){
+  const incomeR = reliableMonthlyIncome();
+  const incomeV = variableMonthlyIncome();
+  const incomeT = incomeR + incomeV;
+  const fixed = totalFixedExpenses();
+  const savingsPct = (state.technique && state.technique.p && typeof state.technique.p.savings === 'number') ? state.technique.p.savings : 20;
+  const savings = Math.round(incomeR * savingsPct / 100);
+  const interestAmt = !isCash ? Math.round(p.price * (p.interestPercent || 0) / 100) : 0;
+  const fee = !isCash ? (p.fee || 0) : 0;
+  const extra = interestAmt + fee;
+  const totalCost = p.price + extra;
+  const reasons = [];
+  const alternatives = [];
+  let title = '', text = '', tone = status;
+
+  if(!incomeR || !capVal){
+    title = 'بدون درآمد ثبت‌شده نمی‌تونم مطمئن بگم';
+    text = 'مشاور از درآمد قابل‌اتکا سقف اقساط رو حساب می‌کنه و الان اون عدد صفر یا خالیه. اول توی پروفایل یه منبع درآمد قابل‌اتکا وارد کن؛ تا اون موقع فقط عددها رو نشون می‌دم، نه توصیه‌ی قطعی.';
+    tone = 'caution';
+    reasons.push('سقف اقساط از درآمد قابل‌اتکا حساب می‌شه و الان اون عدد صفر یا خالیه.');
+    if(!isCash) reasons.push(`قسط ماهانه‌ی این خرید ${toman(p.monthly)} می‌شه.`);
+    return { tone, title, text, reasons, alternatives, totalCost, extra };
+  }
+
+  if(isCash){
+    const t = jToday();
+    const existingThisMonth = commitmentForMonth(t.jy, t.jm, false);
+    const freeThisMonth = incomeT - fixed - savings - existingThisMonth;
+    const freeAfter = freeThisMonth - p.price;
+    if(freeAfter >= 0){
+      title = 'خرید نقدی می‌صرفه';
+      text = `این خرید نقدیه و قسط جدیدی نمی‌سازه. بعد از پرداختش، این ماه حدود ${toman(freeAfter)} پول آزاد می‌مونه.`;
+      tone = 'safe';
+      reasons.push(`قیمتش ${toman(p.price)}، یعنی ${fa(p.price / incomeR * 100)}٪ درآمد قابل‌اتکای یه ماهت.`);
+      reasons.push(`این ماه اقساط فعلی‌ت ${toman(existingThisMonth)} و هزینه‌های ثابتت ${toman(fixed)} هستن.`);
+    } else {
+      title = 'نقدی الان سنگینه';
+      text = `قیمت نقدی ${toman(p.price)} از پول آزاد این ماهت (${toman(Math.max(0, freeThisMonth))}) بیشتره. اگه نقدی بخری، ${toman(Math.abs(freeAfter))} کم میاری.`;
+      tone = 'danger';
+      reasons.push('برای نقدی خریدن، یا باید از پس‌انداز برداری یا خرید رو عقب بندازی.');
+      alternatives.push({ kind:'installments', installments:4, label:'همین خرید رو ۴ قسطه کن', sub:`قسط ماهانه حدود ${toman(Math.round(totalCost / 4))} می‌شه — اول ببین توی ماه‌ها جا می‌شه یا نه` });
+    }
+    return { tone, title, text, reasons, alternatives, totalCost, extra };
+  }
+
+  const newInWorst = scheduleEntries.filter(e=>e.jy===worst.jy && e.jm===worst.jm).reduce((s,e)=>s+e.amount, 0);
+  const existingWorst = worst.val - newInWorst;
+  // The app's own status uses thresholds as % of the cap: safe up to
+  // thresholds.safe% of the cap, caution up to thresholds.caution%.
+  // So "remaining" here is measured against the safe limit, not the cap itself.
+  const safeLimit = Math.round(capVal * state.thresholds.safe / 100);
+  const freeCashWorst = incomeT - fixed - worst.val - savings;
+  const monthlyShare = incomeR > 0 ? (p.monthly / incomeR * 100) : 0;
+  const worstName = MONTH_NAMES[worst.jm];
+
+  reasons.push(`پرفشارترین ماه ${worstName} است: اقساط فعلی‌ت ${toman(existingWorst)}، با این خرید می‌شه ${toman(worst.val)}، یعنی ${fa(Math.round(worst.pct))}٪ سقف ${toman(capVal)}.`);
+  if(worst.val > safeLimit) reasons.push(`حد امن ${toman(safeLimit)} است و در اون ماه ${toman(worst.val - safeLimit)} از حد امن رد می‌شه.`);
+  else reasons.push(`تا حد امن (${toman(safeLimit)}) حدود ${toman(safeLimit - worst.val)} فاصله داری.`);
+  reasons.push(`قسط ماهانه ${toman(p.monthly)}، یعنی ${fa(Math.round(monthlyShare))}٪ درآمد قابل‌اتکای ماهانه‌ت.`);
+  if(extra > 0) reasons.push(`در مجموع ${toman(totalCost)} می‌پردازی؛ ${toman(extra)} سود و کارمزد بیشتر از قیمت نقدی است.`);
+  if(freeCashWorst < 0) reasons.push(`با هزینه‌های ثابت و پس‌انداز ${fa(savingsPct)}٪، در ${worstName} حدود ${toman(Math.abs(freeCashWorst))} کم میاری — حتی اگه سقف اقساط رد نشده باشه.`);
+  else reasons.push(`با هزینه‌های ثابت و پس‌انداز ${fa(savingsPct)}٪، در ${worstName} حدود ${toman(freeCashWorst)} پول آزاد می‌مونه.`);
+
+  const cashRisk = freeCashWorst < 0;
+  if(status === 'safe' && !cashRisk){
+    tone = 'safe';
+    title = 'می‌صرفه';
+    text = p.necessity === 'optional'
+      ? 'از نظر عددها جا می‌شه. چون خرید غیرضروریه، اگه عجله نداری می‌تونی یه ماه صبر کنی، ولی از نظر ظرفیت مشکلی نداره.'
+      : 'از نظر سقف اقساط و پول آزاد ماهانه جا می‌شه.';
+  } else if(status === 'caution' && !cashRisk){
+    tone = 'caution';
+    if(p.necessity === 'optional'){
+      title = 'با احتیاط می‌صرفه — ولی بهتره صبر کنی';
+      text = 'عددها لب مرز هستن و چون خرید غیرضروریه، ریسکش به صبر کردنش نمی‌ارزه. اگه می‌تونی، یکی از جایگزین‌های پایین رو امتحان کن.';
+    } else {
+      title = 'با احتیاط می‌صرفه';
+      text = 'جا می‌شه ولی ماه پرفشار رو شلوغ می‌کنه. اگه ضروریه، با یکی از جایگزین‌های پایین فشارش رو کمتر کن.';
+    }
+  } else {
+    tone = 'danger';
+    if(p.necessity === 'optional'){
+      title = 'الان نمی‌صرفه — صبر کن';
+      text = 'این خرید ماه پرفشار رو به محدوده‌ی پرریسک می‌بره یا پول آزادت رو منفی می‌کنه، و چون غیرضروریه، الان وقتش نیست.';
+    } else {
+      title = 'الان نمی‌صرفه';
+      text = 'حتی برای خرید ضروری هم این شرایط سنگینه. اول یکی از جایگزین‌های پایین رو امتحان کن؛ اگه هیچ‌کدوم جواب نداد، خرید رو عقب بنداز.';
+    }
+  }
+  if(cashRisk && tone === 'safe'){
+    tone = 'caution';
+    title = 'از نظر سقف جا می‌شه، ولی پول نقد کم میاری';
+    text = 'سقف اقساط رد نشده، ولی با هزینه‌های ثابت و پس‌انداز، در ماه پرفشار پول آزادت منفی می‌شه. قبل از ادامه، جایگزین‌ها رو ببین.';
+  }
+
+  // Only propose spreading / delaying when the purchase is not already safe.
+  // A safe purchase does not need a longer term — that would only stretch the debt.
+  if(status !== 'safe' || cashRisk){
+    let bestLonger = null;
+    [2, 4, 6].forEach(add=>{
+      const n = p.installments + add;
+      if(n > 24) return;
+      const newMonthly = Math.round(totalCost / n);
+      const entries = generateSchedule(p.purchaseDate, n, newMonthly, p.scheduleType, p.intervalDays, p.channel);
+      const w = adviceWorstForSchedule(entries, n + 1);
+      if(w.pct < worst.pct - 3 && (!bestLonger || w.pct < bestLonger.worst.pct)){
+        bestLonger = { n, newMonthly, worst: w };
+      }
+    });
+    if(bestLonger){
+      alternatives.push({ kind:'installments', installments:bestLonger.n, label:`قسط رو به ${fa(bestLonger.n)} ماه ببر`, sub:`قسط ماهانه می‌شه ${toman(bestLonger.newMonthly)} و پرفشارترین ماه می‌رسه به ${fa(Math.round(bestLonger.worst.pct))}٪ سقف — هزینه‌ی کل عوض نمی‌شه، فقط پخش می‌شه` });
+    }
+    try{
+      const t = jAddMonths(p.purchaseDate.jy, p.purchaseDate.jm, 1);
+      const delayedDate = { jy:t.jy, jm:t.jm, jd:Math.min(p.purchaseDate.jd, jMonthLength(t.jy, t.jm)) };
+      const entries = generateSchedule(delayedDate, p.installments, p.monthly, p.scheduleType, p.intervalDays, p.channel);
+      const w = adviceWorstForSchedule(entries, p.installments + 1);
+      if(w.pct < worst.pct - 3){
+        alternatives.push({ kind:'delay', delayMonths:1, purchaseDate:delayedDate, label:'خرید رو یه ماه عقب بنداز', sub:`پرفشارترین ماه می‌رسه به ${fa(Math.round(w.pct))}٪ سقف — شروع اقساط از ${MONTH_NAMES[delayedDate.jm]}` });
+      }
+    }catch(e){}
+  }
+  if(extra > 0 && extra / p.price >= 0.10){
+    const t = jToday();
+    const freeThisMonth = incomeT - fixed - savings - commitmentForMonth(t.jy, t.jm, false);
+    if(p.price <= freeThisMonth){
+      alternatives.push({ kind:'installments', installments:1, label:'نقدی بخر و سود نده', sub:`نقدی ${toman(extra)} سود و کارمزد ذخیره می‌کنی` });
+    }
+  }
+
+  return { tone, title, text, reasons, alternatives, totalCost, extra };
+}
+
 function renderSimResult(){
+
   const p = state.pendingSimulation;
   const el = document.getElementById('sim-content');
   const isCash = p.installments === 1;
@@ -2137,6 +2303,9 @@ function renderSimResult(){
   const status = isCash ? 'safe' : statusFromPercent(worst.pct);
   const sm = statusMeta(status);
   const necLabel = NECESSITY.find(n=>n.key===p.necessity).label;
+  const advice = buildPurchaseAdvice(p, scheduleEntries, worst, c, status, isCash);
+  const adviceToneColor = advice.tone==='safe' ? 'var(--safe)' : advice.tone==='caution' ? 'var(--caution)' : 'var(--danger)';
+  const adviceToneBg = advice.tone==='safe' ? 'var(--safe-soft)' : advice.tone==='caution' ? 'var(--caution-soft)' : 'var(--danger-soft)';
   const necClass = p.necessity==='req'?'req':p.necessity==='semi'?'semi':'optional';
 
   el.innerHTML = `
@@ -2155,6 +2324,19 @@ function renderSimResult(){
           `پرفشارترین ماه، ${MONTH_NAMES[worst.jm]} است — ${fa(Math.round(worst.pct))}٪ از سقف آن ماه.`}
       </div>
       <span class="badge-necessity ${necClass}" style="margin-top:10px; display:inline-block;">${necLabel}</span>
+    </div>
+
+    <div class="section-title">💬 مشاور خرید <span class="muted" style="font-size:11px; font-weight:400;">فقط با داده‌های همین دستگاه</span></div>
+    <div class="card mb18" style="background:${adviceToneBg}; border:none;">
+      <div style="font-size:15px; font-weight:800; color:${adviceToneColor}; margin-bottom:6px;">${advice.title}</div>
+      <div class="muted" style="font-size:12.5px; line-height:1.8; margin-bottom:10px;">${advice.text}</div>
+      <ul class="advisor-list">${advice.reasons.map(r=>`<li>${r}</li>`).join('')}</ul>
+      ${advice.alternatives.length ? `
+        <div class="advisor-alt-title">راه‌های سبک‌تر کردن خرید:</div>
+        ${advice.alternatives.map((a,i)=>`<button class="advisor-alt" data-alt="${i}"><span class="advisor-alt-label">${a.label}</span><span class="advisor-alt-sub">${a.sub}</span></button>`).join('')}
+        <div class="hint">با زدن هر گزینه، همون خرید با شرایط جدید دوباره بررسی می‌شه — چیزی ثبت نمی‌شه.</div>` : `
+        <div class="hint">برای این خرید جایگزین محاسباتی بهتری پیدا نشد.</div>`}
+      <details class="advisor-how"><summary>مشاور چطور تصمیم می‌گیره؟</summary><div class="hint" style="margin-top:8px;">سقف اقساط (${toman(c)}) از درآمد قابل‌اتکا، هزینه‌های ثابت، پس‌انداز ${fa(state.technique.p.savings)}٪ و اقساط فعلی‌ت حساب می‌شه؛ بعد پرفشارترین ماه، پول آزاد اون ماه، هزینه‌ی کل (قیمت + سود و کارمزد) و ضروری بودن خرید رو کنار هم می‌ذاره. همه‌ی این حساب‌ها توی خود مرورگر انجام می‌شه و هیچ داده‌ای از دستگاه بیرون نمی‌ره.</div></details>
     </div>
 
     ${!isCash ? `
@@ -2202,6 +2384,19 @@ function renderSimResult(){
       `}
     </div>
   `;
+  el.querySelectorAll('[data-alt]').forEach(btn=>btn.onclick=()=>{
+    const alt = advice.alternatives[parseInt(btn.dataset.alt, 10)];
+    if(!alt) return;
+    if(alt.kind === 'installments'){
+      p.installments = alt.installments;
+      if(alt.installments === 1){ p.monthly = 0; p.scheduleType = null; }
+      else p.monthly = Math.round(advice.totalCost / alt.installments);
+    } else if(alt.kind === 'delay' && alt.purchaseDate){
+      p.purchaseDate = alt.purchaseDate;
+    }
+    state.pendingSimulation = p;
+    renderSimResult();
+  });
   document.getElementById('sm-back').onclick = ()=>{ state.pendingSimulation=null; renderSimStart(); };
   document.getElementById('sm-cancel').onclick = ()=>{
     state.pendingSimulation = null; showToast('خرید ثبت نشد'); goTo('home');
