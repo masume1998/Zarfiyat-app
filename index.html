@@ -126,6 +126,11 @@
   .hero-dot{ width:6px; height:6px; border-radius:100px; background:var(--line); cursor:pointer;
     transition:width .2s ease, background .2s ease; }
   .hero-dot.active{ width:18px; background:var(--ink); }
+  /* ---- dashboard hero slide animation ---- */
+  @keyframes heroInNext { from { opacity:0; transform:translateX(-16px); } to { opacity:1; transform:translateX(0); } }
+  @keyframes heroInPrev { from { opacity:0; transform:translateX(16px); } to { opacity:1; transform:translateX(0); } }
+  #home-hero-slide[data-dir="next"] .hero{ animation: heroInNext .28s ease; }
+  #home-hero-slide[data-dir="prev"] .hero{ animation: heroInPrev .28s ease; }
   /* ---- commitments: month groups as a card grid on wider screens ---- */
   .cmt-grid{ display:grid; grid-template-columns:1fr; gap:12px; }
   .cmt-grid .inst-wrap, .cmt-grid .inst-wrap.cmt-wrap{ margin:0; }
@@ -1656,8 +1661,12 @@ function renderHome(){
     const p = c > 0 ? Math.round(val / c * 100) : 0;
     const sh = shareOfIncome(val);
     const st = statusFromShare(sh);
+    let unpaid = 0;
+    state.commitments.forEach(cm=>buildCommitmentSchedule(cm).forEach(e=>{
+      if(e.jy===m.jy && e.jm===m.jm && !e.paid) unpaid += e.amount;
+    }));
     return { m, val, pct: p, st, label: statusMeta(st).label,
-      share: Math.round(sh), free: Math.max(0, c - val) };
+      free: Math.max(0, c - val), unpaid };
   });
   // One hero per month; the ring shows the overflow in red, without any
   // «over the cap» wording on the dashboard.
@@ -1691,8 +1700,8 @@ function renderHome(){
           <div class="num" style="font-size:16px; font-weight:800; margin-top:2px;">${toman(c)}</div>
         </div>
         <div style="flex:1; text-align:center; border-inline-start:1px solid rgba(255,255,255,.14);">
-          <div class="hero-label">سهم از درآمد</div>
-          <div class="num" style="font-size:16px; font-weight:800; margin-top:2px;">${fa(x.share)}٪</div>
+          <div class="hero-label">پرداخت‌نشده</div>
+          <div class="num" style="font-size:16px; font-weight:800; margin-top:2px;">${toman(x.unpaid)}</div>
         </div>
       </div>
     </div>`;
@@ -1711,7 +1720,7 @@ function renderHome(){
     </div>
 
     <div id="home-hero-slide">${heroHTML(months6[homeHeroSel])}</div>
-    <div class="hero-dots" style="display:flex; justify-content:center; gap:6px; margin:0 0 18px;">
+    <div class="hero-dots" style="display:flex; justify-content:center; gap:6px; margin:0 0 18px; direction:ltr;">
       ${months6.map((x,i)=>`<span class="hero-dot ${i===homeHeroSel?'active':''}" data-hi="${i}"></span>`).join('')}
     </div>
 
@@ -1741,13 +1750,18 @@ function renderHome(){
     </button>
   `;
   el.querySelectorAll('[data-nav]').forEach(b=>b.addEventListener('click', ()=>goTo(b.dataset.nav)));
-  const updateHeroSlide = ()=>{
-    document.getElementById('home-hero-slide').innerHTML = heroHTML(months6[homeHeroSel]);
+  const updateHeroSlide = dir=>{
+    const slide = document.getElementById('home-hero-slide');
+    slide.dataset.dir = dir || 'next';
+    slide.innerHTML = heroHTML(months6[homeHeroSel]);
     el.querySelectorAll('.hero-dot').forEach((d,i)=>d.classList.toggle('active', i===homeHeroSel));
   };
   el.querySelectorAll('.hero-dot').forEach(d=>d.addEventListener('click', ()=>{
-    homeHeroSel = parseInt(d.dataset.hi, 10);
-    updateHeroSlide();
+    const next = parseInt(d.dataset.hi, 10);
+    if(next === homeHeroSel) return;
+    const dir = next > homeHeroSel ? 'next' : 'prev';
+    homeHeroSel = next;
+    updateHeroSlide(dir);
   }));
   const heroSlide = document.getElementById('home-hero-slide');
   let hsX = 0, hsY = 0;
@@ -1755,8 +1769,9 @@ function renderHome(){
   heroSlide.addEventListener('pointerup', e=>{
     const dx = e.clientX - hsX, dy = e.clientY - hsY;
     if(Math.abs(dx) < 40 || Math.abs(dy) > Math.abs(dx)) return;
-    const next = Math.max(0, Math.min(months6.length - 1, homeHeroSel + (dx < 0 ? 1 : -1)));
-    if(next !== homeHeroSel){ homeHeroSel = next; updateHeroSlide(); }
+    const dir = dx > 0 ? 'next' : 'prev'; // swipe right = next month
+    const next = Math.max(0, Math.min(months6.length - 1, homeHeroSel + (dir === 'next' ? 1 : -1)));
+    if(next !== homeHeroSel){ homeHeroSel = next; updateHeroSlide(dir); }
   });
   document.getElementById('home-cta').addEventListener('click', ()=> goTo('sim'));
 
@@ -1954,14 +1969,25 @@ function renderCommitments(){
       <div class="filter-chip ${commitFilter==='paid'?'selected':''}" data-f="paid">پرداخت‌شده</div>
     </div>
     ${groups.length ? groups.map(g=>`
-      <div class="list-section-title">${g.title} · ${fa(g.rows.length)} قسط</div>
+      <div class="list-section-title" data-group="${g.key}">${g.title} · ${fa(g.rows.length)} قسط</div>
       <div class="cmt-grid mb18">${g.rows.map(rowHTML).join('')}</div>`).join('') : ''}
     ${!filtered.length ? `<div class="muted" style="text-align:center; padding:40px 0; font-size:13px;">${shown.length===0 ? (commitMonthOffset===0 ? `قسطی در ${MONTH_NAMES[t.jm]} نداری` : 'قسطی نداری') : 'تعهدی در این دسته نیست'}</div>` : ''}
     <div class="hint" style="margin-top:14px;">برای ثبت پرداخت، روی ✓ کنار هر قسط بزن یا ردیف رو بکش. پرداخت ثبت‌شده فقط با علامت‌گذاری برگردانده می‌شود.</div>
   `;
 
   document.getElementById('cm-new').onclick = ()=>{ commitEditTarget='new'; renderCommitments(); };
-  document.getElementById('cm-month-toggle').onclick = ()=>{ commitMonthOffset = commitMonthOffset===0 ? 1 : 0; renderCommitments(); };
+  document.getElementById('cm-month-toggle').onclick = ()=>{
+    commitMonthOffset = commitMonthOffset===0 ? 1 : 0;
+    renderCommitments();
+    const smooth = (state.reduceMotion || prefersReducedMotion()) ? 'auto' : 'smooth';
+    if(commitMonthOffset === 1){
+      const nm = jAddMonths(t.jy, t.jm, 1);
+      const target = document.querySelector(`[data-group="${nm.jy}-${nm.jm}"]`);
+      if(target) target.scrollIntoView({ behavior: smooth, block: 'start' });
+    } else {
+      window.scrollTo({ top: 0, behavior: smooth });
+    }
+  };
   document.querySelectorAll('#commit-filters [data-f]').forEach(chip=>chip.onclick=()=>{
     commitFilter = chip.dataset.f; renderCommitments();
   });
@@ -2037,6 +2063,7 @@ function renderPlanTechnique(){
 }
 
 let calView = null; // { jy, jm, jd } selected day; month shown = its month
+let calSwipeGuard = false; // set after a swipe so the trailing click can't reselect a day
 function renderPlanCalendar(){
   const t = jToday();
   if(!calView) calView = { jy: t.jy, jm: t.jm, jd: t.jd };
@@ -2070,9 +2097,9 @@ function renderPlanCalendar(){
   document.getElementById('plan-calendar').innerHTML = `
     <div class="card mb18">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
-        <button class="icon-btn" id="cal-prev">›</button>
+        <button class="icon-btn" id="cal-next">›</button>
         <div style="font-size:16px; font-weight:800;">${MONTH_NAMES[jm]} ${fa(jy)}</div>
-        <button class="icon-btn" id="cal-next">‹</button>
+        <button class="icon-btn" id="cal-prev">‹</button>
       </div>
       <div class="cal-grid">
         ${wds.map(w=>`<div class="wd">${w}</div>`).join('')}
@@ -2090,17 +2117,31 @@ function renderPlanCalendar(){
       <div class="waterfall-row"><span class="l">مانده پرداخت این روز</span><span class="r num">${toman(selUnpaid)}</span></div>
     </div>
   `;
-  document.getElementById('cal-prev').onclick = ()=>{
-    const p = jAddMonths(jy, jm, -1);
-    calView = { jy:p.jy, jm:p.jm, jd: Math.min(calView.jd, jMonthLength(p.jy, p.jm)) };
-    renderPlanCalendar();
-  };
   document.getElementById('cal-next').onclick = ()=>{
     const p = jAddMonths(jy, jm, 1);
     calView = { jy:p.jy, jm:p.jm, jd: Math.min(calView.jd, jMonthLength(p.jy, p.jm)) };
     renderPlanCalendar();
   };
+  document.getElementById('cal-prev').onclick = ()=>{
+    const p = jAddMonths(jy, jm, -1);
+    calView = { jy:p.jy, jm:p.jm, jd: Math.min(calView.jd, jMonthLength(p.jy, p.jm)) };
+    renderPlanCalendar();
+  };
+  // Swipe between months (right = next month). Property assignment on the
+  // persistent container, so re-renders never stack duplicate handlers.
+  const calEl = document.getElementById('plan-calendar');
+  let calSwipeX = 0, calSwipeY = 0;
+  calEl.onpointerdown = e=>{ calSwipeX = e.clientX; calSwipeY = e.clientY; };
+  calEl.onpointerup = e=>{
+    const dx = e.clientX - calSwipeX, dy = e.clientY - calSwipeY;
+    if(Math.abs(dx) < 40 || Math.abs(dy) > Math.abs(dx)) return;
+    calSwipeGuard = true;
+    const p = jAddMonths(jy, jm, dx > 0 ? 1 : -1);
+    calView = { jy:p.jy, jm:p.jm, jd: Math.min(calView.jd, jMonthLength(p.jy, p.jm)) };
+    renderPlanCalendar();
+  };
   document.querySelectorAll('#plan-calendar [data-day]').forEach(d=>d.onclick=()=>{
+    if(calSwipeGuard){ calSwipeGuard = false; return; }
     calView.jd = parseInt(d.dataset.day, 10);
     renderPlanCalendar();
   });
