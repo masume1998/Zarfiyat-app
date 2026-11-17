@@ -134,6 +134,11 @@
   .month-card .month-pct{ font-size:11px; color:var(--muted); }
   .mini-bar{ height:6px; border-radius:100px; background:var(--track); overflow:hidden; margin:8px 0 6px; }
   .mini-bar > div{ height:100%; border-radius:100px; }
+  /* ---- commitments: month groups as a card grid on wider screens ---- */
+  .cmt-grid{ display:grid; grid-template-columns:1fr; gap:12px; }
+  .cmt-grid .inst-wrap, .cmt-grid .inst-wrap.cmt-wrap{ margin:0; }
+  @media (min-width:768px){ .cmt-grid{ grid-template-columns:repeat(2, 1fr); } }
+  @media (min-width:1100px){ .cmt-grid{ grid-template-columns:repeat(3, 1fr); } }
   .row-del, .row-edit{ width:26px; height:26px; border-radius:50%; background:var(--paper-deep); border:none;
     display:flex; align-items:center; justify-content:center; color:var(--muted); font-size:12px; cursor:pointer; flex:0 0 auto;}
 
@@ -1746,10 +1751,8 @@ function renderHome(){
 }
 
 let commitFilter = 'all';
-let commitMonthOffset = 0; // 0 = this month, 1 = next month
 let commitEditTarget = null;
 let commitDetailTarget = null;
-let commitSort = 'due'; // 'due' = nearest payment first (default), 'recent' = most recently added first
 
 function renderCommitments(){
   const el = document.getElementById('commitments-content');
@@ -1860,25 +1863,35 @@ function renderCommitments(){
   }
 
   const t = jToday();
-  const target = jAddMonths(t.jy, t.jm, commitMonthOffset);
+  const todayJdn = j2d(t.jy, t.jm, t.jd);
 
-  const decorated = state.commitments.map(cm=>{
+  // Every installment from today onward, grouped by month; overdue unpaid
+  // installments collect under «عقب‌افتاده» so nothing due ever disappears.
+  const entries = [];
+  state.commitments.forEach(cm=>{
     const schedule = buildCommitmentSchedule(cm);
-    const monthIdx = schedule.findIndex(e=>e.jy===target.jy && e.jm===target.jm);
-    if(monthIdx < 0) return null;
-    const entry = schedule[monthIdx];
-    return { cm, schedule, monthIdx, monthEntry: entry, hasUnpaid: !entry.paid,
-      monthJdn: j2d(entry.jy, entry.jm, entry.jd) };
-  }).filter(Boolean);
-  if(commitSort === 'due') decorated.sort((a,b)=> a.monthJdn - b.monthJdn);
+    schedule.forEach((e, idx)=>{
+      const past = j2d(e.jy, e.jm, e.jd) < todayJdn;
+      if(past && e.paid) return;
+      entries.push({ cm, idx, entry: e, hasUnpaid: !e.paid,
+        groupKey: past ? 'overdue' : `${e.jy}-${e.jm}`,
+        groupTitle: past ? 'عقب‌افتاده' : `${MONTH_NAMES[e.jm]} ${fa(e.jy)}`,
+        groupOrder: past ? -1 : e.jy * 12 + e.jm,
+        jdn: j2d(e.jy, e.jm, e.jd) });
+    });
+  });
+  entries.sort((a,b)=> a.groupOrder - b.groupOrder || a.jdn - b.jdn);
 
-  const filtered = decorated.filter(d=>{
+  const filtered = entries.filter(d=>{
     if(commitFilter==='unpaid') return d.hasUnpaid;
     if(commitFilter==='paid') return !d.hasUnpaid;
     return true;
   });
-  const unpaidList = filtered.filter(d=>d.hasUnpaid);
-  const paidList = filtered.filter(d=>!d.hasUnpaid);
+  const groups = [];
+  filtered.forEach(d=>{
+    const g = groups.find(x=>x.key===d.groupKey);
+    if(g) g.rows.push(d); else groups.push({ key:d.groupKey, title:d.groupTitle, rows:[d] });
+  });
   const rowHTML = d=>{
     const cm = d.cm;
     const typeInfo = COMMITMENT_TYPES.find(x=>x.key===cm.type);
@@ -1886,14 +1899,14 @@ function renderCommitments(){
       <div class="cmt-thumb">${d.hasUnpaid?typeInfo.emoji:'✅'}</div>
       <div class="info">
         <div class="title">${cm.name}</div>
-        <div class="sub">${cm.provider} · قسط ${fa(d.monthIdx+1)} از ${fa(cm.installments)}</div>
-        <div class="sub">سررسید ${fmtJDate(d.monthEntry)} · ${toman(cm.monthly)}</div>
+        <div class="sub">${cm.provider} · قسط ${fa(d.idx+1)} از ${fa(cm.installments)}</div>
+        <div class="sub">سررسید ${fmtJDate(d.entry)} · ${toman(cm.monthly)}</div>
       </div>
-      <button class="cmt-check ${d.hasUnpaid?'':'done'}" data-check="${cm.id}" ${d.hasUnpaid?'':'disabled'}
+      <button class="cmt-check ${d.hasUnpaid?'':'done'}" data-check="${cm.id}" data-idx="${d.idx}" ${d.hasUnpaid?'':'disabled'}
         title="${d.hasUnpaid?'علامت‌گذاری این قسط به‌عنوان پرداخت‌شده':'پرداخت‌شده'}">✓</button>
     </div>`;
     if(!d.hasUnpaid) return `<div class="inst-wrap cmt-wrap is-paid" role="listitem">${inner}</div>`;
-    return `<div class="inst-wrap cmt-wrap" role="listitem" data-cid="${cm.id}" data-idx="${d.monthIdx}" data-swipe>
+    return `<div class="inst-wrap cmt-wrap" role="listitem" data-cid="${cm.id}" data-idx="${d.idx}" data-swipe>
       <div class="inst-reveal" aria-hidden="true"><span class="inst-check">✓</span><span class="inst-label">پرداخت شد</span></div>
       ${inner}
     </div>`;
@@ -1901,41 +1914,27 @@ function renderCommitments(){
 
   el.innerHTML = `
     <div class="page-head" style="display:flex; align-items:flex-start; justify-content:space-between; gap:10px;">
-      <button class="icon-btn" id="cm-month-toggle" aria-label="نمایش ماه بعد" title="ماه بعد" style="${commitMonthOffset===1?'border-color:var(--ink); box-shadow:0 0 0 2px var(--ink);':''}">
-        <svg width="17" height="17" viewBox="0 0 24 24" fill="none"><rect x="3" y="4" width="18" height="18" rx="3" stroke="#001F3F" stroke-width="1.8"/><path d="M16 2v4M8 2v4M3 10h18" stroke="#001F3F" stroke-width="1.8" stroke-linecap="round"/></svg>
-      </button>
-      <div style="flex:1; text-align:center;">
+      <div style="flex:1;">
         <h1>اقساط من</h1>
-        <div class="sub">${MONTH_NAMES[target.jm]} ${fa(target.jy)}${commitMonthOffset===1?' · ماه بعد':''} · ${fa(decorated.length)} تعهد</div>
+        <div class="sub">${MONTH_NAMES[t.jm]} ${fa(t.jy)} به بعد · ${fa(entries.length)} قسط</div>
       </div>
       <button class="icon-btn" id="cm-new" aria-label="افزودن قسط یا تعهد" title="افزودن قسط یا تعهد">
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="#001F3F" stroke-width="2.4" stroke-linecap="round"/></svg>
       </button>
     </div>
-    <div style="display:flex; gap:8px; align-items:center; margin-bottom:14px;">
-      <div class="filter-row" id="commit-filters" style="flex:1; margin-bottom:0;">
-        <div class="filter-chip ${commitFilter==='all'?'selected':''}" data-f="all">همه</div>
-        <div class="filter-chip ${commitFilter==='unpaid'?'selected':''}" data-f="unpaid">پرداخت‌نشده</div>
-        <div class="filter-chip ${commitFilter==='paid'?'selected':''}" data-f="paid">پرداخت‌شده</div>
-      </div>
-      <select class="input" id="commit-sort" style="max-width:104px; flex:0 0 auto; padding:8px 10px; font-size:12px;">
-        <option value="due" ${commitSort==='due'?'selected':''}>سررسید</option>
-        <option value="recent" ${commitSort==='recent'?'selected':''}>جدیدترین</option>
-      </select>
+    <div class="filter-row" id="commit-filters">
+      <div class="filter-chip ${commitFilter==='all'?'selected':''}" data-f="all">همه</div>
+      <div class="filter-chip ${commitFilter==='unpaid'?'selected':''}" data-f="unpaid">پرداخت‌نشده</div>
+      <div class="filter-chip ${commitFilter==='paid'?'selected':''}" data-f="paid">پرداخت‌شده</div>
     </div>
-    ${unpaidList.length ? `<div class="list-section-title">پرداخت‌نشده · ${fa(unpaidList.length)} قسط</div>
-    <div class="mb18">${unpaidList.map(rowHTML).join('')}</div>` : ''}
-    ${paidList.length ? `<div class="list-section-title">پرداخت‌شده · ${fa(paidList.length)} قسط</div>
-    <div class="mb18">${paidList.map(rowHTML).join('')}</div>` : ''}
-    ${!filtered.length ? `<div class="muted" style="text-align:center; padding:40px 0; font-size:13px;">${decorated.length===0 ? `قسطی در ${MONTH_NAMES[target.jm]} نداری` : 'تعهدی در این دسته نیست'}</div>` : ''}
+    ${groups.length ? groups.map(g=>`
+      <div class="list-section-title">${g.title} · ${fa(g.rows.length)} قسط</div>
+      <div class="cmt-grid mb18">${g.rows.map(rowHTML).join('')}</div>`).join('') : ''}
+    ${!filtered.length ? `<div class="muted" style="text-align:center; padding:40px 0; font-size:13px;">${entries.length===0 ? 'قسطی نداری' : 'تعهدی در این دسته نیست'}</div>` : ''}
     <div class="hint" style="margin-top:14px;">برای ثبت پرداخت، روی ✓ کنار هر قسط بزن یا ردیف رو بکش. پرداخت ثبت‌شده فقط با علامت‌گذاری برگردانده می‌شود.</div>
   `;
 
   document.getElementById('cm-new').onclick = ()=>{ commitEditTarget='new'; renderCommitments(); };
-  document.getElementById('cm-month-toggle').onclick = ()=>{ commitMonthOffset = commitMonthOffset===0 ? 1 : 0; renderCommitments(); };
-  document.getElementById('commit-sort').addEventListener('change', e=>{
-    commitSort = e.target.value; renderCommitments();
-  });
   document.querySelectorAll('#commit-filters [data-f]').forEach(chip=>chip.onclick=()=>{
     commitFilter = chip.dataset.f; renderCommitments();
   });
@@ -1947,9 +1946,7 @@ function renderCommitments(){
   }));
   document.querySelectorAll('[data-check]').forEach(b=>b.addEventListener('click', ev=>{
     ev.stopPropagation();
-    const d = decorated.find(x=>x.cm.id===b.dataset.check);
-    if(!d || d.monthIdx < 0) return;
-    setPaid(d.cm.id, d.monthIdx, true, { withUndo:true, moved:true });
+    setPaid(b.dataset.check, parseInt(b.dataset.idx, 10), true, { withUndo:true, moved:true });
   }));
   document.getElementById('screen-commitments').scrollTop = prevScroll;
 }
@@ -1994,10 +1991,10 @@ function renderPlanTechnique(){
       <div class="kpi-num num" style="font-size:30px; color:var(--accent2);">${fa(income)}</div>
       <div class="muted" style="font-size:12px;">تومان · فقط درآمد قابل‌اتکا؛ درآمد متغیر کنار گذاشته شده است</div>
       <div class="alloc-bar">${seg(fixed, '#1E488F')}${seg(installments, '#001F3F')}${seg(daily, '#74C365')}${seg(savings, '#DBE64C')}</div>
-      <div class="alloc-row"><span class="l"><span class="alloc-dot" style="background:#1E488F;"></span>هزینه‌های ثابت</span><span class="r num">${toman(fixed)} · ${fa(pctOf(fixed))}٪ از درآمد</span></div>
-      <div class="alloc-row"><span class="l"><span class="alloc-dot" style="background:#001F3F;"></span>اقساط برنامه‌ریزی‌شده</span><span class="r num">${toman(installments)} · ${fa(pctOf(installments))}٪ از درآمد</span></div>
-      <div class="alloc-row"><span class="l"><span class="alloc-dot" style="background:#74C365;"></span>روزمره و خواسته‌ها</span><span class="r num">${toman(daily)} · ${fa(pctOf(daily))}٪ از درآمد</span></div>
-      <div class="alloc-row"><span class="l"><span class="alloc-dot" style="background:#DBE64C;"></span>پس‌انداز اختیاری</span><span class="r num">${toman(savings)} · ${fa(pctOf(savings))}٪ از درآمد</span></div>
+      <div class="alloc-row"><span class="l"><span class="alloc-dot" style="background:#1E488F;"></span>هزینه‌های ثابت</span><span class="r num"><span style="font-weight:400; color:var(--muted); font-size:12px;">${fa(pctOf(fixed))}٪</span> ${toman(fixed)}</span></div>
+      <div class="alloc-row"><span class="l"><span class="alloc-dot" style="background:#001F3F;"></span>اقساط برنامه‌ریزی‌شده</span><span class="r num"><span style="font-weight:400; color:var(--muted); font-size:12px;">${fa(pctOf(installments))}٪</span> ${toman(installments)}</span></div>
+      <div class="alloc-row"><span class="l"><span class="alloc-dot" style="background:#74C365;"></span>روزمره و خواسته‌ها</span><span class="r num"><span style="font-weight:400; color:var(--muted); font-size:12px;">${fa(pctOf(daily))}٪</span> ${toman(daily)}</span></div>
+      <div class="alloc-row"><span class="l"><span class="alloc-dot" style="background:#DBE64C;"></span>پس‌انداز اختیاری</span><span class="r num"><span style="font-weight:400; color:var(--muted); font-size:12px;">${fa(pctOf(savings))}٪</span> ${toman(savings)}</span></div>
       <div class="alloc-row total"><span class="l">تخصیص‌یافته</span><span class="r num">${toman(allocated)}</span></div>
       <div class="alloc-row"><span class="l">تخصیص‌نیافته</span><span class="r num">${toman(unallocated)}</span></div>
     </div>
@@ -2538,8 +2535,8 @@ function renderSimStart(){
   const proposals = state.savedProposals || [];
   el.innerHTML = `
     <div class="topbar">
-      <div class="icon-btn" data-nav="home"><svg width="13" height="13" viewBox="0 0 24 24" fill="none"><path d="M6 6l12 12M18 6L6 18" stroke="#001F3F" stroke-width="2" stroke-linecap="round"/></svg></div>
       <h2 style="font-size:17px;">این خرید، چقدر جا می‌خواهد؟</h2>
+      <div class="icon-btn" data-nav="home"><svg width="13" height="13" viewBox="0 0 24 24" fill="none"><path d="M6 6l12 12M18 6L6 18" stroke="#001F3F" stroke-width="2" stroke-linecap="round"/></svg></div>
     </div>
     <div class="muted" style="font-size:12.5px; margin-bottom:18px;">قبل از تعهد، ارزش آن را ببینید.</div>
 
