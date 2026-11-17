@@ -1329,7 +1329,7 @@ function renderCommitmentForm(container, existing, onSave){
     <div id="cf-down-wrap">
       <div class="field-label">پیش‌پرداخت (تومان)</div>
       <input class="input amt-input num mb6" id="cf-down" inputmode="numeric" placeholder="مثلاً ۶۰۰٬۰۰۰" value="${isEdit&&existing.downPayment?fa(existing.downPayment):''}">
-      <div class="hint mb14">فقط دیجی‌پی پیش‌پرداخت می‌گیره؛ از اصل تأمین مالی کم می‌شه</div>
+      <div class="hint mb14">فقط دیجی‌پی پیش‌پرداخت می‌گیره؛ از مبلغی که قسط‌بندی می‌شه کم می‌شه</div>
     </div>
     <div class="field-label">سود</div>
     <div class="chip-grid mb14" id="cf-interest-mode">
@@ -1337,7 +1337,7 @@ function renderCommitmentForm(container, existing, onSave){
       <div class="chip ${(isEdit?existing.interestMode:'amount')==='percent'?'selected':''}" data-imode="percent">سود درصدی</div>
     </div>
     <div class="row-2 mb14">
-      <div><div class="field-label" id="cf-interest-label">${(isEdit?existing.interestMode:'amount')==='percent'?'سود (٪ از اصل تأمین مالی)':'مبلغ سود کل دوره (تومان)'}</div><input class="input num" id="cf-interest" inputmode="decimal" placeholder="مثلاً ۱۸" value="${isEdit?((existing.interestMode==='percent'?existing.interestPercent:(existing.interestAmount||''))):''}"></div>
+      <div><div class="field-label" id="cf-interest-label">${(isEdit?existing.interestMode:'amount')==='percent'?'سود (٪)':'مبلغ سود کل دوره (تومان)'}</div><input class="input num" id="cf-interest" inputmode="decimal" placeholder="مثلاً ۱۸" value="${isEdit?((existing.interestMode==='percent'?existing.interestPercent:(existing.interestAmount||''))):''}"></div>
       <div><div class="field-label">کارمزد ثابت (تومان)</div><input class="input amt-input num" id="cf-fee" inputmode="numeric" placeholder="مثلاً ۵۰۰٬۰۰۰" value="${isEdit&&existing.fee?fa(existing.fee):''}"></div>
     </div>
     <div class="hint mb14" id="cf-interest-preview">این دو تا (سود درصدی + کارمزد ثابت) به کل بدهی اضافه و روی قسط‌ها پخش می‌شن — برای وام/قرض معمولاً سود بانکیه، برای بقیه هر کارمزدی که سرویس می‌گیره</div>
@@ -1456,7 +1456,7 @@ function renderCommitmentForm(container, existing, onSave){
     const finalMonthly = total ? Math.round((principal + interestAmount + fee) / n) : 0;
     container.querySelector('#cf-interest-preview').textContent = total
       ? `قسط نهایی با احتساب سود و کارمزد: ${toman(finalMonthly)}${interestAmount||fee ? ` (سود: ${toman(interestAmount)}، کارمزد: ${toman(fee)})` : ''}`
-      : 'این دو تا (سود + کارمزد) به اصل تأمین مالی اضافه و روی قسط‌ها پخش می‌شن';
+      : 'این دو تا (سود + کارمزد) به مبلغی که قسط‌بندی می‌شه اضافه و روی قسط‌ها پخش می‌شن';
   }
   totalEl.addEventListener('input', updateInterestPreview);
   perEl.addEventListener('input', updateInterestPreview);
@@ -1467,7 +1467,7 @@ function renderCommitmentForm(container, existing, onSave){
   container.querySelectorAll('[data-imode]').forEach(c=>c.onclick=()=>{
     container.querySelectorAll('[data-imode]').forEach(x=>x.classList.remove('selected'));
     c.classList.add('selected'); selImode = c.dataset.imode;
-    container.querySelector('#cf-interest-label').textContent = selImode === 'amount' ? 'مبلغ سود کل دوره (تومان)' : 'سود (٪ از اصل تأمین مالی)';
+    container.querySelector('#cf-interest-label').textContent = selImode === 'amount' ? 'مبلغ سود کل دوره (تومان)' : 'سود (٪)';
     interestEl.value = '';
     interestEl.placeholder = selImode === 'amount' ? 'مثلاً ۵۰۰٬۰۰۰' : 'مثلاً ۱۸';
     updateInterestPreview();
@@ -1627,7 +1627,13 @@ function renderHome(){
   const incomeV = variableMonthlyIncome();
   const fixed = totalFixedExpenses();
   const used = commitmentForMonth(t.jy, t.jm, false);
-  const due = dueSoonEntries(5);
+  const unpaidThisMonth = [];
+  state.commitments.forEach(cm=>{
+    buildCommitmentSchedule(cm).forEach((e, idx)=>{
+      if(e.jy===t.jy && e.jm===t.jm && !e.paid) unpaidThisMonth.push({commitment:cm, entry:e, index:idx});
+    });
+  });
+  unpaidThisMonth.sort((a,b)=> j2d(a.entry.jy,a.entry.jm,a.entry.jd) - j2d(b.entry.jy,b.entry.jm,b.entry.jd));
   const analysis = buildMonthlyAnalysis();
   const pctCap = c > 0 ? Math.round((used / c) * 100) : 0;
   const share = Math.round(shareOfIncome(used));
@@ -1701,33 +1707,24 @@ function renderHome(){
     </div>
     <div class="muted" id="home-month-detail" style="font-size:12px; margin:-8px 0 18px;">${monthDetailText(months6[homeMonthSel])}</div>
 
-    <div class="grid-2 mb18">
-      <div class="card">
-        <div class="eyebrow">پول باقی‌مانده این ماه</div>
+    <div class="card mb18">
+      <div class="eyebrow">پول باقی‌مانده این ماه</div>
         <div class="kpi-num num" style="font-size:30px;">${fa(analysis.moneyLeft)}</div>
         <div class="muted" style="font-size:12px; margin-bottom:8px;">تومان · قبل از روزمره و پس‌انداز اختیاری</div>
         <div class="waterfall-row"><span class="l">درآمد قابل‌اتکا</span><span class="r num">${toman(incomeR)}</span></div>
         <div class="waterfall-row"><span class="l">هزینه‌های ثابت</span><span class="r num">${toman(fixed)}</span></div>
         <div class="waterfall-row"><span class="l">اقساط برنامه‌ریزی‌شده</span><span class="r num">${toman(used)}</span></div>
         ${incomeV > 0 ? `<div class="hint">${fa(incomeV)} تومان درآمد متغیر در محاسبات بالا منظور نشده است.</div>` : ''}
-      </div>
-      <div class="card">
-        <div class="eyebrow">تحلیل ${MONTH_NAMES[analysis.t.jm]}</div>
-        <div class="waterfall-row"><span class="l">سنگین‌ترین ماه</span><span class="r">${MONTH_NAMES[analysis.worst.jm]} — ${toman(analysis.worst.val)}</span></div>
-        ${analysis.biggest ? `<div class="waterfall-row"><span class="l">بزرگ‌ترین قسط</span><span class="r">${analysis.biggest.name} — ${toman(analysis.biggest.amount)}</span></div>` : ''}
-        ${analysis.dueCount ? `<div class="waterfall-row"><span class="l">پرداخت‌شده</span><span class="r num">${fa(analysis.paidCount)} از ${fa(analysis.dueCount)} قسط</span></div>` : ''}
-        <div style="font-size:12.5px; font-weight:700; margin-top:4px;">${analysis.tip}</div>
-      </div>
     </div>
 
     <div class="card mb18">
-      <div class="eyebrow">سررسیدهای نزدیک</div>
-        ${due.length ? `
+      <div class="eyebrow">پرداخت‌نشده‌های ${MONTH_NAMES[t.jm]} · ${fa(unpaidThisMonth.length)} قسط</div>
+        ${unpaidThisMonth.length ? `
           <div id="home-due-list" role="list">
-            ${due.slice(0,3).map(d=>installmentRowHTML(d.commitment.id, d.index, d.entry, { label: `${d.commitment.name} — ${fmtJDateShort(d.entry)}` })).join('')}
+            ${unpaidThisMonth.slice(0,4).map(d=>installmentRowHTML(d.commitment.id, d.index, d.entry, { label: `${d.commitment.name} — ${fmtJDateShort(d.entry)}` })).join('')}
           </div>
           <div style="text-align:center; margin-top:10px;"><span class="link" data-nav="commitments" style="font-size:12.5px; font-weight:700; color:var(--safe); cursor:pointer;">همه اقساط ←</span></div>
-        ` : `<div class="muted" style="font-size:13px; padding:10px 0;">قسطی در ۵ روز آینده نداری</div>`}
+        ` : `<div class="muted" style="font-size:13px; padding:10px 0;">قسط پرداخت‌نشده‌ای نداری</div>`}
     </div>
 
     <button class="btn btn-primary" id="home-cta">
@@ -1749,6 +1746,7 @@ function renderHome(){
 }
 
 let commitFilter = 'all';
+let commitMonthOffset = 0; // 0 = this month, 1 = next month
 let commitEditTarget = null;
 let commitDetailTarget = null;
 let commitSort = 'due'; // 'due' = nearest payment first (default), 'recent' = most recently added first
@@ -1862,24 +1860,17 @@ function renderCommitments(){
   }
 
   const t = jToday();
-  const totalPlanned = commitmentForMonth(t.jy, t.jm, false);
-  let paidThisMonth = 0;
-  state.commitments.forEach(cm=>{
-    buildCommitmentSchedule(cm).forEach(e=>{
-      if(e.jy===t.jy && e.jm===t.jm && e.paid) paidThisMonth += e.amount;
-    });
-  });
-  const unpaidThisMonth = totalPlanned - paidThisMonth;
-  const activeCount = state.commitments.filter(cm=>buildCommitmentSchedule(cm).some(e=>!e.paid)).length;
+  const target = jAddMonths(t.jy, t.jm, commitMonthOffset);
 
   const decorated = state.commitments.map(cm=>{
     const schedule = buildCommitmentSchedule(cm);
-    const next = schedule.find(e=>!e.paid);
-    return { cm, schedule, nextJdn: next ? j2d(next.jy,next.jm,next.jd) : Infinity,
-      nextIdx: schedule.findIndex(e=>!e.paid),
-      hasUnpaid: schedule.some(e=>!e.paid) };
-  });
-  if(commitSort === 'due') decorated.sort((a,b)=> a.nextJdn - b.nextJdn);
+    const monthIdx = schedule.findIndex(e=>e.jy===target.jy && e.jm===target.jm);
+    if(monthIdx < 0) return null;
+    const entry = schedule[monthIdx];
+    return { cm, schedule, monthIdx, monthEntry: entry, hasUnpaid: !entry.paid,
+      monthJdn: j2d(entry.jy, entry.jm, entry.jd) };
+  }).filter(Boolean);
+  if(commitSort === 'due') decorated.sort((a,b)=> a.monthJdn - b.monthJdn);
 
   const filtered = decorated.filter(d=>{
     if(commitFilter==='unpaid') return d.hasUnpaid;
@@ -1891,59 +1882,57 @@ function renderCommitments(){
   const rowHTML = d=>{
     const cm = d.cm;
     const typeInfo = COMMITMENT_TYPES.find(x=>x.key===cm.type);
-    const schedule = d.schedule;
-    const paidCount = schedule.filter(e=>e.paid).length;
-    const next = schedule.find(e=>!e.paid);
     const inner = `<div class="cmt-row inst-card" data-detail="${cm.id}">
       <div class="cmt-thumb">${d.hasUnpaid?typeInfo.emoji:'✅'}</div>
       <div class="info">
         <div class="title">${cm.name}</div>
-        <div class="sub">${cm.provider} · قسط ${fa(paidCount+1)} از ${fa(cm.installments)}</div>
-        <div class="sub">${next ? 'سررسید ' + fmtJDate(next) + ' · ' + toman(cm.monthly) : 'همه‌ی اقساط پرداخت شده'}</div>
+        <div class="sub">${cm.provider} · قسط ${fa(d.monthIdx+1)} از ${fa(cm.installments)}</div>
+        <div class="sub">سررسید ${fmtJDate(d.monthEntry)} · ${toman(cm.monthly)}</div>
       </div>
       <button class="cmt-check ${d.hasUnpaid?'':'done'}" data-check="${cm.id}" ${d.hasUnpaid?'':'disabled'}
-        title="${d.hasUnpaid?'علامت‌گذاری قسط بعدی به‌عنوان پرداخت‌شده':'پرداخت‌شده'}">✓</button>
+        title="${d.hasUnpaid?'علامت‌گذاری این قسط به‌عنوان پرداخت‌شده':'پرداخت‌شده'}">✓</button>
     </div>`;
     if(!d.hasUnpaid) return `<div class="inst-wrap cmt-wrap is-paid" role="listitem">${inner}</div>`;
-    return `<div class="inst-wrap cmt-wrap" role="listitem" data-cid="${cm.id}" data-idx="${d.nextIdx}" data-swipe>
+    return `<div class="inst-wrap cmt-wrap" role="listitem" data-cid="${cm.id}" data-idx="${d.monthIdx}" data-swipe>
       <div class="inst-reveal" aria-hidden="true"><span class="inst-check">✓</span><span class="inst-label">پرداخت شد</span></div>
       ${inner}
     </div>`;
   };
 
   el.innerHTML = `
-    <div class="page-head">
-      <h1>اقساط من</h1>
-      <div class="sub">${fmtJDate(t)} · ${fa(activeCount)} تعهد فعال</div>
+    <div class="page-head" style="display:flex; align-items:flex-start; justify-content:space-between; gap:10px;">
+      <button class="icon-btn" id="cm-month-toggle" aria-label="نمایش ماه بعد" title="ماه بعد" style="${commitMonthOffset===1?'border-color:var(--ink); box-shadow:0 0 0 2px var(--ink);':''}">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none"><rect x="3" y="4" width="18" height="18" rx="3" stroke="#001F3F" stroke-width="1.8"/><path d="M16 2v4M8 2v4M3 10h18" stroke="#001F3F" stroke-width="1.8" stroke-linecap="round"/></svg>
+      </button>
+      <div style="flex:1; text-align:center;">
+        <h1>اقساط من</h1>
+        <div class="sub">${MONTH_NAMES[target.jm]} ${fa(target.jy)}${commitMonthOffset===1?' · ماه بعد':''} · ${fa(decorated.length)} تعهد</div>
+      </div>
+      <button class="icon-btn" id="cm-new" aria-label="افزودن قسط یا تعهد" title="افزودن قسط یا تعهد">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="#001F3F" stroke-width="2.4" stroke-linecap="round"/></svg>
+      </button>
     </div>
-    <button class="btn btn-primary mb18" id="cm-new">افزودن قسط یا تعهد</button>
-    <div class="card mb18">
-      <div class="waterfall-row"><span class="l">کل برنامه‌ریزی‌شده ${MONTH_NAMES[t.jm]}</span><span class="r num">${toman(totalPlanned)}</span></div>
-      <div class="waterfall-row"><span class="l">پرداخت‌شده</span><span class="r num" style="color:var(--safe);">${toman(paidThisMonth)}</span></div>
-      <div class="waterfall-row total"><span class="l">مانده پرداخت‌نشده</span><span class="r num">${toman(unpaidThisMonth)}</span></div>
-      <div class="hint">پرداخت، سقف مصرف‌شده این ماه را آزاد نمی‌کند.</div>
-    </div>
-    <div class="filter-row" id="commit-filters">
-      <div class="filter-chip ${commitFilter==='all'?'selected':''}" data-f="all">همه</div>
-      <div class="filter-chip ${commitFilter==='unpaid'?'selected':''}" data-f="unpaid">پرداخت‌نشده</div>
-      <div class="filter-chip ${commitFilter==='paid'?'selected':''}" data-f="paid">پرداخت‌شده</div>
-    </div>
-    <div class="row-2 mb14">
-      <div style="flex:none; align-self:center;" class="field-label">مرتب‌سازی:</div>
-      <select class="input" id="commit-sort" style="max-width:200px;">
-        <option value="due" ${commitSort==='due'?'selected':''}>نزدیک‌ترین سررسید</option>
-        <option value="recent" ${commitSort==='recent'?'selected':''}>آخرین اضافه‌شده</option>
+    <div style="display:flex; gap:8px; align-items:center; margin-bottom:14px;">
+      <div class="filter-row" id="commit-filters" style="flex:1; margin-bottom:0;">
+        <div class="filter-chip ${commitFilter==='all'?'selected':''}" data-f="all">همه</div>
+        <div class="filter-chip ${commitFilter==='unpaid'?'selected':''}" data-f="unpaid">پرداخت‌نشده</div>
+        <div class="filter-chip ${commitFilter==='paid'?'selected':''}" data-f="paid">پرداخت‌شده</div>
+      </div>
+      <select class="input" id="commit-sort" style="max-width:104px; flex:0 0 auto; padding:8px 10px; font-size:12px;">
+        <option value="due" ${commitSort==='due'?'selected':''}>سررسید</option>
+        <option value="recent" ${commitSort==='recent'?'selected':''}>جدیدترین</option>
       </select>
     </div>
     ${unpaidList.length ? `<div class="list-section-title">پرداخت‌نشده · ${fa(unpaidList.length)} قسط</div>
     <div class="mb18">${unpaidList.map(rowHTML).join('')}</div>` : ''}
     ${paidList.length ? `<div class="list-section-title">پرداخت‌شده · ${fa(paidList.length)} قسط</div>
     <div class="mb18">${paidList.map(rowHTML).join('')}</div>` : ''}
-    ${!filtered.length ? `<div class="muted" style="text-align:center; padding:40px 0; font-size:13px;">تعهدی در این دسته نیست</div>` : ''}
+    ${!filtered.length ? `<div class="muted" style="text-align:center; padding:40px 0; font-size:13px;">${decorated.length===0 ? `قسطی در ${MONTH_NAMES[target.jm]} نداری` : 'تعهدی در این دسته نیست'}</div>` : ''}
     <div class="hint" style="margin-top:14px;">برای ثبت پرداخت، روی ✓ کنار هر قسط بزن یا ردیف رو بکش. پرداخت ثبت‌شده فقط با علامت‌گذاری برگردانده می‌شود.</div>
   `;
 
   document.getElementById('cm-new').onclick = ()=>{ commitEditTarget='new'; renderCommitments(); };
+  document.getElementById('cm-month-toggle').onclick = ()=>{ commitMonthOffset = commitMonthOffset===0 ? 1 : 0; renderCommitments(); };
   document.getElementById('commit-sort').addEventListener('change', e=>{
     commitSort = e.target.value; renderCommitments();
   });
@@ -1959,8 +1948,8 @@ function renderCommitments(){
   document.querySelectorAll('[data-check]').forEach(b=>b.addEventListener('click', ev=>{
     ev.stopPropagation();
     const d = decorated.find(x=>x.cm.id===b.dataset.check);
-    if(!d || d.nextIdx < 0) return;
-    setPaid(d.cm.id, d.nextIdx, true, { withUndo:true, moved:true });
+    if(!d || d.monthIdx < 0) return;
+    setPaid(d.cm.id, d.monthIdx, true, { withUndo:true, moved:true });
   }));
   document.getElementById('screen-commitments').scrollTop = prevScroll;
 }
@@ -2134,9 +2123,9 @@ function renderPlanCashflow(){
     <div class="card mb18">
       <div class="tbl">
         <div class="tbl-row head"><span class="c">ماه</span><span class="c">اقساط</span><span class="c l">مانده روزمره</span></div>
-        ${rows.map(r=>`<div class="tbl-row"><span class="c">${MONTH_NAMES[r.m.jm]} ${fa(r.m.jy)}</span><span class="c num">${faM(r.inst)}</span><span class="c l num" style="color:${r.free<0?'var(--danger)':'var(--safe)'};">${faM(r.free)}</span></div>`).join('')}
+        ${rows.map(r=>`<div class="tbl-row"><span class="c">${MONTH_NAMES[r.m.jm]} ${fa(r.m.jy)}</span><span class="c num">${fa(r.inst)}</span><span class="c l num" style="color:${r.free<0?'var(--danger)':'var(--safe)'};">${fa(r.free)}</span></div>`).join('')}
       </div>
-      <div class="hint">اعداد جدول: میلیون تومان · مانده = درآمد قابل‌اتکا − ثابت − اقساط − پس‌انداز برنامه‌ریزی‌شده</div>
+      <div class="hint">اعداد جدول: تومان · مانده = درآمد قابل‌اتکا − ثابت − اقساط − پس‌انداز برنامه‌ریزی‌شده</div>
     </div>
 
     <div class="note"><span class="note-ic">ⓘ</span><span>پایه هر ماه: ${toman(incomeR)} درآمد قابل‌اتکا، ${toman(fixed)} هزینه ثابت و ${toman(savings)} پس‌انداز برنامه‌ریزی‌شده. درآمد متغیر در این مانده منظور نشده است.</span></div>
@@ -2546,7 +2535,6 @@ function renderSimStart(){
   const fixed = totalFixedExpenses();
   const savingsPct = (state.technique && state.technique.p && typeof state.technique.p.savings === 'number') ? state.technique.p.savings : 20;
   const savings = Math.round(incomeR * savingsPct / 100);
-  const freeCash = incomeT - fixed - savings - commitmentForMonth(today.jy, today.jm, false);
   const proposals = state.savedProposals || [];
   el.innerHTML = `
     <div class="topbar">
@@ -2577,12 +2565,7 @@ function renderSimStart(){
       <div id="sm-down-wrap" style="display:none;">
         <div class="field-label">پیش‌پرداخت (تومان)</div>
         <input class="input amt-input num mb6" id="sm-down" inputmode="numeric" placeholder="مثلاً ۶٬۰۰۰٬۰۰۰">
-        <div class="hint mb14">فقط دیجی‌پی پیش‌پرداخت می‌گیره؛ از اصل تأمین مالی کم می‌شه</div>
-      </div>
-      <div class="card mb18">
-        <div class="waterfall-row"><span class="l">وجه آزاد این ماه</span><span class="r num">${toman(Math.max(0, freeCash))}</span></div>
-        <div class="waterfall-row"><span class="l">پرداخت موقع خرید</span><span class="r num" id="sm-paid-now">—</span></div>
-        <div class="waterfall-row"><span class="l">اصل تأمین مالی</span><span class="r num" id="sm-principal">—</span></div>
+        <div class="hint mb14">فقط دیجی‌پی پیش‌پرداخت می‌گیره؛ از مبلغی که قسط‌بندی می‌شه کم می‌شه</div>
       </div>
       <div class="field-label">سود</div>
       <div class="chip-grid mb14" id="sm-interest-mode">
@@ -2592,7 +2575,7 @@ function renderSimStart(){
       <div class="row-2 mb14">
         <div><div class="field-label" id="sm-interest-label">مبلغ سود کل دوره (تومان)</div>
           <input class="input num" id="sm-interest" inputmode="decimal" placeholder="مثلاً ۲٬۰۰۰٬۰۰۰"></div>
-        <div><div class="field-label">کارمزد تأمین مالی</div>
+        <div><div class="field-label">کارمزد</div>
           <input class="input amt-input num" id="sm-fee" inputmode="numeric" placeholder="مثلاً ۱٬۰۰۰٬۰۰۰"></div>
       </div>
       <div class="hint mb18" id="sm-interest-hint"></div>
@@ -2655,15 +2638,13 @@ function renderSimStart(){
   }
   function updatePreview(){
     const { price, down, fee, n, paid, principal, interestAmount, monthly, paidNow } = readNumbers();
-    document.getElementById('sm-paid-now').textContent = price ? toman(Math.max(0, paidNow)) : '—';
-    document.getElementById('sm-principal').textContent = price ? toman(principal) : '—';
     const ih = document.getElementById('sm-interest-hint');
     if(ih){
       if(selInterestMode === 'percent' && principal > 0){
         const pct = parseFaDecimal(document.getElementById('sm-interest').value);
-        ih.textContent = `معادل حدود ${fa(pct)}٪ اصل تأمین مالی — مبلغ دقیق قرارداد ملاک است.`;
+        ih.textContent = `سود ${fa(pct)}٪ از مبلغی که قسط‌بندی می‌شه حساب می‌شه.`;
       } else if(selInterestMode === 'amount' && principal > 0 && interestAmount > 0){
-        ih.textContent = `معادل حدود ${fa(Math.round(interestAmount / principal * 100))}٪ اصل تأمین مالی.`;
+        ih.textContent = `معادل حدود ${fa(Math.round(interestAmount / principal * 100))}٪ از مبلغی که قسط‌بندی می‌شه.`;
       } else ih.textContent = '';
     }
     document.getElementById('sm-monthly-preview').textContent =
@@ -2678,7 +2659,7 @@ function renderSimStart(){
     el.querySelectorAll('#sm-interest-mode [data-mode]').forEach(x=>x.classList.remove('selected'));
     c.classList.add('selected');
     selInterestMode = c.dataset.mode;
-    document.getElementById('sm-interest-label').textContent = selInterestMode === 'amount' ? 'مبلغ سود کل دوره (تومان)' : 'سود (٪ از اصل تأمین مالی)';
+    document.getElementById('sm-interest-label').textContent = selInterestMode === 'amount' ? 'مبلغ سود کل دوره (تومان)' : 'سود (٪)';
     document.getElementById('sm-interest').value = '';
     document.getElementById('sm-interest').placeholder = selInterestMode === 'amount' ? 'مثلاً ۲٬۰۰۰٬۰۰۰' : 'مثلاً ۸';
     updatePreview();
@@ -2941,7 +2922,6 @@ function renderSimResult(){
   const status = statusFromShare(worst.share);
   const sm = statusMeta(status);
   const worstShare = Math.round(worst.share || 0);
-  const freeCashWorst = incomeT - fixed - worst.val - savings;
   const overCap = Math.max(0, worst.val - c);
   const advice = buildPurchaseAdvice(p, scheduleEntries, worst, c, status);
   const adviceToneColor = advice.tone==='safe' ? 'var(--safe)' : advice.tone==='caution' ? 'var(--caution)' : 'var(--danger)';
@@ -2950,30 +2930,7 @@ function renderSimResult(){
   const heroTitle =
     status==='safe' ? 'این پیشنهاد در محدوده شماست' :
     status==='caution' ? 'در مرز ظرفیت شما' : 'این خرید، فشار زیادی می‌سازد';
-  const heroNote =
-    status==='safe' ? `بیشترین نسبت در کل دوره ${fa(worstShare)}٪ است؛ کمتر از آستانه ${fa(state.thresholds.safe)}٪. این ارزیابی فقط بر درآمد قابل‌اتکا تکیه دارد.` :
-    status==='caution' ? `احتیاط از خود ${fa(state.thresholds.safe)}٪ آغاز می‌شود. تمام سقف اقساط پر شده؛ برای هزینه‌های پیش‌بینی‌نشده فضایی کمتر دارید. مبلغ قسط را بازبینی کنید.` :
-    `فشار بالا از ${fa(state.thresholds.caution)}٪ درآمد شروع می‌شود. در سه ماه اول، اقساط از سقف شما عبور می‌کنند. تعویق خرید یا کاهش قسط را بررسی کنید.`;
-
-  /* effect table: one row per month that has a new installment */
-  let effectRows = '';
-  {
-    const seen = {};
-    scheduleEntries.forEach(e=>{
-      const key = e.jy + '-' + e.jm;
-      if(seen[key]) return;
-      seen[key] = true;
-      const existing = commitmentForMonth(e.jy, e.jm, false);
-      const withNew = scheduleEntries.filter(x=>x.jy===e.jy && x.jm===e.jm).reduce((s,x)=>s+x.amount, 0);
-      const total = existing + withNew;
-      const free = incomeR - fixed - total;
-      effectRows += `<div class="tbl-row"><span class="c">${fa(e.jd)} ${MONTH_NAMES[e.jm]} ${fa(e.jy)}</span><span class="c num">${fa(total)}</span><span class="c l num" style="color:${free<0?'var(--danger)':'var(--safe)'}">${fa(free)}</span></div>`;
-    });
-  }
   const paidCount = Math.min(p.paidCount || 0, p.installments);
-  const paidNow = down + paidCount * p.monthly;
-  const t0 = jToday();
-  const freeThisMonth = incomeT - fixed - savings - commitmentForMonth(t0.jy, t0.jm, false);
 
   el.innerHTML = `
     <div class="topbar">
@@ -2993,63 +2950,42 @@ function renderSimResult(){
       ${overCap > 0
         ? `<div class="hero-row"><span class="l">بیش از سقف ${toman(c)}</span><span class="r num" style="color:#F3A28E;">${toman(overCap)}</span></div>`
         : `<div class="hero-row"><span class="l">ظرفیت آزاد از سقف</span><span class="r num">${toman(Math.max(0, c - worst.val))}</span></div>`}
-      <div class="hero-row"><span class="l">مانده پس از ثابت و اقساط</span><span class="r num">${toman(freeCashWorst)}</span></div>
     </div>
-
-    <div class="note"><span class="note-ic">ⓘ</span><span>${heroNote}</span></div>
 
     <div class="section-title">مشاور خرید <span class="muted" style="font-size:11px; font-weight:400;">بدون ارسال داده</span></div>
     <div class="card mb18" style="background:${adviceToneBg}; border:none;">
-      <div style="font-size:15px; font-weight:800; color:${adviceToneColor}; margin-bottom:6px;">${advice.title}</div>
-      <div class="muted" style="font-size:12.5px; line-height:1.8; margin-bottom:10px;">${advice.text}</div>
-      <ul class="advisor-list">${advice.reasons.map(r=>`<li>${r}</li>`).join('')}</ul>
+      <div style="font-size:15px; font-weight:800; color:${adviceToneColor}; margin-bottom:4px;">${advice.title}</div>
+      <div class="muted" style="font-size:12.5px; line-height:1.8;">${advice.text}</div>
       ${advice.alternatives.length ? `
         <div class="advisor-alt-title">سبک‌ترش کن:</div>
         ${advice.alternatives.map((a,i)=>`<button class="advisor-alt" data-alt="${i}"><span class="advisor-alt-label">${a.label}</span><span class="advisor-alt-sub">${a.sub}</span></button>`).join('')}
-        <div class="hint">با زدن هر گزینه دوباره بررسی می‌شه.</div>` : `
-        <div class="hint">جایگزین بهتری پیدا نشد.</div>`}
-      <details class="advisor-how"><summary>مشاور چطور تصمیم می‌گیره؟</summary><div class="hint" style="margin-top:8px;">سقف، هزینه‌های ثابت، پس‌انداز و اقساط فعلی‌ت رو حساب می‌کنه. همه‌چیز توی مرورگره؛ داده بیرون نمی‌ره.</div></details>
+        <div class="hint">با زدن هر گزینه دوباره بررسی می‌شه.</div>` : ''}
     </div>
 
-    <div class="section-title">هزینه واقعی ${p.name}</div>
     <div class="card mb18">
-      <div class="waterfall-row"><span class="l">قیمت نقدی</span><span class="r num">${toman(p.price)}</span></div>
-      ${down>0 ? `<div class="waterfall-row"><span class="l">پیش‌پرداخت</span><span class="r num">${toman(down)}</span></div>` : ''}
-      ${paidCount>0 ? `<div class="waterfall-row"><span class="l">قسط‌های پرداخت‌شده موقع خرید</span><span class="r num">${fa(paidCount)} قسط · ${toman(paidCount * p.monthly)}</span></div>` : ''}
-      <div class="waterfall-row"><span class="l">اصل تأمین مالی</span><span class="r num">${toman(principal)}</span></div>
-      <div class="waterfall-row"><span class="l">سود ثابت کل دوره</span><span class="r num">${toman(interestAmt)}</span></div>
-      <div class="waterfall-row"><span class="l">کارمزد داخل اقساط</span><span class="r num">${toman(fee)}</span></div>
-      <div class="waterfall-row"><span class="l">بازپرداخت مالی</span><span class="r num">${toman(financed)}</span></div>
-      <div class="waterfall-row"><span class="l">${fa(p.installments)} قسط؛ هر قسط</span><span class="r num">${toman(p.monthly)}</span></div>
-      <div class="waterfall-row total"><span class="l">جمع پرداخت</span><span class="r num">${toman(totalCost)}</span></div>
-      <div class="hint">همه مبالغ به تومان؛ هزینه اضافه نسبت به نقدی: ${toman(extra)}.</div>
-    </div>
-
-    <div class="section-title">اثر تا آخرین سررسید <span class="muted" style="font-size:11px; font-weight:400;">میلیون تومان</span></div>
-    <div class="card mb18">
-      <div class="tbl">
-        <div class="tbl-row head"><span class="c">ماه</span><span class="c">اقساط</span><span class="c l">مانده نقدی</span></div>
-        ${effectRows}
+      <div style="display:flex; justify-content:space-between; align-items:baseline; gap:10px;">
+        <span style="font-size:13px; font-weight:700;">جمع پرداخت</span>
+        <span class="num" style="font-size:17px; font-weight:800;">${toman(totalCost)}</span>
       </div>
-      <div class="waterfall-row"><span class="l">وجه آزاد پیش از خرید</span><span class="r num">${toman(Math.max(0, freeThisMonth))}</span></div>
-      <div class="waterfall-row total"><span class="l">پس از پرداخت موقع خرید ${toman(paidNow)}</span><span class="r num">${toman(Math.max(0, freeThisMonth - paidNow))}</span></div>
-      <div class="hint">درآمد قابل‌اتکا ${toman(incomeR)} و هزینه ثابت ${toman(fixed)} فرض شده‌اند. وضعیت ماه پنهان نمی‌کند.</div>
+      <div class="muted" style="font-size:12px; margin-top:4px;">${fa(p.installments)} قسط × ${toman(p.monthly)} · اضافه‌تر از نقدی: ${toman(extra)}</div>
+    </div>
+
+    <div class="section-title">سهم اقساط در سنگین‌ترین ماه (${MONTH_NAMES[worst.jm]})</div>
+    <div class="card mb18">
+      <div style="position:relative; height:10px; border-radius:100px; background:var(--track); overflow:hidden;">
+        <div style="height:100%; width:${Math.min(100, worstShare)}%; background:${adviceToneColor}; border-radius:100px;"></div>
+        <div style="position:absolute; top:-2px; bottom:-2px; right:calc(30% - 1px); width:2px; background:var(--ink);"></div>
+      </div>
+      <div style="display:flex; justify-content:space-between; font-size:11px; color:var(--muted); margin-top:8px;">
+        <span>سهم شما: ${fa(worstShare)}٪</span><span>سقف امن: ۳۰٪</span>
+      </div>
     </div>
 
     <div class="step-actions">
-      ${status==='safe' ? `
-        <button class="btn btn-primary" id="sm-confirm">افزودن این خرید به تعهدات</button>
-        <button class="btn btn-ghost" id="sm-edit">ویرایش و مقایسه پیشنهاد دیگر</button>
-      ` : status==='caution' ? `
-        <button class="btn btn-primary" id="sm-edit">تغییر شرایط خرید</button>
-        <button class="btn btn-ghost" id="sm-confirm">ثبت با آگاهی از وضعیت احتیاط</button>
-      ` : `
-        <button class="btn btn-primary" id="sm-edit">بازبینی مبلغ و شرایط خرید</button>
-        <button class="btn btn-ghost" id="sm-save-only">ذخیره فقط برای مقایسه</button>
-      `}
+      <button class="btn btn-primary" id="sm-confirm">می‌خرم</button>
+      <button class="btn btn-ghost" id="sm-cancel">نمی‌خرم</button>
     </div>
-    ${status!=='danger' ? `<div style="text-align:center; margin-top:10px;"><span class="link" id="sm-save-only" style="font-size:12.5px; font-weight:700; color:var(--safe); cursor:pointer;">ذخیره فقط برای مقایسه</span></div>` : ''}
-    <div style="text-align:center; margin-top:10px;"><span class="link" id="sm-cancel" style="font-size:12.5px; font-weight:700; color:var(--muted); cursor:pointer;">منصرف شدم</span></div>
+    <div style="text-align:center; margin-top:10px;"><span class="link" id="sm-save-only" style="font-size:12.5px; font-weight:700; color:var(--safe); cursor:pointer;">ذخیره برای مقایسه</span></div>
   `;
   el.querySelectorAll('[data-alt]').forEach(btn=>btn.onclick=()=>{
     const alt = advice.alternatives[parseInt(btn.dataset.alt, 10)];
@@ -3068,8 +3004,6 @@ function renderSimResult(){
   if(cancelBtn) cancelBtn.onclick = ()=>{
     state.pendingSimulation = null; showToast('خرید ثبت نشد'); goTo('home');
   };
-  const editBtn = document.getElementById('sm-edit');
-  if(editBtn) editBtn.onclick = ()=>{ state.pendingSimulation = null; renderSimStart(); };
   const saveOnlyBtn = document.getElementById('sm-save-only');
   if(saveOnlyBtn) saveOnlyBtn.onclick = ()=>{
     state.savedProposals = state.savedProposals || [];
