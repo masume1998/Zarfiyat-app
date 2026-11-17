@@ -122,9 +122,18 @@
   .inst-wrap.cmt-wrap{ margin:0 0 10px; border-radius:18px; }
   .inst-wrap.cmt-wrap .inst-card{ border:none; border-radius:18px; padding:12px;
     box-shadow:0 1px 3px rgba(0,31,63,.05); }
-  .ring-legend{ display:flex; gap:14px; justify-content:center; margin-top:12px;
-    font-size:11px; color:rgba(255,255,255,.7); }
-  .ring-legend .dot{ width:8px; height:8px; border-radius:50%; display:inline-block; margin-inline-end:5px; }
+  /* ---- months slider on the dashboard ---- */
+  .month-slider{ display:flex; gap:10px; overflow-x:auto; scroll-snap-type:x mandatory;
+    padding:2px 2px 12px; scrollbar-width:none; }
+  .month-slider::-webkit-scrollbar{ display:none; }
+  .month-card{ flex:0 0 138px; scroll-snap-align:start; background:var(--surface); border-radius:16px;
+    padding:12px 14px; box-shadow:0 1px 3px rgba(0,31,63,.05); cursor:pointer; }
+  .month-card.selected{ box-shadow:0 0 0 2px var(--ink); }
+  .month-card .month-name{ font-size:12.5px; font-weight:800; }
+  .month-card .month-amt{ font-size:14px; font-weight:800; margin-top:4px; }
+  .month-card .month-pct{ font-size:11px; color:var(--muted); }
+  .mini-bar{ height:6px; border-radius:100px; background:var(--track); overflow:hidden; margin:8px 0 6px; }
+  .mini-bar > div{ height:100%; border-radius:100px; }
   .row-del, .row-edit{ width:26px; height:26px; border-radius:50%; background:var(--paper-deep); border:none;
     display:flex; align-items:center; justify-content:center; color:var(--muted); font-size:12px; cursor:pointer; flex:0 0 auto;}
 
@@ -253,11 +262,11 @@
   .toast .toast-undo:focus-visible{ outline:2px solid #fff; outline-offset:2px; }
 
   .bottom-nav{ position:absolute; left:50%; transform:translateX(-50%); bottom:calc(14px + env(safe-area-inset-bottom)); z-index:20;
-    width:max-content; max-width:calc(100% - 24px);
-    background:var(--ink); border-radius:100px; padding:8px 12px;
+    width:min(430px, calc(100% - 32px));
+    background:var(--ink); border-radius:100px; padding:10px 18px;
     box-shadow:0 16px 40px -12px rgba(0,31,63,.45);
-    display:flex; align-items:center; justify-content:center; gap:2px; }
-  .bottom-nav .nav-btn{ color:rgba(255,255,255,.65); padding:8px 12px; border-radius:100px; }
+    display:flex; align-items:center; justify-content:space-between; gap:6px; }
+  .bottom-nav .nav-btn{ color:rgba(255,255,255,.65); padding:10px 14px; border-radius:100px; }
   .bottom-nav .nav-btn.active{ background:var(--accent); color:var(--ink); }
   .nav-btn{ background:none; border:none; display:flex; flex-direction:column; align-items:center; gap:4px;
     font-family:inherit; font-size:10px; font-weight:700; color:var(--muted); cursor:pointer; padding:6px 10px; }
@@ -810,24 +819,19 @@ function gaugeSVG(percent, trackColor, color){
    middle = fixed expenses vs reliable income,
    inner = free cash vs reliable income. */
 function ringSVG(pct, color){
-  const clamp01 = v => Math.max(0, Math.min(100, v));
-  const incomeR = reliableMonthlyIncome();
-  const t = jToday();
-  const used = commitmentForMonth(t.jy, t.jm, false);
-  const fixed = totalFixedExpenses();
-  const rings = [
-    { r:62, pct: clamp01(pct), color: color || '#74C365' },
-    { r:47, pct: clamp01(incomeR > 0 ? fixed / incomeR * 100 : 0), color: '#74C365' },
-    { r:32, pct: clamp01(incomeR > 0 ? Math.max(0, incomeR - fixed - used) / incomeR * 100 : 0), color: '#7FA8E0' }
-  ];
-  const one = x=>{
-    const c = 2 * Math.PI * x.r;
-    const off = c * (1 - x.pct / 100);
-    return `<circle cx="74" cy="74" r="${x.r}" fill="none" stroke="rgba(255,255,255,.14)" stroke-width="11"/>
-    <circle cx="74" cy="74" r="${x.r}" fill="none" stroke="${x.color}" stroke-width="11" stroke-linecap="round"
-      stroke-dasharray="${c}" stroke-dashoffset="${off}" transform="rotate(-90 74 74)" style="transition:stroke-dashoffset .5s ease"/>`;
-  };
-  return `<svg viewBox="0 0 148 148">${rings.map(one).join('')}</svg>`;
+  // One ring only: installments as % of the cap. Past 100% the ring is full and
+  // the overflow draws a second lap in bright red, so the overage is visible.
+  const R = 62, C = 2 * Math.PI * R;
+  const main = Math.min(Math.max(pct, 0), 100) / 100 * C;
+  const over = pct > 100 ? Math.min(pct - 100, 100) / 100 * C : 0;
+  const dash = v => `${v.toFixed(1)} ${(C - v).toFixed(1)}`;
+  return `<svg viewBox="0 0 148 148" role="img" aria-label="ظرفیت اقساط ${fa(Math.round(pct))} درصد">
+    <circle cx="74" cy="74" r="${R}" fill="none" stroke="rgba(255,255,255,.15)" stroke-width="12"/>
+    <circle cx="74" cy="74" r="${R}" fill="none" stroke="${color || '#74C365'}" stroke-width="12" stroke-linecap="round"
+      stroke-dasharray="${dash(main)}" transform="rotate(-90 74 74)" style="transition:stroke-dasharray .5s ease"/>
+    ${over > 0 ? `<circle cx="74" cy="74" r="${R}" fill="none" stroke="#FF5A4E" stroke-width="12" stroke-linecap="round"
+      stroke-dasharray="${dash(over)}" transform="rotate(-90 74 74)"/>` : ''}
+  </svg>`;
 }
 function requestNotifications(){
   if(!('Notification' in window)){ showToast('این مرورگر از نوتیفیکیشن پشتیبانی نمی‌کنه'); return; }
@@ -868,7 +872,7 @@ function checkDueNotifications(){
 const swipeBusy = new Set();            // "cid:idx" currently animating out — repeated gestures are ignored
 let lastMovedInstallment = null;        // lets the row animate into its new list after the re-render
 const expandedCommitments = new Set();  // keeps expanded commitment cards open across re-renders
-let homeCarouselIndex = 0;
+let homeMonthSel = 0;
 
 function prefersReducedMotion(){
   return !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
@@ -1060,7 +1064,7 @@ function goTo(name){
   document.getElementById('screen-'+name).classList.add('active');
   document.querySelectorAll('.nav-btn').forEach(b=>b.classList.toggle('active', b.dataset.nav===name));
   document.getElementById('screen-'+name).scrollTop = 0;
-  if(name==='home'){ homeCarouselIndex = 0; renderHome(); }
+  if(name==='home'){ homeMonthSel = 0; renderHome(); }
   if(name==='commitments'){ commitEditTarget = null; commitDetailTarget = null; renderCommitments(); }
   if(name==='plan') renderPlan();
   if(name==='profile'){ profileView = 'main'; renderProfile(); }
@@ -1632,6 +1636,15 @@ function renderHome(){
   const freeCap = Math.max(0, c - used);
   const ringColor = status==='safe' ? '#74C365' : status==='caution' ? '#DBE64C' : '#F3A28E';
 
+  const months6 = nextMonths(6).map(m=>{
+    const val = commitmentForMonth(m.jy, m.jm, false);
+    const p = c > 0 ? Math.round(val / c * 100) : 0;
+    const st = statusFromShare(shareOfIncome(val));
+    return { m, val, pct: p, st, label: statusMeta(st).label };
+  });
+  const monthBarColor = st => st==='safe' ? '#3FBE85' : st==='caution' ? '#DBE64C' : '#F3A28E';
+  const monthDetailText = x => `${MONTH_NAMES[x.m.jm]} ${fa(x.m.jy)}: ${toman(x.val)} قسط · ${fa(x.pct)}٪ سقف · ${x.label}`;
+
   const el = document.getElementById('home-content');
   el.innerHTML = `
     <div class="topbar">
@@ -1652,18 +1665,13 @@ function renderHome(){
         <div style="display:flex; align-items:center; gap:18px;">
           <div class="ring-wrap">
             ${ringSVG(pctCap, ringColor)}
-            <div class="ring-center"><div class="big">${fa(pctCap)}٪</div><div class="small">از سقف اقساط</div></div>
+            <div class="ring-center"><div class="big" style="color:${pctCap>100?'#FF8A7A':''};">${fa(pctCap)}٪</div><div class="small">از سقف اقساط</div>${pctCap>100?`<div class="small" style="color:#FF8A7A;">${fa(pctCap-100)}٪ بالاتر از سقف</div>`:''}</div>
           </div>
           <div style="flex:1; min-width:0;">
             <div class="hero-label">ظرفیت آزاد برای قسط جدید</div>
             <div class="hero-num num">${fa(freeCap)}</div>
-            <div class="hero-sub">تومان در ماه · ${fa(Math.max(0, 100 - pctCap))}٪ از سقف، هنوز آزاد است</div>
+            <div class="hero-sub">${pctCap>100 ? `سقف رد شده — ${fa(pctCap-100)}٪ بالاتر از سقف` : `تومان در ماه · ${fa(100 - pctCap)}٪ از سقف، هنوز آزاد است`}</div>
           </div>
-        </div>
-        <div class="ring-legend">
-          <span><i class="dot" style="background:${ringColor};"></i>اقساط</span>
-          <span><i class="dot" style="background:#74C365;"></i>ثابت</span>
-          <span><i class="dot" style="background:#7FA8E0;"></i>آزاد</span>
         </div>
         <div style="display:flex; margin-top:18px; border-top:1px solid rgba(255,255,255,.14); padding-top:14px;">
           <div style="flex:1; text-align:center;">
@@ -1680,6 +1688,18 @@ function renderHome(){
           </div>
         </div>
     </div>
+
+    <div class="section-title" style="margin-top:0;">ماه‌های پیش رو</div>
+    <div class="month-slider mb18" id="home-month-slider">
+      ${months6.map((x,i)=>`
+        <div class="month-card ${i===homeMonthSel?'selected':''}" data-mi="${i}">
+          <div class="month-name">${MONTH_NAMES[x.m.jm]} ${fa(x.m.jy)}</div>
+          <div class="month-amt num">${toman(x.val)}</div>
+          <div class="mini-bar"><div style="width:${Math.min(100,x.pct)}%; background:${monthBarColor(x.st)};"></div></div>
+          <div class="month-pct">${fa(x.pct)}٪ از سقف · ${x.label}</div>
+        </div>`).join('')}
+    </div>
+    <div class="muted" id="home-month-detail" style="font-size:12px; margin:-8px 0 18px;">${monthDetailText(months6[homeMonthSel])}</div>
 
     <div class="grid-2 mb18">
       <div class="card">
@@ -1716,6 +1736,11 @@ function renderHome(){
     </button>
   `;
   el.querySelectorAll('[data-nav]').forEach(b=>b.addEventListener('click', ()=>goTo(b.dataset.nav)));
+  el.querySelectorAll('.month-card').forEach(card=>card.addEventListener('click', ()=>{
+    homeMonthSel = parseInt(card.dataset.mi, 10);
+    el.querySelectorAll('.month-card').forEach(x=>x.classList.toggle('selected', x === card));
+    document.getElementById('home-month-detail').textContent = monthDetailText(months6[homeMonthSel]);
+  }));
   document.getElementById('home-cta').addEventListener('click', ()=> goTo('sim'));
 
   wireInstallmentRows(el);
