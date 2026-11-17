@@ -38,13 +38,13 @@
   ::selection{ background: var(--safe); color:#fff; }
   h1,h2,h3{ font-weight:800; letter-spacing:-.01em; }
   .num{ font-variant-numeric: tabular-nums; }
-  .eyebrow{ font-size:12.5px; font-weight:600; color:var(--muted); margin-bottom:6px; }
+  .eyebrow{ font-size:11.5px; font-weight:600; color:var(--muted); margin-bottom:6px; letter-spacing:.03em; }
 
   .app{ display:flex; height:100vh; height:100dvh; }
   .main{ flex:1; min-width:0; display:flex; flex-direction:column; position:relative; }
   .screens{ flex:1; position:relative; overflow:hidden; }
   .screen{ position:absolute; inset:0; overflow-y:auto; -ms-overflow-style:none; scrollbar-width:none;
-    padding:26px 20px 32px; opacity:0; visibility:hidden; transform:translateY(10px);
+    padding:44px 20px 32px; opacity:0; visibility:hidden; transform:translateY(10px);
     transition:opacity .25s ease, transform .25s ease; }
   .screen::-webkit-scrollbar{ display:none; }
   .screen.active{ opacity:1; visibility:visible; transform:translateY(0); }
@@ -54,22 +54,23 @@
   /* ---- desktop sidebar (right side in RTL) ---- */
   .sidebar{ display:none; }
   @media (min-width:768px){
-    .sidebar{ display:flex; flex-direction:column; width:232px; flex:0 0 232px;
+    .sidebar{ display:flex; flex-direction:column; align-items:center; width:76px; flex:0 0 76px;
       background:var(--ink);
-      color:#fff; padding:28px 18px 20px; }
-    .side-logo{ display:flex; align-items:center; gap:10px; font-size:26px; font-weight:800; color:var(--accent); }
-    .side-logo-mark{ width:40px; height:40px; border-radius:12px; background:var(--accent); color:var(--ink);
-      display:flex; align-items:center; justify-content:center; font-size:22px; }
-    .side-tag{ font-size:11.5px; color:rgba(255,255,255,.55); margin:8px 4px 26px; }
-    .side-nav{ display:flex; flex-direction:column; gap:4px; }
-    .sidebar .nav-btn{ flex-direction:row; justify-content:flex-start; gap:12px; width:100%;
-      padding:12px 14px; border-radius:12px; font-size:14px; color:rgba(255,255,255,.75); }
-    .sidebar .nav-btn svg{ width:20px; height:20px; }
+      color:#fff; padding:22px 10px 16px; }
+    .side-logo{ display:flex; align-items:center; justify-content:center; color:var(--accent); }
+    .side-logo-mark{ width:44px; height:44px; border-radius:14px; background:var(--accent); color:var(--ink);
+      display:flex; align-items:center; justify-content:center; font-size:22px; font-weight:800; }
+    .side-logo-text{ display:none; }
+    .side-tag{ display:none; }
+    .side-nav{ display:flex; flex-direction:column; gap:8px; align-items:center; margin-top:28px; }
+    .sidebar .nav-btn{ flex-direction:column; justify-content:center; align-items:center; width:52px; height:52px;
+      padding:0; border-radius:16px; color:rgba(255,255,255,.75); }
+    .sidebar .nav-btn svg{ width:22px; height:22px; }
     .sidebar .nav-btn.active{ background:var(--accent); color:var(--ink); }
-    .side-profile{ margin-top:auto; background:var(--accent2); border-radius:16px; padding:16px; }
-    .side-profile .sp-name{ font-size:15px; font-weight:800; }
-    .side-profile .sp-sub{ font-size:11.5px; color:rgba(255,255,255,.7); margin-top:4px; line-height:1.7; }
-    .screen{ padding:40px 48px 60px; }
+    .side-profile{ margin-top:auto; width:44px; height:44px; border-radius:50%; background:var(--accent);
+      color:var(--ink); display:flex; align-items:center; justify-content:center;
+      font-size:19px; font-weight:800; cursor:pointer; padding:0; }
+    .screen{ padding:64px 48px 60px; }
     .bottom-nav{ display:none !important; }
     .grid-2{ display:grid; grid-template-columns:1fr 1fr; gap:16px; align-items:start; }
     .grid-2 .card + .card{ margin-top:0; }
@@ -80,14 +81,15 @@
     .grid-2, .grid-3{ display:block; }
   }
 
-  .card{ background:var(--surface); border-radius:22px; padding:20px; border:1px solid var(--line); }
+  .card{ background:var(--surface); border-radius:22px; padding:20px; border:none;
+    box-shadow:0 1px 3px rgba(0,31,63,.05); }
   .card + .card{ margin-top:14px; }
-  .section-title{ font-size:14px; font-weight:700; margin:22px 0 10px; display:flex; align-items:center; justify-content:space-between; }
+  .section-title{ font-size:13px; font-weight:700; margin:26px 0 8px; display:flex; align-items:center; justify-content:space-between; }
   .section-title span.link{ font-size:12px; font-weight:600; color:var(--safe); cursor:pointer; }
   .muted{ color:var(--muted); }
   .hint{ font-size:11px; color:var(--muted); margin-top:5px; line-height:1.6; }
-  .note{ display:flex; gap:10px; align-items:flex-start; background:var(--paper-deep); border-radius:16px;
-    padding:14px 16px; font-size:12.5px; line-height:1.8; color:var(--ink-soft); margin-bottom:14px; }
+  .note{ display:flex; gap:10px; align-items:flex-start; background:transparent; border-radius:0;
+    border-top:1px solid var(--line); padding:12px 2px; font-size:12.5px; line-height:1.8; color:var(--ink-soft); margin-bottom:14px; }
   .note .note-ic{ flex:0 0 auto; width:22px; height:22px; border-radius:50%; background:var(--surface);
     display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:800; }
 
@@ -111,19 +113,36 @@
   .row-3{ display:flex; gap:8px; } .row-3 > *{ flex:1; min-width:0; }
   .mb6{ margin-bottom:6px; } .mb14{ margin-bottom:14px; } .mb18{ margin-bottom:18px; } .mb22{ margin-bottom:22px; }
 
-  .chip{ padding:9px 14px; border-radius:100px; border:1.4px solid var(--line); background:var(--surface);
+  .chip{ padding:9px 14px; border-radius:100px; border:1px solid var(--line); background:var(--surface);
     font-size:12.5px; font-weight:700; color:var(--ink-soft); cursor:pointer; display:inline-flex; align-items:center; gap:6px; }
   .chip.selected{ border-color:var(--ink); background:var(--ink); color:#fff; }
   .chip-grid{ display:flex; flex-wrap:wrap; gap:8px; }
 
   .list-row{ display:flex; align-items:center; gap:12px; padding:13px 0; cursor:pointer; }
-  .list-row + .list-row{ border-top:1px dashed var(--line); }
+  .list-row + .list-row{ border-top:none; }
   .list-row .emoji-badge{ width:38px; height:38px; border-radius:12px; background:var(--paper-deep);
     display:flex; align-items:center; justify-content:center; font-size:17px; flex:0 0 auto; }
   .list-row .info{ flex:1; min-width:0; }
   .list-row .title{ font-size:13.5px; font-weight:700; }
   .list-row .sub{ font-size:11.5px; color:var(--muted); margin-top:2px; }
   .list-row .amount{ font-size:13.5px; font-weight:800; }
+  .cmt-row{ display:flex; align-items:center; gap:12px; padding:12px 0; cursor:pointer; }
+  .cmt-row + .cmt-row{ border-top:none; }
+  .cmt-thumb{ width:52px; height:52px; border-radius:14px; background:var(--paper-deep);
+    display:flex; align-items:center; justify-content:center; font-size:24px; flex:0 0 auto; }
+  .cmt-row .info{ flex:1; min-width:0; }
+  .cmt-row .title{ font-size:14px; font-weight:800; }
+  .cmt-row .sub{ font-size:11.5px; color:var(--muted); margin-top:2px; }
+  .cmt-row .amount{ font-size:13.5px; font-weight:800; }
+  .cmt-side{ display:flex; flex-direction:column; align-items:flex-start; gap:8px; flex:0 0 auto; }
+  .cmt-check{ width:30px; height:30px; border-radius:50%; border:1.5px solid var(--line);
+    background:var(--surface); color:var(--muted); font-size:14px; cursor:pointer; font-family:inherit;
+    display:flex; align-items:center; justify-content:center; flex:0 0 auto; }
+  .cmt-check:hover{ border-color:var(--safe); color:var(--safe); }
+  .cmt-check.done{ background:var(--safe); border-color:var(--safe); color:#fff; cursor:default; }
+  .ring-legend{ display:flex; gap:14px; justify-content:center; margin-top:12px;
+    font-size:11px; color:rgba(255,255,255,.7); }
+  .ring-legend .dot{ width:8px; height:8px; border-radius:50%; display:inline-block; margin-inline-end:5px; }
   .row-del, .row-edit{ width:26px; height:26px; border-radius:50%; background:var(--paper-deep); border:none;
     display:flex; align-items:center; justify-content:center; color:var(--muted); font-size:12px; cursor:pointer; flex:0 0 auto;}
 
@@ -157,13 +176,12 @@
   .status-chip .dot{ width:6px; height:6px; border-radius:50%; background:currentColor; }
 
   /* dark hero card */
-  .hero{ background:linear-gradient(160deg,var(--ink) 0%, #0A2E55 100%); border-radius:22px; padding:22px;
+  .hero{ background:var(--ink); border-radius:22px; padding:22px;
     color:#fff; border:none; }
   .hero .hero-label{ font-size:12.5px; color:rgba(255,255,255,.65); }
   .hero .hero-num{ font-size:34px; font-weight:800; color:var(--accent); line-height:1.25; }
   .hero .hero-sub{ font-size:12px; color:rgba(255,255,255,.65); line-height:1.7; }
-  .hero .hero-row{ display:flex; justify-content:space-between; gap:10px; padding:10px 0; font-size:12.5px;
-    border-top:1px solid rgba(255,255,255,.12); }
+  .hero .hero-row{ display:flex; justify-content:space-between; gap:10px; padding:9px 0; font-size:12.5px; }
   .hero .hero-row .l{ color:rgba(255,255,255,.65); }
   .hero .hero-row .r{ font-weight:800; }
   .hero-chip{ font-size:11px; font-weight:700; padding:5px 12px; border-radius:100px; display:inline-flex; align-items:center; gap:6px; }
@@ -183,20 +201,27 @@
     font-family:inherit; font-size:12px; font-weight:700; color:var(--muted); cursor:pointer; }
   .segmented button.active{ background:var(--surface); color:var(--ink); box-shadow:0 2px 6px rgba(0,31,63,.1); }
 
-  .waterfall-row{ display:flex; align-items:center; justify-content:space-between; padding:13px 0; gap:10px; }
-  .waterfall-row + .waterfall-row{ border-top:1px dashed var(--line); }
+  .waterfall-row{ display:flex; align-items:center; justify-content:space-between; padding:11px 0; gap:10px; }
   .waterfall-row .l{ font-size:13px; font-weight:600; color:var(--ink-soft); display:flex; align-items:center; gap:8px;}
   .waterfall-row .r{ font-size:14.5px; font-weight:800; text-align:left; }
+  .waterfall-row.total{ border-top:2px solid var(--ink); margin-top:2px; }
+  .waterfall-row.total .l{ font-size:14px; font-weight:800; color:var(--ink); }
   .waterfall-row.total .r{ font-size:17px; }
   .waterfall-arrow{ text-align:center; color:var(--line); font-size:12px; }
 
   /* budget allocation bars */
-  .alloc-bar{ display:flex; height:10px; border-radius:100px; overflow:hidden; margin:14px 0 6px; }
+  .alloc-bar{ display:flex; height:8px; border-radius:100px; overflow:hidden; margin:14px 0 6px; }
   .alloc-bar > div{ height:100%; }
-  .alloc-row{ display:flex; justify-content:space-between; gap:10px; padding:11px 0; font-size:13px;
-    border-top:1px dashed var(--line); }
+  .alloc-row{ display:flex; justify-content:space-between; gap:10px; padding:11px 0; font-size:13px; }
   .alloc-row .l{ display:flex; align-items:center; gap:8px; font-weight:600; color:var(--ink-soft); }
   .alloc-row .r{ font-weight:800; text-align:left; }
+  .alloc-row.total{ border-top:2px solid var(--ink); }
+  .alloc-row.total .l{ font-size:14px; font-weight:800; color:var(--ink); }
+  .alloc-row.total .r{ font-size:16px; }
+  .tbl-row.total{ border-top:2px solid var(--ink); }
+  .tbl-row.total .c{ font-size:14px; font-weight:800; }
+  .hero .hero-row.total{ border-top:2px solid rgba(255,255,255,.35); }
+  .hero .hero-row.total .r{ font-size:15px; }
   .alloc-dot{ width:10px; height:10px; border-radius:3px; flex:0 0 auto; }
 
   /* bar chart (cashflow forecast) */
@@ -209,8 +234,7 @@
 
   /* simple table */
   .tbl{ width:100%; }
-  .tbl .tbl-row{ display:flex; justify-content:space-between; gap:10px; padding:11px 2px; font-size:13px;
-    border-top:1px dashed var(--line); }
+  .tbl .tbl-row{ display:flex; justify-content:space-between; gap:10px; padding:11px 2px; font-size:13px; }
   .tbl .tbl-row.head{ font-size:11.5px; color:var(--muted); font-weight:700; border-top:none; padding-top:0; }
   .tbl .tbl-row .c{ flex:1; }
   .tbl .tbl-row .c.l{ text-align:left; }
@@ -248,12 +272,13 @@
   .bottom-nav{ position:relative; z-index:20; background:var(--surface); border-top:1px solid var(--line);
     display:flex; align-items:center; justify-content:space-around; padding:10px 8px 16px; }
   .nav-btn{ background:none; border:none; display:flex; flex-direction:column; align-items:center; gap:4px;
-    font-family:inherit; font-size:10px; font-weight:700; color:var(--muted); cursor:pointer; padding:4px 6px; }
-  .nav-btn svg{ width:20px; height:20px; }
+    font-family:inherit; font-size:10px; font-weight:700; color:var(--muted); cursor:pointer; padding:6px 10px; }
+  .nav-btn .nav-label{ display:none; }
+  .nav-btn svg{ width:22px; height:22px; }
   .nav-btn.active{ color:var(--safe-ink); background:var(--accent); border-radius:12px; }
   .nav-fab{ width:52px; height:52px; border-radius:50%; background:var(--accent); color:var(--ink); display:flex;
     align-items:center; justify-content:center; border:none; margin-top:-30px;
-    box-shadow:0 10px 22px -6px rgba(219,230,76,.7); cursor:pointer; }
+    box-shadow:0 8px 18px -6px rgba(219,230,76,.5); cursor:pointer; }
   .nav-fab svg{ width:22px; height:22px; }
 
   .topbar{ display:flex; align-items:center; justify-content:space-between; margin-bottom:18px; }
@@ -347,28 +372,28 @@
 
 <div class="app">
   <aside class="sidebar" id="sidebar">
-    <div class="side-logo"><span class="side-logo-mark">ظ</span><span>ظرفیت</span></div>
+    <div class="side-logo"><span class="side-logo-mark">ظ</span><span class="side-logo-text">ظرفیت</span></div>
     <div class="side-tag">فضایی روشن برای تصمیم‌های مالی</div>
     <nav class="side-nav">
-      <button class="nav-btn side-link active" data-nav="home">
+      <button class="nav-btn side-link active" data-nav="home" aria-label="داشبورد">
         <svg viewBox="0 0 24 24" fill="none"><path d="M4 11l8-7 8 7M6 10v9h5v-5h2v5h5v-9" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        داشبورد
+        <span class="nav-label">داشبورد</span>
       </button>
-      <button class="nav-btn side-link" data-nav="commitments">
+      <button class="nav-btn side-link" data-nav="commitments" aria-label="اقساط">
         <svg viewBox="0 0 24 24" fill="none"><path d="M5 6h14M5 12h14M5 18h9" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
-        اقساط
+        <span class="nav-label">اقساط</span>
       </button>
-      <button class="nav-btn side-link" data-nav="plan">
+      <button class="nav-btn side-link" data-nav="plan" aria-label="برنامه مالی">
         <svg viewBox="0 0 24 24" fill="none"><rect x="4" y="5" width="16" height="15" rx="3" stroke="currentColor" stroke-width="1.8"/><path d="M4 10h16M8 3v4M16 3v4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
-        برنامه مالی
+        <span class="nav-label">برنامه مالی</span>
       </button>
-      <button class="nav-btn side-link" data-nav="sim">
+      <button class="nav-btn side-link" data-nav="sim" aria-label="شبیه‌ساز">
         <svg viewBox="0 0 24 24" fill="none"><rect x="4" y="4" width="16" height="16" rx="4" stroke="currentColor" stroke-width="1.8"/><path d="M8 12h8M12 8v8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
-        شبیه‌ساز
+        <span class="nav-label">شبیه‌ساز</span>
       </button>
-      <button class="nav-btn side-link" data-nav="profile">
+      <button class="nav-btn side-link" data-nav="profile" aria-label="پروفایل">
         <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="8" r="3.4" stroke="currentColor" stroke-width="1.8"/><path d="M5 20c1.6-3.6 4.4-5.4 7-5.4S17.4 16.4 19 20" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
-        پروفایل
+        <span class="nav-label">پروفایل</span>
       </button>
     </nav>
     <div class="side-profile" id="side-profile"></div>
@@ -416,24 +441,24 @@
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
   <div class="bottom-nav" id="bottom-nav" style="display:none;">
-    <button class="nav-btn active" data-nav="home">
+    <button class="nav-btn active" data-nav="home" aria-label="داشبورد">
       <svg viewBox="0 0 24 24" fill="none"><path d="M4 11l8-7 8 7M6 10v9h5v-5h2v5h5v-9" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
-      داشبورد
+      <span class="nav-label">داشبورد</span>
     </button>
-    <button class="nav-btn" data-nav="commitments">
+    <button class="nav-btn" data-nav="commitments" aria-label="اقساط">
       <svg viewBox="0 0 24 24" fill="none"><path d="M5 6h14M5 12h14M5 18h9" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
-      اقساط
+      <span class="nav-label">اقساط</span>
     </button>
-    <button class="nav-fab" data-nav="sim">
+    <button class="nav-fab" data-nav="sim" aria-label="شبیه‌ساز">
       <svg viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="#001F3F" stroke-width="2.4" stroke-linecap="round"/></svg>
     </button>
-    <button class="nav-btn" data-nav="plan">
+    <button class="nav-btn" data-nav="plan" aria-label="برنامه مالی">
       <svg viewBox="0 0 24 24" fill="none"><rect x="4" y="5" width="16" height="15" rx="3" stroke="currentColor" stroke-width="1.8"/><path d="M4 10h16M8 3v4M16 3v4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
-      برنامه مالی
+      <span class="nav-label">برنامه مالی</span>
     </button>
-    <button class="nav-btn" data-nav="profile">
+    <button class="nav-btn" data-nav="profile" aria-label="پروفایل">
       <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="8" r="3.4" stroke="currentColor" stroke-width="1.8"/><path d="M5 20c1.6-3.6 4.4-5.4 7-5.4S17.4 16.4 19 20" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
-      پروفایل
+      <span class="nav-label">پروفایل</span>
     </button>
   </div>
   </main>
@@ -623,12 +648,12 @@ const EXPENSE_PERIODS = [
   {key:'yearly', label:'سالانه', factor:1/12}
 ];
 const TECHNIQUES = [
-  {key:'50-30-20', label:'۵۰ / ۳۰ / ۲۰', desc:'نیازها ۵۰٪ · خواسته‌ها ۳۰٪ · پس‌انداز ۲۰٪', p:{needs:50,wants:30,savings:20}},
-  {key:'zero-based', label:'بودجه‌بندی صفر-پایه', desc:'هر تومان درآمد یک وظیفه مشخص دارد', p:{needs:60,wants:20,savings:20}},
-  {key:'envelope', label:'پاکت‌بندی', desc:'بودجه هر دسته در یک پاکت جدا نگه داشته می‌شود', p:{needs:55,wants:25,savings:20}},
-  {key:'pay-first', label:'اول به خودت پرداخت کن', desc:'ابتدا پس‌انداز کنار گذاشته می‌شود، بعد بقیه هزینه‌ها', p:{needs:50,wants:20,savings:30}},
-  {key:'percentage', label:'مدیریت اقساط بر اساس درصد', desc:'تمرکز اصلی روی سقف اقساط از درآمد قابل‌اتکا', p:{needs:50,wants:30,savings:20}},
-  {key:'custom', label:'سفارشی', desc:'درصدها را کاملاً خودت تعیین کن', p:{needs:50,wants:30,savings:20}}
+  {key:'50-30-20', label:'۵۰ / ۳۰ / ۲۰', desc:'نیازها ۵۰٪ · خواسته‌ها ۳۰٪ · پس‌انداز ۲۰٪', how:'درآمد رو سه قسمت کن: ۵۰٪ نیازها (اجاره، خوراک، قبض، اقساط)، ۳۰٪ خواسته‌ها (تفریح، خرید) و ۲۰٪ پس‌انداز. اول پس‌انداز رو کنار بذار، بعد بقیه رو خرج کن.', p:{needs:50,wants:30,savings:20}},
+  {key:'zero-based', label:'بودجه‌بندی صفر-پایه', desc:'هر تومان درآمد یک وظیفه مشخص دارد', how:'به هر تومان یک وظیفه بده؛ آخر ماه چیزی بدون برنامه نمونه. درآمد منهای همه تخصیص‌ها باید صفر بشه.', p:{needs:60,wants:20,savings:20}},
+  {key:'envelope', label:'پاکت‌بندی', desc:'بودجه هر دسته در یک پاکت جدا نگه داشته می‌شود', how:'برای هر دسته یک پاکت (سقف) مشخص کن؛ وقتی پاکت یک دسته خالی شد، از پاکت دسته دیگه برندار.', p:{needs:55,wants:25,savings:20}},
+  {key:'pay-first', label:'اول به خودت پرداخت کن', desc:'ابتدا پس‌انداز کنار گذاشته می‌شود، بعد بقیه هزینه‌ها', how:'به‌محض گرفتن حقوق، اول سهم پس‌انداز رو کنار بذار؛ بعد با بقیه پول زندگی کن.', p:{needs:50,wants:20,savings:30}},
+  {key:'percentage', label:'مدیریت اقساط بر اساس درصد', desc:'تمرکز اصلی روی سقف اقساط از درآمد قابل‌اتکا', how:'سقف اقساط رو از درآمد قابل‌اتکا حساب کن و نذار از ۳۰٪ رد بشه؛ بقیه درآمد رو آزاد خرج کن.', p:{needs:50,wants:30,savings:20}},
+  {key:'custom', label:'سفارشی', desc:'درصدها را کاملاً خودت تعیین کن', how:'درصد هر دسته رو خودت تعیین کن؛ جمع هر سه دسته باید ۱۰۰٪ بشه.', p:{needs:50,wants:30,savings:20}}
 ];
 const NECESSITY = [
   {key:'req', label:'ضروری'}, {key:'semi', label:'نسبتاً ضروری'}, {key:'optional', label:'غیرضروری'}
@@ -704,12 +729,18 @@ function scheduleEntryAt(purchaseJ, offset, ruleType, intervalDays, amount){
   const j = d2j(jdn0 + step*offset);
   return { jy:j.jy, jm:j.jm, jd:j.jd, amount };
 }
-function generateSchedule(purchaseJ, installments, perInstallment, ruleType, intervalDays, channel){
+function generateSchedule(purchaseJ, installments, perInstallment, ruleType, intervalDays, channel, platform){
   const entries = [];
   let count = installments;
   if(channel === 'online'){
     entries.push({ jy:purchaseJ.jy, jm:purchaseJ.jm, jd:purchaseJ.jd, amount:perInstallment });
     count = installments - 1;
+    // SnapPay: خرید اینترنتی از ۱۶ تا آخر ماه → قسط اول موقع خرید پرداخت می‌شه و ماه بعد قسطی نیست
+    const startOffset = (platform === 'snapppay' && purchaseJ.jd >= 16) ? 2 : 1;
+    for(let p=0; p<count; p++){
+      entries.push(scheduleEntryAt(purchaseJ, startOffset + p, ruleType, intervalDays, perInstallment));
+    }
+    return entries;
   }
   for(let p=0; p<count; p++){
     entries.push(scheduleEntryAt(purchaseJ, p+1, ruleType, intervalDays, perInstallment));
@@ -717,7 +748,7 @@ function generateSchedule(purchaseJ, installments, perInstallment, ruleType, int
   return entries;
 }
 function buildCommitmentSchedule(c){
-  const sched = generateSchedule(c.purchaseDate, c.installments, c.monthly, c.scheduleType, c.intervalDays, c.channel);
+  const sched = generateSchedule(c.purchaseDate, c.installments, c.monthly, c.scheduleType, c.intervalDays, c.channel, c.providerKey);
   return sched.map((e,i) => Object.assign({}, e, { paid: !!(c.paidFlags && c.paidFlags[i]), index:i }));
 }
 
@@ -772,7 +803,8 @@ function allEntries(includePending){
     generateSchedule(
       state.pendingSimulation.purchaseDate, state.pendingSimulation.installments,
       state.pendingSimulation.monthly, state.pendingSimulation.scheduleType,
-      state.pendingSimulation.intervalDays, state.pendingSimulation.channel
+      state.pendingSimulation.intervalDays, state.pendingSimulation.channel,
+      state.pendingSimulation.providerKey
     ).forEach(e=>list.push(e));
   }
   return list;
@@ -812,16 +844,29 @@ function gaugeSVG(percent, trackColor, color){
   </svg>`;
 }
 
-/* full-circle donut ring: pct is % of cap; color reflects status (share of income) */
+/* Activity-rings style (Apple Watch Health): 3 concentric rings.
+   Outer = installments vs cap (pct + status color passed in),
+   middle = fixed expenses vs reliable income,
+   inner = free cash vs reliable income. */
 function ringSVG(pct, color){
-  const p = Math.max(0, Math.min(100, pct));
-  const r = 62, c = 2 * Math.PI * r;
-  const off = c * (1 - p / 100);
-  return `<svg viewBox="0 0 148 148">
-    <circle cx="74" cy="74" r="${r}" fill="none" stroke="rgba(255,255,255,.14)" stroke-width="13"/>
-    <circle cx="74" cy="74" r="${r}" fill="none" stroke="${color}" stroke-width="13" stroke-linecap="round"
-      stroke-dasharray="${c}" stroke-dashoffset="${off}" transform="rotate(-90 74 74)" style="transition:stroke-dashoffset .5s ease"/>
-  </svg>`;
+  const clamp01 = v => Math.max(0, Math.min(100, v));
+  const incomeR = reliableMonthlyIncome();
+  const t = jToday();
+  const used = commitmentForMonth(t.jy, t.jm, false);
+  const fixed = totalFixedExpenses();
+  const rings = [
+    { r:62, pct: clamp01(pct), color: color || '#74C365' },
+    { r:47, pct: clamp01(incomeR > 0 ? fixed / incomeR * 100 : 0), color: '#74C365' },
+    { r:32, pct: clamp01(incomeR > 0 ? Math.max(0, incomeR - fixed - used) / incomeR * 100 : 0), color: '#7FA8E0' }
+  ];
+  const one = x=>{
+    const c = 2 * Math.PI * x.r;
+    const off = c * (1 - x.pct / 100);
+    return `<circle cx="74" cy="74" r="${x.r}" fill="none" stroke="rgba(255,255,255,.14)" stroke-width="11"/>
+    <circle cx="74" cy="74" r="${x.r}" fill="none" stroke="${x.color}" stroke-width="11" stroke-linecap="round"
+      stroke-dasharray="${c}" stroke-dashoffset="${off}" transform="rotate(-90 74 74)" style="transition:stroke-dashoffset .5s ease"/>`;
+  };
+  return `<svg viewBox="0 0 148 148">${rings.map(one).join('')}</svg>`;
 }
 function requestNotifications(){
   if(!('Notification' in window)){ showToast('این مرورگر از نوتیفیکیشن پشتیبانی نمی‌کنه'); return; }
@@ -1065,8 +1110,10 @@ document.querySelectorAll('[data-nav]').forEach(el=>{
 function renderSidebarProfile(){
   const el = document.getElementById('side-profile');
   if(!el) return;
-  el.innerHTML = `<div class="sp-name">${state.name || 'ظرفیت'}</div>
-    <div class="sp-sub">واحد پول: تومان · تقویم: جلالی<br>ثبت پرداخت‌ها به‌صورت دستی</div>`;
+  const initial = (state.name || 'ظ').trim().charAt(0) || 'ظ';
+  el.textContent = initial;
+  el.title = state.name || 'پروفایل';
+  el.onclick = ()=>goTo('profile');
 }
 
 let obStep = 0;
@@ -1314,9 +1361,11 @@ function renderCommitmentForm(container, existing, onSave){
     <div class="field-label">مبلغ هر قسط (تومان)</div>
     <input class="input amt-input num mb6" id="cf-per-installment" inputmode="numeric" placeholder="اگه کل مبلغ رو نمی‌دونی، فقط همینو پر کن">
     <div class="hint mb14">هر کدوم از این دو مبلغ (کل یا هر قسط) رو که بدونی کافیه؛ اون یکی خودش حساب می‌شه</div>
-    <div class="field-label">پیش‌پرداخت (تومان)</div>
-    <input class="input amt-input num mb6" id="cf-down" inputmode="numeric" placeholder="مثلاً ۶۰۰٬۰۰۰" value="${isEdit&&existing.downPayment?fa(existing.downPayment):''}">
-    <div class="hint mb14">مبلغی که موقع خرید نقد می‌دی؛ از اصل تأمین مالی کم می‌شه</div>
+    <div id="cf-down-wrap">
+      <div class="field-label">پیش‌پرداخت (تومان)</div>
+      <input class="input amt-input num mb6" id="cf-down" inputmode="numeric" placeholder="مثلاً ۶۰۰٬۰۰۰" value="${isEdit&&existing.downPayment?fa(existing.downPayment):''}">
+      <div class="hint mb14">فقط دیجی‌پی پیش‌پرداخت می‌گیره؛ از اصل تأمین مالی کم می‌شه</div>
+    </div>
     <div class="field-label">سود</div>
     <div class="chip-grid mb14" id="cf-interest-mode">
       <div class="chip ${(isEdit?existing.interestMode:'amount')==='amount'?'selected':''}" data-imode="amount">مبلغ سود</div>
@@ -1380,10 +1429,26 @@ function renderCommitmentForm(container, existing, onSave){
 
   function updateChannelHint(){
     const ch = CHANNELS.find(c=>c.key===selChannel);
-    container.querySelector('#cf-channel-hint').textContent = ch.hint;
+    let hint = ch.hint;
+    try{
+      const pd = readJalaliPicker(container, 'cf-date');
+      const pk = container.querySelector('#cf-provider').value;
+      if(selChannel==='online' && pk==='snapppay' && pd.jd >= 16){
+        hint = 'قسط اول موقع خرید پرداخت می‌شه و ماه بعد قسطی نداری.';
+      }
+    }catch(e){}
+    container.querySelector('#cf-channel-hint').textContent = hint;
+  }
+  function updateDownVisibility(){
+    const pk = container.querySelector('#cf-provider').value;
+    container.querySelector('#cf-down-wrap').style.display = pk==='digipay' ? 'block' : 'none';
   }
   updateChannelHint();
+  updateDownVisibility();
   updateTypeDependentSections();
+  ['cf-date-d','cf-date-m','cf-date-y'].forEach(id=>{
+    container.querySelector('#'+id).addEventListener('change', updateChannelHint);
+  });
 
   // total <-> per-installment amount: whichever the person fills in, compute the other
   const totalEl = container.querySelector('#cf-total');
@@ -1417,7 +1482,8 @@ function renderCommitmentForm(container, existing, onSave){
   let selImode = isEdit ? (existing.interestMode || 'amount') : 'amount';
   function updateInterestPreview(){
     const total = parseFaNumber(totalEl.value) || (parseFaNumber(perEl.value) * Math.max(1, parseInt(installmentsEl.value,10)||1));
-    const down = parseFaNumber(downEl.value);
+    const pk = container.querySelector('#cf-provider').value;
+    const down = pk==='digipay' ? parseFaNumber(downEl.value) : (isEdit ? (existing.downPayment||0) : 0);
     const principal = Math.max(0, total - down);
     const n = Math.max(1, parseInt(installmentsEl.value,10) || 1);
     const fee = parseFaNumber(feeEl.value);
@@ -1462,6 +1528,9 @@ function renderCommitmentForm(container, existing, onSave){
     if(p) container.querySelector('#cf-scheduletype').value = p.rule;
     container.querySelector('#cf-interval-wrap').style.display =
       container.querySelector('#cf-scheduletype').value==='custom_interval' ? 'block':'none';
+    updateDownVisibility();
+    updateChannelHint();
+    updateInterestPreview();
   });
   container.querySelector('#cf-scheduletype').addEventListener('change', e=>{
     container.querySelector('#cf-interval-wrap').style.display = e.target.value==='custom_interval' ? 'block':'none';
@@ -1476,7 +1545,8 @@ function renderCommitmentForm(container, existing, onSave){
     let total = parseFaNumber(container.querySelector('#cf-total').value);
     const perInstallment = parseFaNumber(container.querySelector('#cf-per-installment').value);
     if(!total && perInstallment) total = perInstallment * installments; // only knew the per-installment amount
-    const down = parseFaNumber(container.querySelector('#cf-down').value);
+    const providerKey0 = container.querySelector('#cf-provider').value;
+    const down = providerKey0==='digipay' ? parseFaNumber(container.querySelector('#cf-down').value) : (isEdit ? (existing.downPayment||0) : 0);
     const principal = Math.max(0, total - down);
     const fee = parseFaNumber(container.querySelector('#cf-fee').value);
     const interestAmount = selImode === 'amount' ? parseFaNumber(container.querySelector('#cf-interest').value) : Math.round(principal * parseFaDecimal(container.querySelector('#cf-interest').value) / 100);
@@ -1605,7 +1675,7 @@ function renderHome(){
   el.innerHTML = `
     <div class="topbar">
       <div>
-        <div style="font-size:21px; font-weight:800;">سلام، ${state.name || 'دوست من'} 👋</div>
+        <div style="font-size:21px; font-weight:800;">سلام، ${state.name || 'دوست من'}</div>
         <div class="muted" style="font-size:12.5px; margin-top:3px;">${jWeekdayName(t)} ${fa(t.jd)} ${MONTH_NAMES[t.jm]} ${fa(t.jy)} · نمای ماهانه</div>
       </div>
       <div class="icon-btn" data-nav="profile">
@@ -1630,6 +1700,11 @@ function renderHome(){
             <div class="hero-sub">تومان در ماه · ${fa(Math.max(0, 100 - pctCap))}٪ از سقف، هنوز آزاد است</div>
           </div>
         </div>
+        <div class="ring-legend">
+          <span><i class="dot" style="background:${ringColor};"></i>اقساط</span>
+          <span><i class="dot" style="background:#74C365;"></i>ثابت</span>
+          <span><i class="dot" style="background:#7FA8E0;"></i>آزاد</span>
+        </div>
         <div style="margin-top:16px;">
           <div class="hero-row"><span class="l">اقساط برنامه‌ریزی‌شده</span><span class="r num">${toman(used)}</span></div>
           <div class="hero-row"><span class="l">سقف (${fa(state.installmentCapPercent)}٪ درآمد قابل‌اتکا)</span><span class="r num">${toman(c)}</span></div>
@@ -1642,22 +1717,20 @@ function renderHome(){
         <div class="eyebrow">پول باقی‌مانده این ماه</div>
         <div class="kpi-num num" style="font-size:30px;">${fa(analysis.moneyLeft)}</div>
         <div class="muted" style="font-size:12px; margin-bottom:8px;">تومان · قبل از روزمره و پس‌انداز اختیاری</div>
-        <div class="waterfall-row"><span class="l">💰 درآمد قابل‌اتکا</span><span class="r num">${toman(incomeR)}</span></div>
-        <div class="waterfall-row"><span class="l">🧾 هزینه‌های ثابت</span><span class="r num">${toman(fixed)}</span></div>
-        <div class="waterfall-row"><span class="l">📆 اقساط برنامه‌ریزی‌شده</span><span class="r num">${toman(used)}</span></div>
-        ${incomeV > 0 ? `<div class="hint">💡 ${fa(incomeV)} تومان درآمد متغیر در محاسبات بالا منظور نشده است.</div>` : ''}
+        <div class="waterfall-row"><span class="l">درآمد قابل‌اتکا</span><span class="r num">${toman(incomeR)}</span></div>
+        <div class="waterfall-row"><span class="l">هزینه‌های ثابت</span><span class="r num">${toman(fixed)}</span></div>
+        <div class="waterfall-row"><span class="l">اقساط برنامه‌ریزی‌شده</span><span class="r num">${toman(used)}</span></div>
+        ${incomeV > 0 ? `<div class="hint">${fa(incomeV)} تومان درآمد متغیر در محاسبات بالا منظور نشده است.</div>` : ''}
       </div>
     </div>
 
     <div class="grid-2 mb18">
       <div class="card">
-        <div class="eyebrow">📊 تحلیل ${MONTH_NAMES[analysis.t.jm]}</div>
-        <div class="waterfall-row"><span class="l">اقساط این ماه</span><span class="r num">${toman(analysis.total)} · ${fa(Math.round(analysis.pct))}٪ سقف</span></div>
-        <div class="waterfall-row"><span class="l">پول آزاد</span><span class="r num" style="color:${analysis.free<0?'var(--danger)':'var(--safe)'}">${toman(analysis.free)}</span></div>
+        <div class="eyebrow">تحلیل ${MONTH_NAMES[analysis.t.jm]}</div>
         <div class="waterfall-row"><span class="l">سنگین‌ترین ماه</span><span class="r">${MONTH_NAMES[analysis.worst.jm]} — ${toman(analysis.worst.val)}</span></div>
         ${analysis.biggest ? `<div class="waterfall-row"><span class="l">بزرگ‌ترین قسط</span><span class="r">${analysis.biggest.name} — ${toman(analysis.biggest.amount)}</span></div>` : ''}
         ${analysis.dueCount ? `<div class="waterfall-row"><span class="l">پرداخت‌شده</span><span class="r num">${fa(analysis.paidCount)} از ${fa(analysis.dueCount)} قسط</span></div>` : ''}
-        <div style="font-size:12.5px; font-weight:700; margin-top:4px;">💡 ${analysis.tip}</div>
+        <div style="font-size:12.5px; font-weight:700; margin-top:4px;">${analysis.tip}</div>
       </div>
 
       <div class="card">
@@ -1667,7 +1740,7 @@ function renderHome(){
             ${due.slice(0,3).map(d=>installmentRowHTML(d.commitment.id, d.index, d.entry, { label: `${d.commitment.name} — ${fmtJDateShort(d.entry)}` })).join('')}
           </div>
           <div style="text-align:center; margin-top:10px;"><span class="link" data-nav="commitments" style="font-size:12.5px; font-weight:700; color:var(--safe); cursor:pointer;">همه اقساط ←</span></div>
-        ` : `<div class="muted" style="font-size:13px; padding:10px 0;">قسطی در ۵ روز آینده نداری 🎉</div>`}
+        ` : `<div class="muted" style="font-size:13px; padding:10px 0;">قسطی در ۵ روز آینده نداری</div>`}
       </div>
     </div>
 
@@ -1750,7 +1823,7 @@ function renderCommitments(){
         <div class="hero-num num">${fa(cm.monthly)} <span style="font-size:15px; color:rgba(255,255,255,.7);">تومان</span></div>
         <div class="hero-row"><span class="l">کل بازپرداخت</span><span class="r num">${toman(totalRepay)}</span></div>
         <div class="hero-row"><span class="l">پیشرفت پرداخت</span><span class="r num">${fa(paidCount)} از ${fa(cm.installments)} قسط · ${fa(pctPaid)}٪</span></div>
-        <div class="hero-row"><span class="l">مانده این تعهد</span><span class="r num">${toman(unpaidSum)}</span></div>
+        <div class="hero-row total"><span class="l">مانده این تعهد</span><span class="r num">${toman(unpaidSum)}</span></div>
         <div style="height:8px; border-radius:100px; background:rgba(255,255,255,.14); overflow:hidden; margin-top:12px;">
           <div style="height:100%; border-radius:100px; width:${pctPaid}%; background:var(--green-bar);"></div>
         </div>
@@ -1812,6 +1885,7 @@ function renderCommitments(){
     const schedule = buildCommitmentSchedule(cm);
     const next = schedule.find(e=>!e.paid);
     return { cm, schedule, nextJdn: next ? j2d(next.jy,next.jm,next.jd) : Infinity,
+      nextIdx: schedule.findIndex(e=>!e.paid),
       hasUnpaid: schedule.some(e=>!e.paid) };
   });
   if(commitSort === 'due') decorated.sort((a,b)=> a.nextJdn - b.nextJdn);
@@ -1829,15 +1903,17 @@ function renderCommitments(){
     const schedule = d.schedule;
     const paidCount = schedule.filter(e=>e.paid).length;
     const next = schedule.find(e=>!e.paid);
-    return `<div class="list-row" data-detail="${cm.id}">
-      <div class="emoji-badge" style="${d.hasUnpaid?'':'background:var(--safe-soft);'}">${d.hasUnpaid?typeInfo.emoji:'✅'}</div>
+    return `<div class="cmt-row" data-detail="${cm.id}">
+      <div class="cmt-thumb">${d.hasUnpaid?typeInfo.emoji:'✅'}</div>
       <div class="info">
         <div class="title">${cm.name}</div>
-        <div class="sub">${cm.provider} · قسط ${fa(paidCount+1)} از ${fa(cm.installments)}${next ? ' · سررسید ' + fmtJDateShort(next) : ''}</div>
+        <div class="sub">${cm.provider} · قسط ${fa(paidCount+1)} از ${fa(cm.installments)}</div>
+        <div class="sub">${next ? 'سررسید ' + fmtJDate(next) : 'همه‌ی اقساط پرداخت شده'}</div>
       </div>
-      <div style="text-align:left;">
+      <div class="cmt-side">
         <div class="amount num">${toman(cm.monthly)}</div>
-        <div class="sub" style="font-size:11px; color:var(--muted);">${d.hasUnpaid?'پرداخت‌نشده':'پرداخت‌شده'}</div>
+        <button class="cmt-check ${d.hasUnpaid?'':'done'}" data-check="${cm.id}" ${d.hasUnpaid?'':'disabled'}
+          title="${d.hasUnpaid?'علامت‌گذاری قسط بعدی به‌عنوان پرداخت‌شده':'پرداخت‌شده'}">✓</button>
       </div>
     </div>`;
   };
@@ -1851,7 +1927,7 @@ function renderCommitments(){
     <div class="card mb18">
       <div class="waterfall-row"><span class="l">کل برنامه‌ریزی‌شده ${MONTH_NAMES[t.jm]}</span><span class="r num">${toman(totalPlanned)}</span></div>
       <div class="waterfall-row"><span class="l">پرداخت‌شده</span><span class="r num" style="color:var(--safe);">${toman(paidThisMonth)}</span></div>
-      <div class="waterfall-row"><span class="l">مانده پرداخت‌نشده</span><span class="r num">${toman(unpaidThisMonth)}</span></div>
+      <div class="waterfall-row total"><span class="l">مانده پرداخت‌نشده</span><span class="r num">${toman(unpaidThisMonth)}</span></div>
       <div class="hint">پرداخت، سقف مصرف‌شده این ماه را آزاد نمی‌کند.</div>
     </div>
     <div class="filter-row" id="commit-filters">
@@ -1871,7 +1947,7 @@ function renderCommitments(){
     ${paidList.length ? `<div class="section-title">پرداخت‌شده · ${fa(paidList.length)} قسط</div>
     <div class="card mb18">${paidList.map(rowHTML).join('')}</div>` : ''}
     ${!filtered.length ? `<div class="muted" style="text-align:center; padding:40px 0; font-size:13px;">تعهدی در این دسته نیست</div>` : ''}
-    <div class="hint" style="margin-top:14px;">برای ثبت پرداخت، روی ردیف بزن و به چپ بکش یا در جزئیات قسط علامت‌گذاری کن. پرداخت ثبت‌شده فقط با علامت‌گذاری برگردانده می‌شود.</div>
+    <div class="hint" style="margin-top:14px;">برای ثبت پرداخت، روی ✓ کنار هر قسط بزن یا وارد جزئیات شو. پرداخت ثبت‌شده فقط با علامت‌گذاری برگردانده می‌شود.</div>
   `;
 
   document.getElementById('cm-new').onclick = ()=>{ commitEditTarget='new'; renderCommitments(); };
@@ -1883,6 +1959,12 @@ function renderCommitments(){
   });
   document.querySelectorAll('[data-detail]').forEach(row=>row.addEventListener('click', ()=>{
     commitDetailTarget = row.dataset.detail; renderCommitments();
+  }));
+  document.querySelectorAll('[data-check]').forEach(b=>b.addEventListener('click', ev=>{
+    ev.stopPropagation();
+    const d = decorated.find(x=>x.cm.id===b.dataset.check);
+    if(!d || d.nextIdx < 0) return;
+    setPaid(d.cm.id, d.nextIdx, true, { withUndo:true, moved:true });
   }));
   document.getElementById('screen-commitments').scrollTop = prevScroll;
 }
@@ -1917,6 +1999,7 @@ function renderPlanTechnique(){
     <div class="card mb18">
       <div class="eyebrow">روش بودجه‌بندی</div>
       <div style="font-size:15px; font-weight:800; margin-bottom:4px;">${tech.label} · قابل ویرایش</div>
+      <div style="font-size:12.5px; line-height:1.9; color:var(--ink-soft); margin-bottom:14px;">${tech.how || tech.desc}</div>
       <div class="muted" style="font-size:12px; margin-bottom:14px;">روش‌های دیگر: ${TECHNIQUES.filter(x=>x.key!==tech.key).map(x=>x.label).join('، ')}</div>
       <div class="chip-grid">
         ${TECHNIQUES.map(x=>`<div class="chip ${x.key===tech.key?'selected':''}" data-tech="${x.key}">${x.label}</div>`).join('')}
@@ -1931,7 +2014,7 @@ function renderPlanTechnique(){
       <div class="alloc-row"><span class="l"><span class="alloc-dot" style="background:#001F3F;"></span>اقساط برنامه‌ریزی‌شده</span><span class="r num">${toman(installments)} · ${fa(pctOf(installments))}٪ از درآمد</span></div>
       <div class="alloc-row"><span class="l"><span class="alloc-dot" style="background:#74C365;"></span>روزمره و خواسته‌ها</span><span class="r num">${toman(daily)} · ${fa(pctOf(daily))}٪ از درآمد</span></div>
       <div class="alloc-row"><span class="l"><span class="alloc-dot" style="background:#DBE64C;"></span>پس‌انداز اختیاری</span><span class="r num">${toman(savings)} · ${fa(pctOf(savings))}٪ از درآمد</span></div>
-      <div class="alloc-row"><span class="l">تخصیص‌یافته</span><span class="r num">${toman(allocated)}</span></div>
+      <div class="alloc-row total"><span class="l">تخصیص‌یافته</span><span class="r num">${toman(allocated)}</span></div>
       <div class="alloc-row"><span class="l">تخصیص‌نیافته</span><span class="r num">${toman(unallocated)}</span></div>
     </div>
     <div class="note"><span class="note-ic">ⓘ</span><span>از مانده ${toman(moneyLeft)}، ${toman(savings)} پس‌انداز و ${toman(daily)} روزمره تخصیص یافته است. پس‌انداز دوباره از هزینه ثابت یا اقساط کم نمی‌شود.</span></div>
@@ -1995,7 +2078,7 @@ function renderPlanCalendar(){
         const cm = state.commitments.find(c=>c.id===e.cid);
         return `<div class="waterfall-row"><span class="l">${cm ? cm.name : 'قسط'}${e.paid?' · پرداخت‌شده':''}</span><span class="r num" style="${e.paid?'color:var(--muted); text-decoration:line-through;':''}">${toman(e.amount)}</span></div>`;
       }).join('') : '<div class="muted" style="font-size:13px; padding:8px 0;">این روز سررسیدی ندارد.</div>'}
-      <div class="waterfall-row"><span class="l">جمع روز انتخاب‌شده</span><span class="r num">${toman(selTotal)}</span></div>
+      <div class="waterfall-row total"><span class="l">جمع روز انتخاب‌شده</span><span class="r num">${toman(selTotal)}</span></div>
       <div class="waterfall-row"><span class="l">مانده پرداخت این روز</span><span class="r num">${toman(selUnpaid)}</span></div>
     </div>
   `;
@@ -2035,11 +2118,8 @@ function renderPlanCashflow(){
   const frees = rows.map(r=>r.free);
   const minFree = Math.min(...frees), maxFree = Math.max(...frees);
   const maxBar = Math.max(...frees, 1);
-  const freesUp = state.commitments.map(cm=>{
-    const sched = buildCommitmentSchedule(cm);
-    const last = sched[sched.length - 1];
-    return last ? { name: cm.name, j: last } : null;
-  }).filter(Boolean).sort((a,b)=> j2d(a.j.jy,a.j.jm,a.j.jd) - j2d(b.j.jy,b.j.jm,b.j.jd));
+  const sumInst = rows.reduce((a2,r)=>a2+r.inst, 0);
+  const sumFree = rows.reduce((a2,r)=>a2+r.free, 0);
 
   document.getElementById('plan-cashflow').innerHTML = `
     <div class="hero mb18">
@@ -2062,24 +2142,19 @@ function renderPlanCashflow(){
       <div class="tbl">
         <div class="tbl-row head"><span class="c">ماه</span><span class="c">اقساط</span><span class="c l">مانده نقدی</span></div>
         ${rows.map(r=>`<div class="tbl-row"><span class="c">${MONTH_NAMES[r.m.jm]} ${fa(r.m.jy)}</span><span class="c num">${fa(r.inst)}</span><span class="c l num" style="color:var(--safe);">${fa(r.free)}</span></div>`).join('')}
+        <div class="tbl-row total"><span class="c">مجموع ۸ ماه</span><span class="c num">${fa(sumInst)}</span><span class="c l num">${fa(sumFree)}</span></div>
       </div>
       <div class="hint">اعداد جدول: میلیون تومان · پرداخت‌شده و پرداخت‌نشده با هم</div>
     </div>
 
     <div class="note"><span class="note-ic">ⓘ</span><span>پایه هر ماه: ${toman(incomeR)} درآمد قابل‌اتکا و ${toman(fixed)} هزینه ثابت. درآمد متغیر، هزینه روزمره و پس‌انداز اختیاری در این مانده منظور نشده‌اند.</span></div>
 
-    ${freesUp.length ? `
-    <div class="section-title">چه زمانی فضا باز می‌شود؟</div>
-    <div class="card mb18">
-      ${freesUp.map(f=>`<div class="waterfall-row"><span class="l">${f.name} · آخرین قسط</span><span class="r">${fmtJDate(f.j)}</span></div>`).join('')}
-    </div>` : ''}
-
     <div class="section-title">پس‌انداز واقعی این ماه</div>
     <div class="hint mb14">گاهی پس‌انداز برنامه‌ریزی‌شده در طول ماه خرج می‌شه. اینجا واقعیتش رو ثبت کن.</div>
     <div class="card mb18">
       <div class="chip-grid mb14" id="sv-toggle">
-        <div class="chip ${kept?'selected':''}" data-kept="1">✅ کامل نگه‌داشتم</div>
-        <div class="chip ${!kept?'selected':''}" data-kept="0">💸 بخشیش رو خرج کردم</div>
+        <div class="chip ${kept?'selected':''}" data-kept="1">کامل نگه‌داشتم</div>
+        <div class="chip ${!kept?'selected':''}" data-kept="0">بخشیش رو خرج کردم</div>
       </div>
       <div id="sv-amount-wrap" style="display:${kept?'none':'block'};">
         <div class="field-label">چقدر واقعاً پس‌انداز مونده؟</div>
@@ -2126,6 +2201,27 @@ function exportState(){
   }catch(e){ showToast('خروجی ممکن نشد'); }
 }
 
+function importState(file){
+  const reader = new FileReader();
+  reader.onload = ()=>{
+    try{
+      const data = JSON.parse(reader.result);
+      if(!data || typeof data !== 'object' || (!Array.isArray(data.commitments) && !Array.isArray(data.incomeSources))) throw new Error('bad backup');
+      if(!confirm('اطلاعات فعلی با نسخه پشتیبان جایگزین بشه؟')) return;
+      state = Object.assign(defaultState(), data);
+      state.commitments = (state.commitments||[]).map(migrateCommitment);
+      if(!Array.isArray(state.savedProposals)) state.savedProposals = [];
+      if(!state.savingsLog) state.savingsLog = {};
+      saveState();
+      profileView = 'main';
+      renderProfile();
+      showToast('نسخه پشتیبان بازگردانی شد ✅');
+    }catch(e){ showToast('فایل پشتیبان معتبر نیست'); }
+  };
+  reader.onerror = ()=> showToast('خواندن فایل ممکن نشد');
+  reader.readAsText(file);
+}
+
 function renderProfile(){
   const el = document.getElementById('profile-content');
   if(profileView === 'income'){ renderProfileIncome(el); return; }
@@ -2165,6 +2261,9 @@ function renderProfile(){
     <div class="card mb18">
       <div class="list-row" id="pf-export"><div class="emoji-badge">📤</div>
         <div class="info"><div class="title">دریافت خروجی اطلاعات من</div><div class="sub">خروجی و بازیابی اطلاعات</div></div><span style="color:var(--muted);">‹</span></div>
+      <div class="list-row" id="pf-import"><div class="emoji-badge">📥</div>
+        <div class="info"><div class="title">بازگردانی نسخه پشتیبان</div><div class="sub">آپلود فایل خروجی و جایگزینی اطلاعات</div></div><span style="color:var(--muted);">‹</span></div>
+      <input type="file" id="pf-import-file" accept="application/json,.json" style="display:none;">
       <div class="list-row" id="pf-motion-row"><div class="emoji-badge">♿</div>
         <div class="info"><div class="title">دسترس‌پذیری</div><div class="sub">خوانایی و کاهش حرکت</div></div>
         <span style="font-size:12px; font-weight:700; color:${state.reduceMotion ? 'var(--safe)' : 'var(--muted)'};">${state.reduceMotion ? 'کاهش حرکت روشن' : 'خاموش'}</span></div>
@@ -2172,6 +2271,7 @@ function renderProfile(){
 
     <div class="note"><span class="note-ic">ⓘ</span><span>پرداخت‌ها خوداظهاری هستند. برای تطبیق مالی، رسیدها و گردش حساب بانکی خود را جداگانه بررسی کنید.</span></div>
     <button class="btn btn-ghost mb14" id="pf-export2">دریافت خروجی اطلاعات من</button>
+    <button class="btn btn-ghost mb14" id="pf-import2">بازگردانی از فایل پشتیبان</button>
     <button class="btn btn-outline-danger" id="pf-reset">بازنشانی کامل اپ</button>
     <div class="muted" style="text-align:center; font-size:11.5px; margin-top:16px;">ظرفیت · مدیریت شخصی، نه توصیه سرمایه‌گذاری</div>
   `;
@@ -2192,6 +2292,11 @@ function renderProfile(){
   };
   document.getElementById('pf-export').onclick = exportState;
   document.getElementById('pf-export2').onclick = exportState;
+  const importFile = document.getElementById('pf-import-file');
+  const pickImport = ()=>{ importFile.value = ''; importFile.click(); };
+  document.getElementById('pf-import').onclick = pickImport;
+  document.getElementById('pf-import2').onclick = pickImport;
+  importFile.onchange = ()=>{ if(importFile.files && importFile.files[0]) importState(importFile.files[0]); };
   document.getElementById('pf-reset').onclick = ()=>{
     if(!confirm('همه‌ی اطلاعات پاک بشه و از اول شروع کنیم؟')) return;
     try{ localStorage.removeItem(STORAGE_KEY); }catch(e){}
@@ -2396,6 +2501,7 @@ function renderProfileTech(el){
       <select class="input mb14" id="pf-tech">
         ${TECHNIQUES.map(t=>`<option value="${t.key}" ${state.technique.key===t.key?'selected':''}>${t.label}</option>`).join('')}
       </select>
+      <div class="hint mb14" id="pf-tech-how">${(TECHNIQUES.find(t=>t.key===state.technique.key)||TECHNIQUES[0]).how}</div>
       <div class="row-2 mb14">
         <div><div class="field-label">نیازها ٪</div><input class="input num" type="number" id="pf-p-needs" value="${state.technique.p.needs}" placeholder="۵۰">
           <div class="hint num" id="pf-p-needs-amt"></div></div>
@@ -2419,6 +2525,15 @@ function renderProfileTech(el){
     document.getElementById('pf-p-savings-amt').textContent = toman(income*savings/100);
   }
   updateTechAmounts();
+  document.getElementById('pf-tech').addEventListener('change', e=>{
+    const nt = TECHNIQUES.find(t=>t.key===e.target.value);
+    if(!nt) return;
+    document.getElementById('pf-tech-how').textContent = nt.how || nt.desc;
+    document.getElementById('pf-p-needs').value = nt.p.needs;
+    document.getElementById('pf-p-wants').value = nt.p.wants;
+    document.getElementById('pf-p-savings').value = nt.p.savings;
+    updateTechAmounts();
+  });
   ['pf-p-needs','pf-p-wants','pf-p-savings'].forEach(id=>document.getElementById(id).addEventListener('input', updateTechAmounts));
   document.getElementById('pf-save-tech').onclick = ()=>{
     state.technique.key = document.getElementById('pf-tech').value;
@@ -2448,11 +2563,6 @@ function renderSimStart(){
     </div>
     <div class="muted" style="font-size:12.5px; margin-bottom:18px;">قبل از تعهد، ارزش آن را ببینید.</div>
 
-    <div class="segmented mb18" id="sm-type">
-      <button data-type="installments" class="active">خرید اقساطی</button>
-      <button data-type="cash">خرید نقدی</button>
-    </div>
-
     <div class="field-label">اسم خرید</div>
     <input class="input mb18" id="sm-name" placeholder="مثلاً لوازم خانه، گوشی، لپ‌تاپ">
 
@@ -2469,12 +2579,17 @@ function renderSimStart(){
     </div>
 
     <div id="sm-install-fields">
-      <div class="field-label">پیش‌پرداخت (تومان)</div>
-      <input class="input amt-input num mb6" id="sm-down" inputmode="numeric" placeholder="مثلاً ۶٬۰۰۰٬۰۰۰">
-      <div class="hint mb14" id="sm-down-hint"></div>
+      <div class="field-label">چند قسط پرداخت شده؟</div>
+      <input class="input num mb6" id="sm-paid" type="number" min="0" value="0" placeholder="مثلاً ۰">
+      <div class="hint mb14">قسط‌هایی که موقع خرید پرداخت می‌کنی؛ از اقساط باقی‌مانده کم می‌شه</div>
+      <div id="sm-down-wrap" style="display:none;">
+        <div class="field-label">پیش‌پرداخت (تومان)</div>
+        <input class="input amt-input num mb6" id="sm-down" inputmode="numeric" placeholder="مثلاً ۶٬۰۰۰٬۰۰۰">
+        <div class="hint mb14">فقط دیجی‌پی پیش‌پرداخت می‌گیره؛ از اصل تأمین مالی کم می‌شه</div>
+      </div>
       <div class="card mb18">
         <div class="waterfall-row"><span class="l">وجه آزاد این ماه</span><span class="r num">${toman(Math.max(0, freeCash))}</span></div>
-        <div class="waterfall-row"><span class="l">وجه پس از پیش‌پرداخت</span><span class="r num" id="sm-after-down">—</span></div>
+        <div class="waterfall-row"><span class="l">پرداخت موقع خرید</span><span class="r num" id="sm-paid-now">—</span></div>
         <div class="waterfall-row"><span class="l">اصل تأمین مالی</span><span class="r num" id="sm-principal">—</span></div>
       </div>
       <div class="field-label">سود</div>
@@ -2530,24 +2645,26 @@ function renderSimStart(){
   wireAmountInputs(el);
   initJalaliPicker(el, 'sm-date', today);
 
-  let selType = 'installments', selInterestMode = 'amount', selNec = 'req', selChannel = 'in_person';
+  let selInterestMode = 'amount', selNec = 'req', selChannel = 'in_person';
 
   function readNumbers(){
     const price = parseFaNumber(document.getElementById('sm-price').value);
-    const down = parseFaNumber(document.getElementById('sm-down').value);
+    const providerKey = document.getElementById('sm-provider').value;
+    const down = providerKey==='digipay' ? parseFaNumber(document.getElementById('sm-down').value) : 0;
     const fee = parseFaNumber(document.getElementById('sm-fee').value);
     const n = Math.max(1, parseInt(document.getElementById('sm-installments').value,10) || 1);
+    const paid = Math.min(Math.max(0, parseInt(document.getElementById('sm-paid').value,10) || 0), n);
     const rawInterest = document.getElementById('sm-interest').value;
     const principal = Math.max(0, price - down);
     const interestAmount = selInterestMode === 'amount' ? parseFaNumber(rawInterest) : Math.round(principal * parseFaDecimal(rawInterest) / 100);
-    return { price, down, fee, n, principal, interestAmount };
+    const monthly = Math.round((principal + interestAmount + fee) / n);
+    const paidNow = down + paid * monthly;
+    return { price, down, fee, n, paid, principal, interestAmount, monthly, paidNow };
   }
   function updatePreview(){
-    const { price, down, fee, n, principal, interestAmount } = readNumbers();
-    document.getElementById('sm-after-down').textContent = toman(Math.max(0, freeCash - down));
+    const { price, down, fee, n, paid, principal, interestAmount, monthly, paidNow } = readNumbers();
+    document.getElementById('sm-paid-now').textContent = price ? toman(Math.max(0, paidNow)) : '—';
     document.getElementById('sm-principal').textContent = price ? toman(principal) : '—';
-    const hintEl = document.getElementById('sm-down-hint');
-    if(hintEl) hintEl.textContent = down > freeCash ? 'پیش‌پرداخت از وجه آزاد این ماه بیشتر است.' : '';
     const ih = document.getElementById('sm-interest-hint');
     if(ih){
       if(selInterestMode === 'percent' && principal > 0){
@@ -2557,24 +2674,14 @@ function renderSimStart(){
         ih.textContent = `معادل حدود ${fa(Math.round(interestAmount / principal * 100))}٪ اصل تأمین مالی.`;
       } else ih.textContent = '';
     }
-    const monthly = n===1 ? 0 : Math.round((principal + interestAmount + fee) / n);
     document.getElementById('sm-monthly-preview').textContent =
-      selType === 'cash' ? 'خرید نقدی — بدون قسط' :
-      (n===1 ? 'خرید نقدی — بدون قسط' : `قسط ماهانه: ${toman(monthly)} · جمع پرداخت: ${toman(down + principal + interestAmount + fee)}`);
+      `قسط ماهانه: ${toman(monthly)} · جمع پرداخت: ${toman(down + principal + interestAmount + fee)}${paid>0 ? ` · باقی‌مانده: ${fa(n-paid)} قسط` : ''}`;
   }
-  ['sm-price','sm-down','sm-fee','sm-installments','sm-interest'].forEach(id=>{
+  ['sm-price','sm-down','sm-fee','sm-installments','sm-interest','sm-paid'].forEach(id=>{
     const e2 = document.getElementById(id);
     if(e2) e2.addEventListener('input', updatePreview);
   });
   updatePreview();
-
-  el.querySelectorAll('#sm-type [data-type]').forEach(c=>c.onclick=()=>{
-    el.querySelectorAll('#sm-type [data-type]').forEach(x=>x.classList.remove('active'));
-    c.classList.add('active');
-    selType = c.dataset.type;
-    document.getElementById('sm-install-fields').style.display = selType === 'cash' ? 'none' : 'block';
-    updatePreview();
-  });
   el.querySelectorAll('#sm-interest-mode [data-mode]').forEach(c=>c.onclick=()=>{
     el.querySelectorAll('#sm-interest-mode [data-mode]').forEach(x=>x.classList.remove('selected'));
     c.classList.add('selected');
@@ -2585,9 +2692,25 @@ function renderSimStart(){
     updatePreview();
   });
   function updateChannelHint(){
-    document.getElementById('sm-channel-hint').textContent = CHANNELS.find(c=>c.key===selChannel).hint;
+    let hint = CHANNELS.find(c=>c.key===selChannel).hint;
+    try{
+      const pd = readJalaliPicker(el, 'sm-date');
+      const pk = document.getElementById('sm-provider').value;
+      if(selChannel==='online' && pk==='snapppay' && pd.jd >= 16){
+        hint = 'قسط اول موقع خرید پرداخت می‌شه و ماه بعد قسطی نداری.';
+      }
+    }catch(e){}
+    document.getElementById('sm-channel-hint').textContent = hint;
+  }
+  function updateDownVisibility(){
+    document.getElementById('sm-down-wrap').style.display =
+      document.getElementById('sm-provider').value==='digipay' ? 'block' : 'none';
   }
   updateChannelHint();
+  updateDownVisibility();
+  ['sm-date-d','sm-date-m','sm-date-y'].forEach(id=>{
+    document.getElementById(id).addEventListener('change', updateChannelHint);
+  });
   el.querySelectorAll('[data-channel]').forEach(c=>c.onclick=()=>{
     el.querySelectorAll('[data-channel]').forEach(x=>x.classList.remove('selected'));
     c.classList.add('selected'); selChannel = c.dataset.channel; updateChannelHint();
@@ -2601,6 +2724,9 @@ function renderSimStart(){
     if(p) document.getElementById('sm-scheduletype').value = p.rule;
     document.getElementById('sm-interval-wrap').style.display =
       document.getElementById('sm-scheduletype').value==='custom_interval' ? 'block':'none';
+    updateDownVisibility();
+    updateChannelHint();
+    updatePreview();
   });
   document.getElementById('sm-scheduletype').addEventListener('change', e=>{
     document.getElementById('sm-interval-wrap').style.display = e.target.value==='custom_interval' ? 'block':'none';
@@ -2621,26 +2747,24 @@ function renderSimStart(){
 
   document.getElementById('sm-check').onclick = ()=>{
     const name = document.getElementById('sm-name').value.trim();
-    const { price, down, fee, n, principal, interestAmount } = readNumbers();
+    const { price, down, fee, n, paid, principal, interestAmount, monthly } = readNumbers();
     if(!name){ showToast('اسم خرید رو وارد کن'); return; }
     if(!price){ showToast('قیمت کالا رو وارد کن'); return; }
-    const isCash = selType === 'cash' || n === 1;
-    const installments = isCash ? 1 : n;
+    const installments = n;
     const providerKey = document.getElementById('sm-provider').value;
     const provider = PROVIDERS.find(p=>p.key===providerKey);
     const scheduleType = document.getElementById('sm-scheduletype').value;
     const interval = parseInt(document.getElementById('sm-interval').value,10) || 30;
     const purchaseDate = readJalaliPicker(el, 'sm-date');
-    const monthly = isCash ? 0 : Math.round((principal + interestAmount + fee) / installments);
     const interestPercent = selInterestMode === 'percent'
       ? parseFaDecimal(document.getElementById('sm-interest').value)
       : (principal > 0 ? Math.round(interestAmount / principal * 1000) / 10 : 0);
     state.pendingSimulation = {
-      name, price, downPayment: isCash ? 0 : down, principal: isCash ? 0 : principal,
-      interestMode: selInterestMode, interestPercent, interestAmount: isCash ? 0 : interestAmount,
-      fee: isCash ? 0 : fee, installments, monthly, provider: provider.label, providerKey: provider.key,
-      scheduleType: isCash ? null : scheduleType, intervalDays: interval,
-      purchaseDate, necessity: selNec, channel: selChannel
+      name, price, downPayment: down, principal,
+      interestMode: selInterestMode, interestPercent, interestAmount,
+      fee, installments, monthly, provider: provider.label, providerKey: provider.key,
+      scheduleType, intervalDays: interval,
+      purchaseDate, necessity: selNec, channel: selChannel, paidCount: paid
     };
     renderSimResult();
   };
@@ -2667,7 +2791,7 @@ function adviceWorstForSchedule(entries, horizonMonths){
   });
   return worst;
 }
-function buildPurchaseAdvice(p, scheduleEntries, worst, capVal, status, isCash){
+function buildPurchaseAdvice(p, scheduleEntries, worst, capVal, status){
   const incomeR = reliableMonthlyIncome();
   const incomeV = variableMonthlyIncome();
   const incomeT = incomeR + incomeV;
@@ -2676,8 +2800,8 @@ function buildPurchaseAdvice(p, scheduleEntries, worst, capVal, status, isCash){
   const savings = Math.round(incomeR * savingsPct / 100);
   const down = p.downPayment || 0;
   const principal = typeof p.principal === 'number' ? p.principal : Math.max(0, p.price - down);
-  const interestAmt = !isCash ? (p.interestMode === 'amount' ? (p.interestAmount || 0) : Math.round(principal * (p.interestPercent || 0) / 100)) : 0;
-  const fee = !isCash ? (p.fee || 0) : 0;
+  const interestAmt = p.interestMode === 'amount' ? (p.interestAmount || 0) : Math.round(principal * (p.interestPercent || 0) / 100);
+  const fee = p.fee || 0;
   const extra = interestAmt + fee;
   const financed = principal + interestAmt + fee;
   const totalCost = down + financed;
@@ -2690,28 +2814,7 @@ function buildPurchaseAdvice(p, scheduleEntries, worst, capVal, status, isCash){
     text = 'بدون درآمد نمی‌تونم بگم می‌صرفه یا نه.';
     tone = 'caution';
     reasons.push('سقف از درآمد حساب می‌شه.');
-    if(!isCash) reasons.push(`قسط ماهانه: ${toman(p.monthly)}.`);
-    return { tone, title, text, reasons, alternatives, totalCost, extra };
-  }
-
-  if(isCash){
-    const t = jToday();
-    const existingThisMonth = commitmentForMonth(t.jy, t.jm, false);
-    const freeThisMonth = incomeT - fixed - savings - existingThisMonth;
-    const freeAfter = freeThisMonth - p.price;
-    if(freeAfter >= 0){
-      title = 'خرید نقدی می‌صرفه';
-      text = `بعدش ${toman(freeAfter)} پول آزاد می‌مونه.`;
-      tone = 'safe';
-      reasons.push(`قیمت: ${toman(p.price)} — ${fa(p.price / incomeR * 100)}٪ درآمد ماه.`);
-      reasons.push(`اقساط این ماه: ${toman(existingThisMonth)}.`);
-    } else {
-      title = 'نقدی الان سنگینه';
-      text = `${toman(Math.abs(freeAfter))} کم میاری.`;
-      tone = 'danger';
-      reasons.push(`پول آزاد این ماه: ${toman(Math.max(0, freeThisMonth))}.`);
-      alternatives.push({ kind:'installments', installments:4, label:'۴ قسطه کن', sub:`قسط ماهانه: ${toman(Math.round(totalCost / 4))}` });
-    }
+    reasons.push(`قسط ماهانه: ${toman(p.monthly)}.`);
     return { tone, title, text, reasons, alternatives, totalCost, extra };
   }
 
@@ -2756,7 +2859,7 @@ function buildPurchaseAdvice(p, scheduleEntries, worst, capVal, status, isCash){
       const n = p.installments + add;
       if(n > 24) return;
       const newMonthly = Math.round(financed / n);
-      const entries = generateSchedule(p.purchaseDate, n, newMonthly, p.scheduleType, p.intervalDays, p.channel);
+      const entries = generateSchedule(p.purchaseDate, n, newMonthly, p.scheduleType, p.intervalDays, p.channel, p.providerKey);
       const w = adviceWorstForSchedule(entries, n + 1);
       if(w.pct < worst.pct - 3 && (!bestLonger || w.pct < bestLonger.worst.pct)){
         bestLonger = { n, newMonthly, worst: w };
@@ -2768,28 +2871,19 @@ function buildPurchaseAdvice(p, scheduleEntries, worst, capVal, status, isCash){
     try{
       const t = jAddMonths(p.purchaseDate.jy, p.purchaseDate.jm, 1);
       const delayedDate = { jy:t.jy, jm:t.jm, jd:Math.min(p.purchaseDate.jd, jMonthLength(t.jy, t.jm)) };
-      const entries = generateSchedule(delayedDate, p.installments, p.monthly, p.scheduleType, p.intervalDays, p.channel);
+      const entries = generateSchedule(delayedDate, p.installments, p.monthly, p.scheduleType, p.intervalDays, p.channel, p.providerKey);
       const w = adviceWorstForSchedule(entries, p.installments + 1);
       if(w.pct < worst.pct - 3){
         alternatives.push({ kind:'delay', delayMonths:1, purchaseDate:delayedDate, label:'یه ماه عقب بنداز', sub:`شروع اقساط از ${MONTH_NAMES[delayedDate.jm]} — سنگین‌ترین ماه: ${fa(Math.round(w.share))}٪ درآمد` });
       }
     }catch(e){}
   }
-  if(extra > 0 && extra / p.price >= 0.10){
-    const t = jToday();
-    const freeThisMonth = incomeT - fixed - savings - commitmentForMonth(t.jy, t.jm, false);
-    if(p.price <= freeThisMonth){
-      alternatives.push({ kind:'installments', installments:1, label:'نقدی بخر', sub:`${toman(extra)} سود ذخیره می‌کنی` });
-    }
-  }
-
   return { tone, title, text, reasons, alternatives, totalCost, extra };
 }
 
 function renderSimResult(){
   const p = state.pendingSimulation;
   const el = document.getElementById('sim-content');
-  const isCash = p.installments === 1;
   const c = cap();
   const incomeR = reliableMonthlyIncome();
   const incomeT = incomeR + variableMonthlyIncome();
@@ -2798,8 +2892,8 @@ function renderSimResult(){
   const savings = Math.round(incomeR * savingsPct / 100);
   const down = p.downPayment || 0;
   const principal = typeof p.principal === 'number' ? p.principal : Math.max(0, p.price - down);
-  const interestAmt = !isCash ? (p.interestMode === 'amount' ? (p.interestAmount || 0) : Math.round(principal * (p.interestPercent || 0) / 100)) : 0;
-  const fee = !isCash ? (p.fee || 0) : 0;
+  const interestAmt = p.interestMode === 'amount' ? (p.interestAmount || 0) : Math.round(principal * (p.interestPercent || 0) / 100);
+  const fee = p.fee || 0;
   const financed = principal + interestAmt + fee;
   const totalCost = down + financed;
   const extra = interestAmt + fee;
@@ -2842,38 +2936,36 @@ function renderSimResult(){
 
   let scheduleEntries = [];
   let worst = { pct:0, share:0, jy:0, jm:0, val:0 };
-  if(!isCash){
-    scheduleEntries = generateSchedule(p.purchaseDate, p.installments, p.monthly, p.scheduleType, p.intervalDays, p.channel);
-    const months = nextMonths(Math.max(6, p.installments+1));
-    months.forEach(m=>{
-      const existing = commitmentForMonth(m.jy,m.jm,false);
-      const withNew = scheduleEntries.filter(e=>e.jy===m.jy&&e.jm===m.jm).reduce((s,e)=>s+e.amount,0);
-      const total = existing + withNew;
-      const pct = c>0 ? (total/c)*100 : 0;
-      const share = shareOfIncome(total);
-      if(pct > worst.pct) worst = { pct, share, jy:m.jy, jm:m.jm, val: total };
-    });
-  }
-  const status = isCash ? 'safe' : statusFromShare(worst.share);
+  scheduleEntries = generateSchedule(p.purchaseDate, p.installments, p.monthly, p.scheduleType, p.intervalDays, p.channel, p.providerKey);
+  const months = nextMonths(Math.max(6, p.installments+1));
+  months.forEach(m=>{
+    const existing = commitmentForMonth(m.jy,m.jm,false);
+    const withNew = scheduleEntries.filter(e=>e.jy===m.jy&&e.jm===m.jm).reduce((s,e)=>s+e.amount,0);
+    const total = existing + withNew;
+    const pct = c>0 ? (total/c)*100 : 0;
+    const share = shareOfIncome(total);
+    if(pct > worst.pct) worst = { pct, share, jy:m.jy, jm:m.jm, val: total };
+  });
+  const status = statusFromShare(worst.share);
   const sm = statusMeta(status);
   const worstShare = Math.round(worst.share || 0);
   const freeCashWorst = incomeT - fixed - worst.val - savings;
   const overCap = Math.max(0, worst.val - c);
-  const advice = buildPurchaseAdvice(p, scheduleEntries, worst, c, status, isCash);
+  const advice = buildPurchaseAdvice(p, scheduleEntries, worst, c, status);
   const adviceToneColor = advice.tone==='safe' ? 'var(--safe)' : advice.tone==='caution' ? 'var(--caution)' : 'var(--danger)';
   const adviceToneBg = advice.tone==='safe' ? 'var(--safe-soft)' : advice.tone==='caution' ? 'var(--caution-soft)' : 'var(--danger-soft)';
 
-  const heroTitle = isCash ? 'خرید نقدی' :
+  const heroTitle =
     status==='safe' ? 'این پیشنهاد در محدوده شماست' :
     status==='caution' ? 'در مرز ظرفیت شما' : 'این خرید، فشار زیادی می‌سازد';
-  const heroNote = isCash ? 'این خرید نقدی است و تعهد اقساطی جدیدی ایجاد نمی‌کند.' :
+  const heroNote =
     status==='safe' ? `بیشترین نسبت در کل دوره ${fa(worstShare)}٪ است؛ کمتر از آستانه ${fa(state.thresholds.safe)}٪. این ارزیابی فقط بر درآمد قابل‌اتکا تکیه دارد.` :
-    status==='caution' ? `احتیاط از خود ${fa(state.thresholds.safe)}٪ آغاز می‌شود. تمام سقف اقساط پر شده؛ برای هزینه‌های پیش‌بینی‌نشده فضایی کمتر دارید. مبلغ قسط یا پیش‌پرداخت را بازبینی کنید.` :
-    `فشار بالا از ${fa(state.thresholds.caution)}٪ درآمد شروع می‌شود. در سه ماه اول، اقساط از سقف شما عبور می‌کنند. تعویق خرید، افزایش پیش‌پرداخت یا کاهش قسط را بررسی کنید.`;
+    status==='caution' ? `احتیاط از خود ${fa(state.thresholds.safe)}٪ آغاز می‌شود. تمام سقف اقساط پر شده؛ برای هزینه‌های پیش‌بینی‌نشده فضایی کمتر دارید. مبلغ قسط را بازبینی کنید.` :
+    `فشار بالا از ${fa(state.thresholds.caution)}٪ درآمد شروع می‌شود. در سه ماه اول، اقساط از سقف شما عبور می‌کنند. تعویق خرید یا کاهش قسط را بررسی کنید.`;
 
   /* effect table: one row per month that has a new installment */
   let effectRows = '';
-  if(!isCash){
+  {
     const seen = {};
     scheduleEntries.forEach(e=>{
       const key = e.jy + '-' + e.jm;
@@ -2886,6 +2978,8 @@ function renderSimResult(){
       effectRows += `<div class="tbl-row"><span class="c">${fa(e.jd)} ${MONTH_NAMES[e.jm]} ${fa(e.jy)}</span><span class="c num">${fa(total)}</span><span class="c l num" style="color:${free<0?'var(--danger)':'var(--safe)'}">${fa(free)}</span></div>`;
     });
   }
+  const paidCount = Math.min(p.paidCount || 0, p.installments);
+  const paidNow = down + paidCount * p.monthly;
   const t0 = jToday();
   const freeThisMonth = incomeT - fixed - savings - commitmentForMonth(t0.jy, t0.jm, false);
 
@@ -2894,31 +2988,25 @@ function renderSimResult(){
       <div class="icon-btn" id="sm-back"><svg width="13" height="13" viewBox="0 0 24 24" fill="none"><path d="M9 6l6 6-6 6" stroke="#001F3F" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
       <h2 style="font-size:17px;">${heroTitle}</h2>
     </div>
-    <div class="muted" style="font-size:12.5px; margin-bottom:18px;">${p.name} · ${p.provider} · ${isCash ? 'خرید نقدی' : `${fa(p.installments)} قسط`}</div>
+    <div class="muted" style="font-size:12.5px; margin-bottom:18px;">${p.name} · ${p.provider} · ${fa(p.installments)} قسط</div>
 
     <div class="hero mb18">
       <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:12px;">
         <span class="hero-chip ${status}">${sm.emoji} ${sm.label}</span>
-        <span class="hero-label">${isCash ? 'خرید نقدی' : 'پیشنهاد · خریدی مستقل'}</span>
+        <span class="hero-label">پیشنهاد · خریدی مستقل</span>
       </div>
-      ${isCash ? `
-        <div class="hero-label">قیمت نقدی</div>
-        <div class="hero-num num">${fa(p.price)}</div>
-        <div class="hero-sub">تومان · بدون قسط و بدون سود</div>
-      ` : `
-        <div class="hero-label">${status==='safe' ? 'سهم کل اقساط از درآمد، پس از خرید' : 'بیشترین سهم اقساط از درآمد'}</div>
-        <div class="hero-num num">${fa(worstShare)}٪</div>
-        <div class="hero-row"><span class="l">اقساط قبلی + قسط جدید ${toman(p.monthly)}</span><span class="r num">${toman(worst.val)}</span></div>
-        ${overCap > 0
-          ? `<div class="hero-row"><span class="l">بیش از سقف ${toman(c)}</span><span class="r num" style="color:#F3A28E;">${toman(overCap)}</span></div>`
-          : `<div class="hero-row"><span class="l">ظرفیت آزاد از سقف</span><span class="r num">${toman(Math.max(0, c - worst.val))}</span></div>`}
-        <div class="hero-row"><span class="l">مانده پس از ثابت و اقساط</span><span class="r num">${toman(freeCashWorst)}</span></div>
-      `}
+      <div class="hero-label">${status==='safe' ? 'سهم کل اقساط از درآمد، پس از خرید' : 'بیشترین سهم اقساط از درآمد'}</div>
+      <div class="hero-num num">${fa(worstShare)}٪</div>
+      <div class="hero-row"><span class="l">اقساط قبلی + قسط جدید ${toman(p.monthly)}</span><span class="r num">${toman(worst.val)}</span></div>
+      ${overCap > 0
+        ? `<div class="hero-row"><span class="l">بیش از سقف ${toman(c)}</span><span class="r num" style="color:#F3A28E;">${toman(overCap)}</span></div>`
+        : `<div class="hero-row"><span class="l">ظرفیت آزاد از سقف</span><span class="r num">${toman(Math.max(0, c - worst.val))}</span></div>`}
+      <div class="hero-row"><span class="l">مانده پس از ثابت و اقساط</span><span class="r num">${toman(freeCashWorst)}</span></div>
     </div>
 
     <div class="note"><span class="note-ic">ⓘ</span><span>${heroNote}</span></div>
 
-    <div class="section-title">💬 مشاور خرید <span class="muted" style="font-size:11px; font-weight:400;">بدون ارسال داده</span></div>
+    <div class="section-title">مشاور خرید <span class="muted" style="font-size:11px; font-weight:400;">بدون ارسال داده</span></div>
     <div class="card mb18" style="background:${adviceToneBg}; border:none;">
       <div style="font-size:15px; font-weight:800; color:${adviceToneColor}; margin-bottom:6px;">${advice.title}</div>
       <div class="muted" style="font-size:12.5px; line-height:1.8; margin-bottom:10px;">${advice.text}</div>
@@ -2931,17 +3019,17 @@ function renderSimResult(){
       <details class="advisor-how"><summary>مشاور چطور تصمیم می‌گیره؟</summary><div class="hint" style="margin-top:8px;">سقف، هزینه‌های ثابت، پس‌انداز و اقساط فعلی‌ت رو حساب می‌کنه. همه‌چیز توی مرورگره؛ داده بیرون نمی‌ره.</div></details>
     </div>
 
-    ${!isCash ? `
     <div class="section-title">هزینه واقعی ${p.name}</div>
     <div class="card mb18">
       <div class="waterfall-row"><span class="l">قیمت نقدی</span><span class="r num">${toman(p.price)}</span></div>
-      <div class="waterfall-row"><span class="l">پیش‌پرداخت</span><span class="r num">${toman(down)}</span></div>
+      ${down>0 ? `<div class="waterfall-row"><span class="l">پیش‌پرداخت</span><span class="r num">${toman(down)}</span></div>` : ''}
+      ${paidCount>0 ? `<div class="waterfall-row"><span class="l">قسط‌های پرداخت‌شده موقع خرید</span><span class="r num">${fa(paidCount)} قسط · ${toman(paidCount * p.monthly)}</span></div>` : ''}
       <div class="waterfall-row"><span class="l">اصل تأمین مالی</span><span class="r num">${toman(principal)}</span></div>
       <div class="waterfall-row"><span class="l">سود ثابت کل دوره</span><span class="r num">${toman(interestAmt)}</span></div>
       <div class="waterfall-row"><span class="l">کارمزد داخل اقساط</span><span class="r num">${toman(fee)}</span></div>
       <div class="waterfall-row"><span class="l">بازپرداخت مالی</span><span class="r num">${toman(financed)}</span></div>
       <div class="waterfall-row"><span class="l">${fa(p.installments)} قسط؛ هر قسط</span><span class="r num">${toman(p.monthly)}</span></div>
-      <div class="waterfall-row total"><span class="l">جمع پرداخت با پیش‌پرداخت</span><span class="r num">${toman(totalCost)}</span></div>
+      <div class="waterfall-row total"><span class="l">جمع پرداخت</span><span class="r num">${toman(totalCost)}</span></div>
       <div class="hint">همه مبالغ به تومان؛ هزینه اضافه نسبت به نقدی: ${toman(extra)}.</div>
     </div>
 
@@ -2952,20 +3040,12 @@ function renderSimResult(){
         ${effectRows}
       </div>
       <div class="waterfall-row"><span class="l">وجه آزاد پیش از خرید</span><span class="r num">${toman(Math.max(0, freeThisMonth))}</span></div>
-      <div class="waterfall-row"><span class="l">پس از پیش‌پرداخت ${toman(down)}</span><span class="r num">${toman(Math.max(0, freeThisMonth - down))}</span></div>
+      <div class="waterfall-row total"><span class="l">پس از پرداخت موقع خرید ${toman(paidNow)}</span><span class="r num">${toman(Math.max(0, freeThisMonth - paidNow))}</span></div>
       <div class="hint">درآمد قابل‌اتکا ${toman(incomeR)} و هزینه ثابت ${toman(fixed)} فرض شده‌اند. وضعیت ماه پنهان نمی‌کند.</div>
-    </div>` : `
-    <div class="card mb18">
-      <div class="waterfall-row"><span class="l">قیمت</span><span class="r num">${toman(p.price)}</span></div>
-      <div class="waterfall-row"><span class="l">وجه آزاد این ماه</span><span class="r num">${toman(Math.max(0, freeThisMonth))}</span></div>
-      <div class="waterfall-row"><span class="l">پس از خرید</span><span class="r num">${toman(Math.max(0, freeThisMonth - p.price))}</span></div>
-    </div>`}
+    </div>
 
     <div class="step-actions">
-      ${isCash ? `
-        <button class="btn btn-primary" id="sm-confirm">ثبت خرید نقدی</button>
-        <button class="btn btn-ghost" id="sm-cancel">منصرف شدم</button>
-      ` : status==='safe' ? `
+      ${status==='safe' ? `
         <button class="btn btn-primary" id="sm-confirm">افزودن این خرید به تعهدات</button>
         <button class="btn btn-ghost" id="sm-edit">ویرایش و مقایسه پیشنهاد دیگر</button>
       ` : status==='caution' ? `
@@ -2976,16 +3056,15 @@ function renderSimResult(){
         <button class="btn btn-ghost" id="sm-save-only">ذخیره فقط برای مقایسه</button>
       `}
     </div>
-    ${!isCash && status!=='danger' ? `<div style="text-align:center; margin-top:10px;"><span class="link" id="sm-save-only" style="font-size:12.5px; font-weight:700; color:var(--safe); cursor:pointer;">ذخیره فقط برای مقایسه</span></div>` : ''}
-    ${isCash ? '' : `<div style="text-align:center; margin-top:10px;"><span class="link" id="sm-cancel" style="font-size:12.5px; font-weight:700; color:var(--muted); cursor:pointer;">منصرف شدم</span></div>`}
+    ${status!=='danger' ? `<div style="text-align:center; margin-top:10px;"><span class="link" id="sm-save-only" style="font-size:12.5px; font-weight:700; color:var(--safe); cursor:pointer;">ذخیره فقط برای مقایسه</span></div>` : ''}
+    <div style="text-align:center; margin-top:10px;"><span class="link" id="sm-cancel" style="font-size:12.5px; font-weight:700; color:var(--muted); cursor:pointer;">منصرف شدم</span></div>
   `;
   el.querySelectorAll('[data-alt]').forEach(btn=>btn.onclick=()=>{
     const alt = advice.alternatives[parseInt(btn.dataset.alt, 10)];
     if(!alt) return;
     if(alt.kind === 'installments'){
       p.installments = alt.installments;
-      if(alt.installments === 1){ p.monthly = 0; p.scheduleType = null; }
-      else p.monthly = Math.round(financed / alt.installments);
+      p.monthly = Math.round(financed / alt.installments);
     } else if(alt.kind === 'delay' && alt.purchaseDate){
       p.purchaseDate = alt.purchaseDate;
     }
@@ -3001,32 +3080,25 @@ function renderSimResult(){
   if(editBtn) editBtn.onclick = ()=>{ state.pendingSimulation = null; renderSimStart(); };
   const saveOnlyBtn = document.getElementById('sm-save-only');
   if(saveOnlyBtn) saveOnlyBtn.onclick = ()=>{
-    if(!isCash){
-      state.savedProposals = state.savedProposals || [];
-      state.savedProposals.unshift({ id: uid(), name:p.name, price:p.price, downPayment:down, principal,
-        interestMode:p.interestMode, interestPercent:p.interestPercent, interestAmount:interestAmt, fee,
-        installments:p.installments, monthly:p.monthly, provider:p.provider, providerKey:p.providerKey,
-        scheduleType:p.scheduleType, intervalDays:p.intervalDays, purchaseDate:p.purchaseDate,
-        necessity:p.necessity, channel:p.channel, totalCost, createdAt: Date.now() });
-      saveState();
-      state.pendingSimulation = null;
-      showToast('برای مقایسه ذخیره شد ✅');
-      renderSimStart();
-    }
+    state.savedProposals = state.savedProposals || [];
+    state.savedProposals.unshift({ id: uid(), name:p.name, price:p.price, downPayment:down, principal,
+      interestMode:p.interestMode, interestPercent:p.interestPercent, interestAmount:interestAmt, fee,
+      installments:p.installments, monthly:p.monthly, provider:p.provider, providerKey:p.providerKey,
+      scheduleType:p.scheduleType, intervalDays:p.intervalDays, purchaseDate:p.purchaseDate,
+      necessity:p.necessity, channel:p.channel, paidCount, totalCost, createdAt: Date.now() });
+    saveState();
+    state.pendingSimulation = null;
+    showToast('برای مقایسه ذخیره شد ✅');
+    renderSimStart();
   };
   const confirmBtn = document.getElementById('sm-confirm');
   if(confirmBtn) confirmBtn.onclick = ()=>{
-    if(isCash){
-      state.pendingSimulation = null;
-      showToast('خرید نقدی ثبت شد ✅');
-      goTo('home');
-    } else {
-      registerSimCommitment();
-    }
+    registerSimCommitment();
   };
 
   function registerSimCommitment(){
     const paidFlags = Array(p.installments).fill(false);
+    for(let i=0; i<paidCount; i++) paidFlags[i] = true;
     if(p.channel==='online') paidFlags[0] = true;
     state.commitments.unshift({
       id: uid(), name:p.name, type:'bnpl', total:p.price, downPayment:down, principal,
