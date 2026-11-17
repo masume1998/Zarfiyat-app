@@ -3057,7 +3057,22 @@ if(state.onboarded){
 
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
-    navigator.serviceWorker.register('service-worker.js').catch(() => {});
+    navigator.serviceWorker.register('service-worker.js').then(reg=>{
+      if(!reg.active) return; // first install: nothing to update from
+      // If a newer version is live, install it and reload once it takes over,
+      // so updates stop getting stuck on the old cache.
+      let reloading = false;
+      navigator.serviceWorker.addEventListener('controllerchange', ()=>{
+        if(reloading) return; reloading = true; location.reload();
+      });
+      fetch('./service-worker.js?v=' + Date.now(), { cache: 'no-store' }).then(r=>r.text()).then(txt=>{
+        const m = txt.match(/CACHE_NAME = '([^']+)'/);
+        if(!m) return;
+        caches.keys().then(keys=>{
+          if(keys.length && !keys.includes(m[1])) reg.update();
+        });
+      }).catch(()=>{});
+    }).catch(() => {});
   });
 }
 </script>
