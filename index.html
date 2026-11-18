@@ -254,9 +254,7 @@
 
   .filter-row{ display:flex; gap:8px; margin-bottom:16px; overflow-x:auto; }
   /* ---- sticky commitments header: floating card, stuck at the top ---- */
-  .cm-sticky{ position:sticky; top:env(safe-area-inset-top, 0px); z-index:20; background:var(--surface);
-    border-radius:20px; padding:14px 14px 12px; margin:0 6px 14px;
-    box-shadow:0 10px 24px -12px rgba(0,31,63,.25); }
+  .cm-sticky{ position:sticky; top:env(safe-area-inset-top, 0px); z-index:20; background:var(--paper); padding-bottom:14px; }
   .cm-sticky .filter-row{ margin-bottom:0; }
   .sort-select{ flex:0 0 auto; margin-inline-start:auto; background:var(--surface); border:1px solid var(--line);
     border-radius:100px; padding:8px 10px; font-family:inherit; font-size:12px; font-weight:700;
@@ -288,8 +286,7 @@
   .nav-btn svg{ width:22px; height:22px; }
   .nav-btn.active{ color:var(--safe-ink); background:var(--accent); border-radius:12px; }
   .nav-fab{ width:52px; height:52px; border-radius:50%; background:var(--accent); color:var(--ink); display:flex;
-    align-items:center; justify-content:center; border:none; margin-top:-30px;
-    box-shadow:0 8px 18px -6px rgba(219,230,76,.5); cursor:pointer; }
+    align-items:center; justify-content:center; border:none; margin-top:-30px; cursor:pointer; }
   .nav-fab svg{ width:22px; height:22px; }
 
   .topbar{ display:flex; align-items:center; justify-content:space-between; margin-bottom:18px; }
