@@ -255,6 +255,8 @@
   .filter-row{ display:flex; gap:8px; margin-bottom:16px; overflow-x:auto; }
   /* ---- sticky commitments header: floating card, stuck at the top ---- */
   .cm-sticky{ position:sticky; top:env(safe-area-inset-top, 0px); z-index:20; background:var(--paper); padding-bottom:14px; }
+  /* extend the paper background above the header to the top of the screen */
+  .cm-sticky::before{ content:''; position:absolute; top:-64px; left:0; right:0; height:64px; background:var(--paper); }
   .cm-sticky .filter-row{ margin-bottom:0; }
   .sort-select{ flex:0 0 auto; margin-inline-start:auto; background:var(--surface); border:1px solid var(--line);
     border-radius:100px; padding:8px 10px; font-family:inherit; font-size:12px; font-weight:700;
@@ -1999,12 +2001,20 @@ function renderCommitments(){
     commitMonthOffset = commitMonthOffset===0 ? 1 : 0;
     renderCommitments();
     const smooth = (state.reduceMotion || prefersReducedMotion()) ? 'auto' : 'smooth';
+    const sc = document.getElementById('screen-commitments');
     if(commitMonthOffset === 1){
       const nm = jAddMonths(t.jy, t.jm, 1);
       const target = document.querySelector(`[data-group="${nm.jy}-${nm.jm}"]`);
-      if(target) target.scrollIntoView({ behavior: smooth, block: 'start' });
-    } else {
-      window.scrollTo({ top: 0, behavior: smooth });
+      if(target && sc){
+        // scrollIntoView would hide the group title under the sticky header;
+        // land it just below the header instead.
+        const sticky = document.querySelector('.cm-sticky');
+        const stickyH = sticky ? sticky.offsetHeight : 0;
+        const stickyTop = sticky ? (parseFloat(getComputedStyle(sticky).top) || 0) : 0;
+        sc.scrollTo({ top: target.offsetTop - stickyTop - stickyH - 8, behavior: smooth });
+      }
+    } else if(sc){
+      sc.scrollTo({ top: 0, behavior: smooth });
     }
   };
   document.querySelectorAll('#commit-filters [data-f]').forEach(chip=>chip.onclick=()=>{
