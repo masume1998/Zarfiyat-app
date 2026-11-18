@@ -654,6 +654,7 @@ function loadState(){
     const raw = localStorage.getItem(STORAGE_KEY);
     if(raw){
       state = Object.assign(defaultState(), JSON.parse(raw));
+      state.installmentCapPercent = clampCap(state.installmentCapPercent);
       state.commitments = (state.commitments||[]).map(migrateCommitment);
       if(!Array.isArray(state.savedProposals)) state.savedProposals = [];
     }
@@ -717,6 +718,10 @@ function totalFixedExpenses(){
   },0);
 }
 function cap(){ return Math.round(reliableMonthlyIncome() * state.installmentCapPercent / 100); }
+// the installment cap is a share of the needs budget: it can never exceed needs%
+function needsPct(){ return (state.technique && state.technique.p && typeof state.technique.p.needs === 'number') ? state.technique.p.needs : 50; }
+function clampCapTo(v, needs){ return Math.max(0, Math.min(v || 0, needs)); }
+function clampCap(v){ return clampCapTo(v, needsPct()); }
 function shareOfIncome(total){
   const incomeR = reliableMonthlyIncome();
   return incomeR > 0 ? (total / incomeR) * 100 : 0;
@@ -1218,12 +1223,12 @@ function renderOnboarding(){
     },0);
     el.innerHTML = `${obDots()}
       <div class="step-title">یک مرز روشن برای خرید</div>
-      <div class="step-sub">سقف پیشنهادی بر اساس درآمد قابل‌اتکای شماست؛ خودت می‌تونی تغییرش بدی.</div>
+      <div class="step-sub">سقف، سهمی از بودجه‌ی نیازهاست (نیازها ${fa(obDraft.technique.p.needs)}٪)؛ خودت می‌تونی تغییرش بدی.</div>
       <div class="hero mb18">
         <div class="hero-label">سقف پیشنهادی اقساط ماهانه</div>
         <div class="hero-num num" id="ob-cap-amount">${(()=>{ const s = moneyShort(reliable * obDraft.capPercent / 100); return s.num + ' <span style="font-size:15px; color:rgba(255,255,255,.7);">' + s.unit + '</span>'; })()}</div>
         <div class="hero-sub">پایه محاسبه: ${toman(reliable)} · <span id="ob-cap-pct">${fa(obDraft.capPercent)}٪</span> از درآمد قابل‌اتکا</div>
-        <input type="range" min="10" max="70" step="5" value="${obDraft.capPercent}" id="ob-cap-slider" style="margin-top:14px;">
+        <input type="range" min="5" max="${Math.max(5, obDraft.technique.p.needs)}" step="5" value="${Math.min(obDraft.capPercent, obDraft.technique.p.needs)}" id="ob-cap-slider" style="margin-top:14px;">
         <div class="hero-sub" style="margin-top:8px;">درصد سقف دلخواه</div>
       </div>
       <button type="button" class="card mb18" id="ob-add-cm" style="display:flex; align-items:center; gap:12px; padding:16px; width:100%; text-align:start; cursor:pointer; border:none; font-family:inherit; color:inherit;">
@@ -1247,7 +1252,7 @@ function renderOnboarding(){
       document.getElementById('ob-cap-pct').textContent = fa(obDraft.capPercent) + '٪';
     }
     document.getElementById('ob-cap-slider').addEventListener('input', e=>{
-      obDraft.capPercent = parseInt(e.target.value,10); updateObCap();
+      obDraft.capPercent = clampCapTo(parseInt(e.target.value,10), obDraft.technique.p.needs); updateObCap();
     });
     function renderCmList(){
       document.getElementById('cm-list').innerHTML = obDraft.commitments.map(c=>{
@@ -1282,7 +1287,7 @@ function renderOnboarding(){
       state.incomeSources = obDraft.incomeSources;
       state.fixedExpenses = obDraft.fixedExpenses;
       state.technique = obDraft.technique;
-      state.installmentCapPercent = obDraft.capPercent;
+      state.installmentCapPercent = clampCapTo(obDraft.capPercent, obDraft.technique.p.needs);
       state.thresholds = obDraft.thresholds;
       state.commitments = obDraft.commitments;
       state.onboarded = true;
@@ -2224,6 +2229,7 @@ function importState(file, onDone){
       if(!data || typeof data !== 'object' || (!Array.isArray(data.commitments) && !Array.isArray(data.incomeSources))) throw new Error('bad backup');
       if(!confirm('اطلاعات فعلی با نسخه پشتیبان جایگزین بشه؟')) return;
       state = Object.assign(defaultState(), data);
+      state.installmentCapPercent = clampCap(state.installmentCapPercent);
       state.commitments = (state.commitments||[]).map(migrateCommitment);
       if(!Array.isArray(state.savedProposals)) state.savedProposals = [];
       if(!state.savingsLog) state.savingsLog = {};
@@ -2481,8 +2487,9 @@ function renderProfileCap(el){
         <span id="pf-cap-val" style="font-size:19px; font-weight:800; color:var(--safe);"></span>
         <span class="field-label" style="margin:0;">درصد سقف اقساط</span>
       </div>
-      <input type="range" min="10" max="70" step="5" id="pf-cap-slider" value="${state.installmentCapPercent}">
+      <input type="range" min="5" max="${Math.max(5, needsPct())}" step="5" id="pf-cap-slider" value="${clampCap(state.installmentCapPercent)}">
       <div class="hint num" id="pf-cap-amt"></div>
+      <div class="hint">سقف، سهمی از بودجه‌ی نیازهاست (نیازها ${fa(needsPct())}٪) و نمی‌تونه بیشتر از اون بشه.</div>
       <div class="row-2" style="margin-top:14px;">
         <div><div class="field-label">🟢 امن تا</div><input class="input num" type="number" id="pf-th-safe" value="${state.thresholds.safe}" placeholder="مثلاً ۳۰"></div>
         <div><div class="field-label">🟡 احتیاط تا</div><input class="input num" type="number" id="pf-th-caution" value="${state.thresholds.caution}" placeholder="مثلاً ۴۰"></div>
@@ -2500,7 +2507,7 @@ function renderProfileCap(el){
   updateCapLabel();
   document.getElementById('pf-cap-slider').addEventListener('input', updateCapLabel);
   document.getElementById('pf-save-cap').onclick = ()=>{
-    state.installmentCapPercent = parseInt(document.getElementById('pf-cap-slider').value,10);
+    state.installmentCapPercent = clampCap(parseInt(document.getElementById('pf-cap-slider').value,10));
     state.thresholds.safe = parseInt(document.getElementById('pf-th-safe').value,10) || 30;
     state.thresholds.caution = parseInt(document.getElementById('pf-th-caution').value,10) || 40;
     saveState(); showToast('تغییرات ذخیره شد ✅'); profileView='main'; renderProfile();
@@ -2559,7 +2566,11 @@ function renderProfileTech(el){
       wants: parseInt(document.getElementById('pf-p-wants').value,10)||0,
       savings: parseInt(document.getElementById('pf-p-savings').value,10)||0
     };
-    saveState(); showToast('تغییرات ذخیره شد ✅'); profileView='main'; renderProfile();
+    const oldCap = state.installmentCapPercent;
+    state.installmentCapPercent = clampCap(state.installmentCapPercent);
+    saveState();
+    showToast(oldCap > state.installmentCapPercent ? `سقف اقساط به ${fa(state.installmentCapPercent)}٪ کاهش پیدا کرد (سهم نیازها)` : 'تغییرات ذخیره شد ✅');
+    profileView='main'; renderProfile();
   };
 }
 

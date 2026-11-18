@@ -1,4 +1,4 @@
-const CACHE_NAME = 'zarfiyat-v29';
+const CACHE_NAME = 'zarfiyat-v30';
 const APP_SHELL = [
   './',
   './index.html',
