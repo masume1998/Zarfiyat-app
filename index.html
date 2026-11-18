@@ -149,8 +149,8 @@
   .step-dots span.now{ background:var(--ink); }
   .step-title{ font-size:20px; font-weight:800; margin-bottom:6px; }
   .step-sub{ font-size:13px; color:var(--muted); margin-bottom:24px; line-height:1.7; }
-  .step-actions{ position:sticky; bottom:0; background:linear-gradient(0deg,var(--paper) 65%,transparent);
-    padding-top:16px; display:flex; gap:10px; }
+  .step-actions{ position:sticky; bottom:0; background:var(--paper);
+    padding:16px 0 calc(12px + env(safe-area-inset-bottom, 0px)); display:flex; gap:10px; }
 
   .gauge-wrap{ display:flex; flex-direction:column; align-items:center; margin:10px 0 2px; position:relative; }
   .gauge-figure{ position:relative; width:200px; }
@@ -1072,7 +1072,7 @@ function worstMonthStatus(monthsAhead){
   });
   return worst;
 }
-function goTo(name){
+function goTo(name, sub){
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
   document.getElementById('screen-'+name).classList.add('active');
   document.querySelectorAll('.nav-btn').forEach(b=>b.classList.toggle('active', b.dataset.nav===name));
@@ -1080,7 +1080,7 @@ function goTo(name){
   if(name==='home'){ homeHeroSel = 0; renderHome(); }
   if(name==='commitments'){ commitEditTarget = null; commitDetailTarget = null; renderCommitments(); }
   if(name==='plan') renderPlan();
-  if(name==='profile'){ profileView = 'main'; renderProfile(); }
+  if(name==='profile'){ profileView = sub || 'main'; renderProfile(); }
   if(name==='sim'){ state.pendingSimulation = null; renderSimStart(); }
 }
 document.querySelectorAll('[data-nav]').forEach(el=>{
@@ -1114,7 +1114,7 @@ function renderOnboarding(){
       <input class="input" id="ob-name" placeholder="مثلاً معصومه" value="${state.name||''}">
       <div class="hint">ثبت پرداخت‌ها دستی است؛ وجهی منتقل یا پرداخت بانکی تأیید نمی‌شود.</div>
       <div class="step-actions"><button class="btn btn-primary" id="ob-next">شروع تنظیم ظرفیت</button></div>
-      <button class="btn btn-ghost" id="ob-restore" style="margin-top:10px;">بازگردانی نسخه پشتیبان</button>
+      <button class="btn btn-ghost" id="ob-restore" style="margin-top:10px;">📥 آپلود کردن داده‌ها</button>
       <input type="file" id="ob-restore-file" accept="application/json,.json" style="display:none;">
       <div class="hint" style="text-align:center;">روش بودجه‌بندی را بعداً در «برنامه مالی» انتخاب می‌کنید.</div>`;
     document.getElementById('ob-restore').onclick = ()=>{
@@ -1194,7 +1194,7 @@ function renderOnboarding(){
       const amount = parseFaNumber(document.getElementById('inc-amount').value);
       const frequency = document.getElementById('inc-freq').value;
       if(!name || !amount){ showToast('نام و مبلغ رو وارد کن'); return; }
-      obDraft.incomeSources.push({id:uid(), name, amount, frequency, fixed: fixedSel===1});
+      obDraft.incomeSources.unshift({id:uid(), name, amount, frequency, fixed: fixedSel===1});
       document.getElementById('inc-name').value=''; document.getElementById('inc-amount').value='';
       renderIncList();
     };
@@ -1249,7 +1249,7 @@ function renderOnboarding(){
         if(amountStr === null) return;
         const amount = parseFaNumber(amountStr);
         if(!amount) return;
-        obDraft.fixedExpenses.push({id:uid(), category: chip.dataset.cat, amount});
+        obDraft.fixedExpenses.unshift({id:uid(), category: chip.dataset.cat, amount});
         renderFxList();
       };
     });
@@ -1283,7 +1283,6 @@ function renderOnboarding(){
       </button>
       <div class="card mb18" id="cm-form" style="display:none;"></div>
       <div id="cm-list"></div>
-      <div class="note"><span class="note-ic">ⓘ</span><span>وضعیت از نسبت اقساط به درآمد تعیین می‌شود: امن، کمتر از ۳۰٪؛ احتیاط، ۳۰ تا کمتر از ۴۰٪؛ فشار بالا، ۴۰٪ و بیشتر.</span></div>
       <div class="step-actions">
         <button class="btn btn-ghost" id="ob-back" style="max-width:90px;">بازگشت</button>
         <button class="btn btn-primary" id="ob-finish">ورود به داشبورد من</button>
@@ -2063,11 +2062,8 @@ function renderPlanTechnique(){
   document.getElementById('plan-technique').innerHTML = `
     <div class="card mb18">
       <div class="eyebrow">روش بودجه‌بندی</div>
-      <div style="font-size:15px; font-weight:800; margin-bottom:4px;">${tech.label} · قابل ویرایش</div>
-      <div style="font-size:12.5px; line-height:1.9; color:var(--ink-soft); margin-bottom:14px;">${tech.how || tech.desc}</div>
-      <div class="chip-grid">
-        ${TECHNIQUES.map(x=>`<div class="chip ${x.key===tech.key?'selected':''}" data-tech="${x.key}">${x.label}</div>`).join('')}
-      </div>
+      <div style="font-size:15px; font-weight:800; margin-bottom:4px;">${tech.label}</div>
+      <div style="font-size:12.5px; line-height:1.9; color:var(--ink-soft);">${tech.how || tech.desc}</div>
     </div>
     <div class="card mb18">
       <div class="eyebrow">بودجه قابل تخصیص</div>
@@ -2082,14 +2078,9 @@ function renderPlanTechnique(){
       <div class="alloc-row"><span class="l">تخصیص‌نیافته</span><span class="r num">${toman(unallocated)}</span></div>
     </div>
     <div class="note"><span class="note-ic">ⓘ</span><span>از مانده ${toman(moneyLeft)}، ${toman(savings)} پس‌انداز و ${toman(daily)} روزمره تخصیص یافته است. پس‌انداز دوباره از هزینه ثابت یا اقساط کم نمی‌شود.</span></div>
-    <button class="btn btn-primary" data-nav="profile">ویرایش تخصیص بودجه</button>
+    <button class="btn btn-primary" id="plan-edit-budget">ویرایش تخصیص بودجه</button>
   `;
-  document.querySelectorAll('#plan-technique [data-nav]').forEach(x=>x.addEventListener('click', ()=>goTo('profile')));
-  document.querySelectorAll('#plan-technique [data-tech]').forEach(x=>x.addEventListener('click', ()=>{
-    const nt = TECHNIQUES.find(y=>y.key===x.dataset.tech);
-    state.technique = { key: nt.key, p: Object.assign({}, nt.p) };
-    saveState(); renderPlanTechnique();
-  }));
+  document.getElementById('plan-edit-budget').onclick = ()=> goTo('profile', 'tech');
 }
 
 let calView = null; // { jy, jm, jd } selected day; month shown = its month
@@ -2346,9 +2337,9 @@ function renderProfile(){
     <div class="section-title">داده و حریم خصوصی</div>
     <div class="card mb18">
       <div class="list-row" id="pf-export"><div class="emoji-badge">📤</div>
-        <div class="info"><div class="title">دریافت خروجی اطلاعات من</div><div class="sub">خروجی و بازیابی اطلاعات</div></div><span style="color:var(--muted);">‹</span></div>
+        <div class="info"><div class="title">بکاپ گرفتن از داده‌ها</div><div class="sub">دانلود فایل بکاپ</div></div><span style="color:var(--muted);">‹</span></div>
       <div class="list-row" id="pf-import"><div class="emoji-badge">📥</div>
-        <div class="info"><div class="title">بازگردانی نسخه پشتیبان</div><div class="sub">آپلود فایل خروجی و جایگزینی اطلاعات</div></div><span style="color:var(--muted);">‹</span></div>
+        <div class="info"><div class="title">آپلود کردن داده‌ها</div><div class="sub">آپلود فایل بکاپ و جایگزینی اطلاعات</div></div><span style="color:var(--muted);">‹</span></div>
       <input type="file" id="pf-import-file" accept="application/json,.json" style="display:none;">
       <div class="list-row" id="pf-motion-row"><div class="emoji-badge">♿</div>
         <div class="info"><div class="title">دسترس‌پذیری</div><div class="sub">خوانایی و کاهش حرکت</div></div>
@@ -2356,8 +2347,8 @@ function renderProfile(){
     </div>
 
     <div class="note"><span class="note-ic">ⓘ</span><span>پرداخت‌ها خوداظهاری هستند. برای تطبیق مالی، رسیدها و گردش حساب بانکی خود را جداگانه بررسی کنید.</span></div>
-    <button class="btn btn-ghost mb14" id="pf-export2">دریافت خروجی اطلاعات من</button>
-    <button class="btn btn-ghost mb14" id="pf-import2">بازگردانی از فایل پشتیبان</button>
+    <button class="btn btn-primary mb14" id="pf-export2">📤 بکاپ گرفتن از داده‌ها</button>
+    <button class="btn btn-ghost mb14" id="pf-import2">📥 آپلود کردن داده‌ها</button>
     <button class="btn btn-outline-danger" id="pf-reset">بازنشانی کامل اپ</button>
     <div class="muted" style="text-align:center; font-size:11.5px; margin-top:16px;">ظرفیت · مدیریت شخصی، نه توصیه سرمایه‌گذاری</div>
   `;
@@ -2478,7 +2469,7 @@ function renderProfileIncome(el){
       if(isEdit){
         Object.assign(profileEditIncome, {name, amount, frequency, fixed: fx===1});
       } else {
-        state.incomeSources.push({id:uid(), name, amount, frequency, fixed: fx===1});
+        state.incomeSources.unshift({id:uid(), name, amount, frequency, fixed: fx===1});
       }
       saveState(); profileEditIncome=null; renderIncomeList(); renderIncomeForm();
     };
@@ -2528,7 +2519,7 @@ function renderProfileIncome(el){
       const period = wrap.querySelector('#ff-period').value;
       if(!amount){ showToast('مبلغ رو وارد کن'); return; }
       if(isEdit){ Object.assign(profileEditFixed, {category, amount, period}); }
-      else { state.fixedExpenses.push({id:uid(), category, amount, period}); }
+      else { state.fixedExpenses.unshift({id:uid(), category, amount, period}); }
       saveState(); profileEditFixed=null; renderFixedList(); renderFixedForm();
     };
   }
