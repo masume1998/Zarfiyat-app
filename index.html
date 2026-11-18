@@ -44,7 +44,7 @@
   .app{ display:flex; height:100vh; height:100dvh; }
   .main{ flex:1; min-width:0; display:flex; flex-direction:column; position:relative; }
   .screens{ flex:1; position:relative; overflow:hidden; }
-  .screen{ position:absolute; inset:0; overflow-y:auto; -ms-overflow-style:none; scrollbar-width:none;
+  .screen{ position:absolute; inset:0; overflow-y:auto; overflow-x:hidden; -ms-overflow-style:none; scrollbar-width:none;
     padding:44px 20px 120px; opacity:0; visibility:hidden; transform:translateY(8px);
     transition:opacity .4s cubic-bezier(.22,1,.36,1), transform .4s cubic-bezier(.22,1,.36,1); }
   .screen::-webkit-scrollbar{ display:none; }
@@ -54,13 +54,6 @@
 
   @media (min-width:768px){
     .screen{ padding:64px 48px 120px; }
-    .grid-2{ display:grid; grid-template-columns:1fr 1fr; gap:16px; align-items:start; }
-    .grid-2 .card + .card{ margin-top:0; }
-    .grid-3{ display:grid; grid-template-columns:repeat(3,1fr); gap:16px; }
-    .grid-3 .card + .card{ margin-top:0; }
-  }
-  @media (max-width:767px){
-    .grid-2, .grid-3{ display:block; }
   }
 
   .card{ background:var(--surface); border-radius:22px; padding:20px; border:none;
@@ -80,13 +73,11 @@
   .btn:active{ transform:scale(.97); }
   .btn-primary{ background:var(--accent); color:var(--ink); }
   .btn-ghost{ background:var(--surface); color:var(--ink); border:1px solid var(--line); }
-  .btn-dark{ background:var(--ink); color:#fff; }
-  .btn-sm{ padding:10px 16px; font-size:13px; width:auto; }
   .btn-outline-danger{ background:transparent; color:var(--danger); border:1px solid rgba(179,64,42,.35); }
   .btn[disabled]{ opacity:.4; pointer-events:none; }
 
   .field-label{ font-size:12.5px; font-weight:700; color:var(--ink-soft); margin-bottom:7px; }
-  .input, select.input, .date-field{
+  .input, select.input{
     width:100%; padding:13px 14px; border-radius:12px; border:1px solid var(--line);
     background:var(--surface); font-family:inherit; font-size:14px; color:var(--ink);
   }
@@ -140,7 +131,7 @@
   .cmt-grid .inst-wrap, .cmt-grid .inst-wrap.cmt-wrap{ margin:0; }
   @media (min-width:768px){ .cmt-grid{ grid-template-columns:repeat(2, 1fr); } }
   @media (min-width:1100px){ .cmt-grid{ grid-template-columns:repeat(3, 1fr); } }
-  .row-del, .row-edit{ width:26px; height:26px; border-radius:50%; background:var(--paper-deep); border:none;
+  .row-del{ width:26px; height:26px; border-radius:50%; background:var(--paper-deep); border:none;
     display:flex; align-items:center; justify-content:center; color:var(--muted); font-size:12px; cursor:pointer; flex:0 0 auto;}
 
   .step-dots{ display:flex; gap:6px; margin-bottom:22px; justify-content:center; }
@@ -186,12 +177,6 @@
   .hero-chip.caution{ background:var(--accent); color:var(--ink); }
   .hero-chip.danger{ background:#B3402A; color:#fff; }
 
-  .month-strip{ display:flex; gap:9px; overflow-x:auto; padding-bottom:2px; }
-  .month-pill{ flex:0 0 auto; width:92px; background:var(--surface); border:1px solid var(--line); border-radius:16px; padding:12px 10px; text-align:center; }
-  .month-pill .mname{ font-size:11.5px; font-weight:700; color:var(--ink-soft); margin-bottom:7px; }
-  .mbar{ height:6px; border-radius:100px; background:var(--track); overflow:hidden; margin-bottom:7px; }
-  .mbar-fill{ height:100%; border-radius:100px; }
-  .month-pill .mval{ font-size:11.5px; font-weight:700; }
 
   .segmented{ display:flex; background:var(--paper-deep); border-radius:100px; padding:3px; margin-bottom:18px; }
   .segmented button{ flex:1; border:none; background:transparent; padding:9px 6px; border-radius:100px;
@@ -204,7 +189,6 @@
   .waterfall-row.total{ border-top:2px solid var(--ink); margin-top:2px; }
   .waterfall-row.total .l{ font-size:14px; font-weight:800; color:var(--ink); }
   .waterfall-row.total .r{ font-size:17px; }
-  .waterfall-arrow{ text-align:center; color:var(--line); font-size:12px; }
 
   /* budget allocation bars */
   .alloc-bar{ display:flex; height:8px; border-radius:100px; overflow:hidden; margin:14px 0 6px; }
@@ -247,10 +231,6 @@
   .cal-grid .day.sel .dot{ background:var(--accent); }
   .cal-grid .day.today{ outline:2px solid var(--accent2); }
 
-  .cal-month-card{ background:var(--surface); border:1px solid var(--line); border-radius:18px; padding:16px; margin-bottom:12px; }
-  .cal-month-head{ display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; }
-  .cal-month-head .name{ font-size:14.5px; font-weight:800; }
-  .cal-due-row{ display:flex; justify-content:space-between; font-size:11.5px; padding:4px 0; color:var(--ink-soft); }
 
   .filter-row{ display:flex; gap:8px; margin-bottom:16px; overflow-x:auto; }
   /* ---- sticky commitments header: floating card, stuck at the top ---- */
@@ -329,51 +309,26 @@
   .inst-wrap.is-paid .inst-title, .inst-wrap.is-paid .inst-amount{ color:var(--muted); }
   .inst-wrap.inst-enter{ animation:instEnter .26s ease-out; }
   @keyframes instEnter{ from{ opacity:0; transform:translateY(8px); } to{ opacity:1; transform:none; } }
-  .inst-section-title{ font-size:12px; font-weight:800; color:var(--ink-soft); margin:14px 0 2px;
-    display:flex; justify-content:space-between; align-items:baseline; gap:8px; }
-  .inst-progress{ height:6px; border-radius:100px; background:var(--track); overflow:hidden; margin:6px 0 2px; }
-  .inst-progress-fill{ height:100%; background:var(--safe); border-radius:100px; transition:width .3s ease; }
   @media (prefers-reduced-motion: reduce){
     .inst-wrap.inst-enter{ animation:none; }
-    .inst-card, .inst-wrap, .inst-progress-fill{ transition:none !important; }
+    .inst-card, .inst-wrap{ transition:none !important; }
   }
-  .schedule-item{ position:relative; z-index:1; background:var(--surface); display:flex; justify-content:space-between;
-    font-size:12px; padding:9px 8px; border-top:1px dashed var(--line); touch-action:pan-y; user-select:none; }
-  .schedule-item.paid-row{ background:var(--safe-soft); }
-  .schedule-item .paid{ color:var(--muted); text-decoration:line-through; }
-  .schedule-item .check{ margin-left:6px; }
 
-  .capacity-carousel{ display:flex; overflow-x:auto; scroll-snap-type:x mandatory;
-    -webkit-overflow-scrolling:touch; scrollbar-width:none; }
-  .capacity-carousel::-webkit-scrollbar{ display:none; }
-  .capacity-slide{ flex:0 0 100%; scroll-snap-align:center; }
-  .carousel-dots{ display:flex; justify-content:center; gap:6px; margin-top:10px; margin-bottom:6px; }
-  .carousel-dots span{ width:6px; height:6px; border-radius:50%; background:var(--track); transition:.2s; }
-  .carousel-dots span.active{ background:var(--ink); width:16px; border-radius:100px; }
 
-  .due-banner{ background:var(--caution-soft); border-radius:16px; padding:14px 16px; margin-bottom:16px; }
-  .due-banner .row{ display:flex; justify-content:space-between; font-size:12px; padding:4px 0; color:var(--ink-soft); }
-  .due-banner .title{ font-size:12.5px; font-weight:800; color:var(--caution); margin-bottom:6px; }
 
   input[type="range"]{ -webkit-appearance:none; width:100%; height:6px; border-radius:100px; background:var(--track); outline:none; }
   input[type="range"]::-webkit-slider-thumb{ -webkit-appearance:none; width:20px; height:20px; border-radius:50%;
     background:var(--safe); border:4px solid #fff; box-shadow:0 2px 8px rgba(0,128,76,.4); cursor:pointer; }
 
   /* ---- purchase advisor (local-only, no server / no API) ---- */
-  .advisor-list{ list-style:none; margin:0 0 12px; padding:0; }
-  .advisor-list li{ font-size:12.5px; line-height:1.8; color:var(--ink-soft); padding-inline-start:18px; position:relative; margin-bottom:6px; }
-  .advisor-list li::before{ content:'•'; position:absolute; inset-inline-start:4px; color:var(--safe); font-weight:800; }
   .advisor-alt-title{ font-size:12.5px; font-weight:800; margin:12px 0 8px; }
   .advisor-alt{ display:block; width:100%; text-align:start; background:var(--paper); border:1px solid var(--line); border-radius:14px; padding:12px 14px; margin-bottom:8px; cursor:pointer; font-family:inherit; }
   .advisor-alt:active{ transform:scale(.98); }
   .advisor-alt-label{ display:block; font-size:13px; font-weight:800; color:var(--ink); margin-bottom:3px; }
   .advisor-alt-sub{ display:block; font-size:11.5px; line-height:1.7; color:var(--muted); }
-  .advisor-how{ margin-top:10px; font-size:12px; color:var(--muted); }
-  .advisor-how summary{ cursor:pointer; font-weight:700; color:var(--ink-soft); }
 
   .kpi-num{ font-size:22px; font-weight:800; }
   body.reduce-motion *{ transition:none !important; animation:none !important; }
-  .kpi-lab{ font-size:11.5px; color:var(--muted); margin-top:2px; }
 </style>
 </head>
 <body>
@@ -528,6 +483,14 @@ function jWeekdayName(j){
 function fa(n){ return Math.round(n).toLocaleString('fa-IR'); }
 function faM(n){ return fa(Math.round(n / 1000000)); } // میلیون تومان، برای جدول و نمودار جریان نقدی
 function toman(n){ return fa(n) + ' تومان'; }
+// compact money for tight hero/stat spots: میلیون with 1 decimal when >= 1M, else full تومان
+function moneyShort(n){
+  if(Math.abs(n) >= 1000000){
+    const m = Math.round(n / 100000) / 10;
+    return { num: m.toLocaleString('fa-IR', { maximumFractionDigits: 1 }), unit: 'میلیون تومان' };
+  }
+  return { num: fa(n), unit: 'تومان' };
+}
 function parseFaDecimal(str){
   if(!str) return 0;
   const latin = String(str).replace(/[۰-۹]/g, d=>'۰۱۲۳۴۵۶۷۸۹'.indexOf(d)).replace(/[٫,]/g, '.');
@@ -763,17 +726,9 @@ function statusFromShare(share){
   if(share >= state.thresholds.safe) return 'caution';
   return 'safe';
 }
-/* kept for old call sites that pass a % of cap: converts to share first — do not use directly */
-function statusFromPercent(pct){
-  const c = cap();
-  const incomeR = reliableMonthlyIncome();
-  if(!c || !incomeR) return 'safe';
-  return statusFromShare((pct / 100) * c / incomeR * 100);
-}
 function statusMeta(s){
   return { safe:{emoji:'🟢',label:'امن'}, caution:{emoji:'🟡',label:'احتیاط'}, danger:{emoji:'🔴',label:'فشار بالا'} }[s];
 }
-function statusColor(s){ return s==='safe' ? 'var(--safe)' : s==='caution' ? 'var(--caution)' : 'var(--danger)'; }
 function allEntries(includePending){
   // A month's committed capacity is everything scheduled to be due in that month,
   // whether it's already been checked off as paid or not — paying it doesn't
@@ -1266,7 +1221,7 @@ function renderOnboarding(){
       <div class="step-sub">سقف پیشنهادی بر اساس درآمد قابل‌اتکای شماست؛ خودت می‌تونی تغییرش بدی.</div>
       <div class="hero mb18">
         <div class="hero-label">سقف پیشنهادی اقساط ماهانه</div>
-        <div class="hero-num num" id="ob-cap-amount">${toman(reliable * obDraft.capPercent / 100)}</div>
+        <div class="hero-num num" id="ob-cap-amount">${(()=>{ const s = moneyShort(reliable * obDraft.capPercent / 100); return s.num + ' <span style="font-size:15px; color:rgba(255,255,255,.7);">' + s.unit + '</span>'; })()}</div>
         <div class="hero-sub">پایه محاسبه: ${toman(reliable)} · <span id="ob-cap-pct">${fa(obDraft.capPercent)}٪</span> از درآمد قابل‌اتکا</div>
         <input type="range" min="10" max="70" step="5" value="${obDraft.capPercent}" id="ob-cap-slider" style="margin-top:14px;">
         <div class="hero-sub" style="margin-top:8px;">درصد سقف دلخواه</div>
@@ -1288,7 +1243,7 @@ function renderOnboarding(){
         <button class="btn btn-primary" id="ob-finish">ورود به داشبورد من</button>
       </div>`;
     function updateObCap(){
-      document.getElementById('ob-cap-amount').textContent = toman(reliable * obDraft.capPercent / 100);
+      document.getElementById('ob-cap-amount').innerHTML = (()=>{ const s = moneyShort(reliable * obDraft.capPercent / 100); return s.num + ' <span style="font-size:15px; color:rgba(255,255,255,.7);">' + s.unit + '</span>'; })();
       document.getElementById('ob-cap-pct').textContent = fa(obDraft.capPercent) + '٪';
     }
     document.getElementById('ob-cap-slider').addEventListener('input', e=>{
@@ -1574,40 +1529,6 @@ function renderCommitmentForm(container, existing, onSave){
   };
 }
 
-function capacitySlideHTML(m, i, c){
-  const val = commitmentForMonth(m.jy, m.jm, false);
-  const pct = c>0 ? Math.round((val/c)*100) : 0;
-  const st = statusFromShare(shareOfIncome(val));
-  const sm = statusMeta(st);
-  const isCurrent = i===0;
-  const chipBg = st==='safe'?'rgba(63,190,133,.2)': st==='caution'?'rgba(219,230,76,.25)':'rgba(243,162,142,.22)';
-  const chipColor = st==='safe'?'#7CE3B8': st==='caution'?'#F1F3A0':'#F3A28E';
-  const barColor = st==='safe'?'#3FBE85': st==='caution'?'#DBE64C':'#F3A28E';
-  return `<div class="capacity-slide">
-    <div class="card" style="background:linear-gradient(160deg,var(--ink) 0%, var(--accent2) 100%); border:none; color:#fff; position:relative;">
-      <div style="display:flex; justify-content:space-between; align-items:flex-start;">
-        <span class="status-chip" style="background:${chipBg}; color:${chipColor};"><span class="dot"></span> ${sm.emoji} ${sm.label}</span>
-        <span class="eyebrow" style="color:rgba(255,255,255,.6); margin:0;">${isCurrent ? 'سقف امن اقساط این ماه' : MONTH_NAMES[m.jm]+' '+fa(m.jy)}</span>
-      </div>
-      <div class="gauge-wrap">
-        <div class="gauge-figure">
-          ${gaugeSVG(pct, 'rgba(255,255,255,.14)', barColor)}
-          <div class="gauge-center"><div class="big" style="color:#fff;">${fa(pct)}٪</div><div class="small" style="color:rgba(255,255,255,.6);">از سقف مصرف شده</div></div>
-        </div>
-      </div>
-      <div style="height:8px; border-radius:100px; background:rgba(255,255,255,.14); overflow:hidden; position:relative;">
-        <div style="height:100%; border-radius:100px; width:${Math.min(100,pct)}%; background:${barColor};"></div>
-      </div>
-      <div style="display:flex; justify-content:space-between; margin-top:9px; font-size:11.5px; color:rgba(255,255,255,.7);">
-        <span>سقف: <b class="num" style="color:#fff;">${fa(c)}</b></span>
-        <span>اقساط: <b class="num" style="color:#fff;">${fa(val)}</b></span>
-      </div>
-      ${isCurrent ? `<div style="text-align:center; margin-top:10px; font-size:10.5px; color:rgba(255,255,255,.5);">برای دیدن ماه‌های بعد بکش ⟷</div>` : ''}
-    </div>
-  </div>`;
-}
-
-
 /* ---- Monthly analysis: short, rule-based, local-only ----
    One card on Home: this month vs cap, free cash, heaviest month
    in the next 6, biggest installment this month, paid count, one tip. */
@@ -1683,6 +1604,7 @@ function renderHome(){
   const heroHTML = x=>{
     const smx = statusMeta(x.st);
     const ringColor = x.st==='safe' ? '#74C365' : x.st==='caution' ? '#DBE64C' : '#F3A28E';
+    const freeS = moneyShort(x.free), valS = moneyShort(x.val), capS = moneyShort(c), unS = moneyShort(x.unpaid);
     return `
     <div class="hero mb18">
       <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:14px;">
@@ -1696,22 +1618,25 @@ function renderHome(){
         </div>
         <div style="flex:1; min-width:0;">
           <div class="hero-label">ظرفیت آزاد برای قسط جدید</div>
-          <div class="hero-num num">${fa(x.free)}</div>
-          <div class="hero-sub">تومان در ماه · ${fa(Math.max(0, 100 - x.pct))}٪ از سقف، هنوز آزاد است</div>
+          <div class="hero-num num">${freeS.num}</div>
+          <div class="hero-sub">${freeS.unit} در ماه · ${fa(Math.max(0, 100 - x.pct))}٪ از سقف، هنوز آزاد است</div>
         </div>
       </div>
       <div style="display:flex; margin-top:18px; border-top:1px solid rgba(255,255,255,.14); padding-top:14px;">
-        <div style="flex:1; text-align:center;">
+        <div style="flex:1; min-width:0; text-align:center;">
           <div class="hero-label">اقساط ${MONTH_NAMES[x.m.jm]}</div>
-          <div class="num" style="font-size:16px; font-weight:800; margin-top:2px;">${toman(x.val)}</div>
+          <div class="num" style="font-size:16px; font-weight:800; margin-top:2px;">${valS.num}</div>
+          <div style="font-size:11px; color:rgba(255,255,255,.65);">${valS.unit}</div>
         </div>
-        <div style="flex:1; text-align:center; border-inline-start:1px solid rgba(255,255,255,.14);">
+        <div style="flex:1; min-width:0; text-align:center; border-inline-start:1px solid rgba(255,255,255,.14);">
           <div class="hero-label">سقف</div>
-          <div class="num" style="font-size:16px; font-weight:800; margin-top:2px;">${toman(c)}</div>
+          <div class="num" style="font-size:16px; font-weight:800; margin-top:2px;">${capS.num}</div>
+          <div style="font-size:11px; color:rgba(255,255,255,.65);">${capS.unit}</div>
         </div>
-        <div style="flex:1; text-align:center; border-inline-start:1px solid rgba(255,255,255,.14);">
+        <div style="flex:1; min-width:0; text-align:center; border-inline-start:1px solid rgba(255,255,255,.14);">
           <div class="hero-label">پرداخت‌نشده</div>
-          <div class="num" style="font-size:16px; font-weight:800; margin-top:2px;">${toman(x.unpaid)}</div>
+          <div class="num" style="font-size:16px; font-weight:800; margin-top:2px;">${unS.num}</div>
+          <div style="font-size:11px; color:rgba(255,255,255,.65);">${unS.unit}</div>
         </div>
       </div>
     </div>`;
@@ -1854,7 +1779,7 @@ function renderCommitments(){
       <div class="muted" style="font-size:12.5px; margin-bottom:18px;">${cm.provider} · ${SCHEDULE_LABELS[cm.scheduleType] || ''}</div>
       <div class="hero mb18">
         <div class="hero-label">مبلغ هر قسط</div>
-        <div class="hero-num num">${fa(cm.monthly)} <span style="font-size:15px; color:rgba(255,255,255,.7);">تومان</span></div>
+        <div class="hero-num num">${(()=>{ const s = moneyShort(cm.monthly); return s.num + ' <span style="font-size:15px; color:rgba(255,255,255,.7);">' + s.unit + '</span>'; })()}</div>
         <div class="hero-row"><span class="l">کل بازپرداخت</span><span class="r num">${toman(totalRepay)}</span></div>
         <div class="hero-row"><span class="l">پیشرفت پرداخت</span><span class="r num">${fa(paidCount)} از ${fa(cm.installments)} قسط · ${fa(pctPaid)}٪</span></div>
         <div class="hero-row total"><span class="l">مانده این تعهد</span><span class="r num">${toman(unpaidSum)}</span></div>
