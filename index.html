@@ -1879,8 +1879,8 @@ function renderCommitments(){
     const pctPaid = cm.installments ? Math.round(paidCount / cm.installments * 100) : 0;
     const principal = typeof cm.principal === 'number' ? cm.principal : Math.max(0, (cm.total||0) - (cm.downPayment||0));
     el.innerHTML = `
-      <div class="topbar" style="margin-top:10px; margin-bottom:4px;">
-        <h2 style="font-size:21px;">${cm.name}</h2>
+      <div class="topbar" style="margin-top:10px; margin-bottom:0;">
+        <h2 style="font-size:21px; line-height:1.3;">${cm.name}</h2>
         <div class="icon-btn" id="cm-back"><svg width="13" height="13" viewBox="0 0 24 24" fill="none"><path d="M9 6l6 6-6 6" stroke="#001F3F" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
       </div>
       <div class="muted" style="font-size:13px; margin-bottom:12px;">${cm.provider}</div>
