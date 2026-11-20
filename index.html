@@ -110,7 +110,7 @@
     background:var(--surface); color:var(--muted); font-size:13px; cursor:pointer; font-family:inherit;
     display:flex; align-items:center; justify-content:center; flex:0 0 auto; }
   .cmt-check:hover{ border-color:var(--safe); color:var(--safe); }
-  .cmt-check.done{ background:var(--safe); border-color:var(--safe); color:#fff; cursor:default; }
+  .cmt-check.done{ background:var(--safe); border-color:var(--safe); color:#fff; cursor:pointer; }
   .list-section-title{ font-size:21px; font-weight:800; margin:22px 0 10px; }
   .inst-wrap.cmt-wrap{ margin:0 0 10px; border-radius:18px; }
   .inst-wrap.cmt-wrap .inst-card{ border:none; border-radius:18px; padding:12px;
@@ -292,12 +292,24 @@
   .inst-wrap{ position:relative; overflow:hidden; border-radius:12px; margin-top:6px; }
   .inst-reveal{ position:absolute; inset:0; display:flex; align-items:center; gap:8px; padding-inline-start:16px;
     background:var(--safe); color:#fff; font-size:13px; font-weight:800;
-    opacity:calc(.35 + var(--p,0)*.65); }
+    opacity:var(--pL,0); }
   .inst-reveal .inst-check{ width:24px; height:24px; border-radius:50%; display:inline-flex; align-items:center;
     justify-content:center; border:2px solid #fff; font-size:13px; line-height:1;
-    transform:scale(calc(.7 + var(--p,0)*.3)); opacity:calc(.3 + var(--p,0)*.7); }
+    transform:scale(calc(.7 + var(--pL,0)*.3)); opacity:calc(.3 + var(--pL,0)*.7); }
   .inst-wrap.ready .inst-check{ background:#fff; color:var(--safe); }
-  .inst-reveal .inst-label{ opacity:var(--p,0); }
+  .inst-reveal .inst-label{ opacity:var(--pL,0); }
+  /* right-swipe reveal (postpone on unpaid, unmark on paid) — content on the end side */
+  .inst-reveal-r{ position:absolute; inset:0; display:flex; align-items:center; justify-content:flex-end; gap:8px; padding-inline-end:16px;
+    background:var(--caution); color:#fff; font-size:13px; font-weight:800;
+    opacity:var(--pR,0); }
+  .inst-reveal-r.unmark{ background:var(--muted); }
+  .inst-reveal-r .inst-check{ width:24px; height:24px; border-radius:50%; display:inline-flex; align-items:center;
+    justify-content:center; border:2px solid #fff; font-size:13px; line-height:1;
+    transform:scale(calc(.7 + var(--pR,0)*.3)); opacity:calc(.3 + var(--pR,0)*.7); }
+  .inst-wrap.ready .inst-reveal-r .inst-check{ background:#fff; color:var(--caution); }
+  .inst-wrap.ready .inst-reveal-r.unmark .inst-check{ background:#fff; color:var(--muted); }
+  .inst-reveal-r .inst-label{ opacity:var(--pR,0); }
+  .badge-postponed{ font-size:10px; font-weight:800; padding:2px 8px; border-radius:100px; background:var(--caution-soft); color:var(--caution); }
   .inst-card{ position:relative; z-index:1; display:flex; align-items:center; gap:10px; padding:10px 12px;
     background:var(--surface); border:1px solid var(--line); border-radius:12px;
     touch-action:pan-y; user-select:none; -webkit-user-select:none; cursor:grab; }
@@ -707,7 +719,15 @@ function generateSchedule(purchaseJ, installments, perInstallment, ruleType, int
 }
 function buildCommitmentSchedule(c){
   const sched = generateSchedule(c.purchaseDate, c.installments, c.monthly, c.scheduleType, c.intervalDays, c.channel, c.providerKey);
-  return sched.map((e,i) => Object.assign({}, e, { paid: !!(c.paidFlags && c.paidFlags[i]), index:i }));
+  return sched.map((e,i) => {
+    const shift = (c.postponeFlags && c.postponeFlags[i]) || 0;
+    let d = e;
+    if(shift > 0){
+      const t = jAddMonths(e.jy, e.jm, shift);
+      d = { jy:t.jy, jm:t.jm, jd: Math.min(e.jd, jMonthLength(t.jy, t.jm)), amount: e.amount };
+    }
+    return Object.assign({}, d, { paid: !!(c.paidFlags && c.paidFlags[i]), index:i, postponed: shift > 0 });
+  });
 }
 
 function reliableMonthlyIncome(){
@@ -888,6 +908,29 @@ function setPaid(commitmentId, idx, value, opts){
   return true;
 }
 
+// postpone an installment by N months (0 = back to its original date); the amount
+// moves to the new month's obligation because the schedule is rebuilt from the shift
+function setPostpone(commitmentId, idx, months, opts){
+  opts = opts || {};
+  const c = state.commitments.find(x=>x.id===commitmentId);
+  if(!c || idx < 0 || idx >= c.installments) return false;
+  if(!Array.isArray(c.postponeFlags) || c.postponeFlags.length !== c.installments){
+    c.postponeFlags = Array.from({length:c.installments}, (_,i)=> (c.postponeFlags && c.postponeFlags[i]) || 0);
+  }
+  const cur = c.postponeFlags[idx] || 0;
+  if(cur === months) return false;
+  c.postponeFlags[idx] = months;
+  saveState();
+  if(opts.moved) lastMovedInstallment = { cid: commitmentId, idx };
+  refreshAfterPaidChange();
+  if(months > cur){
+    showUndoToast('قسط به ماه بعد موکول شد', ()=> setPostpone(commitmentId, idx, cur, { moved:true }));
+  } else {
+    showToast('قسط به تاریخ اصلی برگشت');
+  }
+  return true;
+}
+
 function installmentRowHTML(cid, idx, entry, opts){
   opts = opts || {};
   const paid = !!opts.paid;
@@ -895,32 +938,42 @@ function installmentRowHTML(cid, idx, entry, opts){
   const dateStr = opts.date || fmtJDate(entry);
   const label = opts.label || `${title} — ${dateStr}`;
   const actionText = paid ? 'بازگردانی به پرداخت‌نشده' : 'علامت‌گذاری به‌عنوان پرداخت‌شده';
-  return `<div class="inst-wrap ${paid?'is-paid':''}" role="listitem" data-cid="${cid}" data-idx="${idx}" ${paid?'':'data-swipe'}>
-    ${paid ? '' : `<div class="inst-reveal" aria-hidden="true"><span class="inst-check">✓</span><span class="inst-label">پرداخت‌شده</span></div>`}
+  return `<div class="inst-wrap ${paid?'is-paid':''}" role="listitem" data-cid="${cid}" data-idx="${idx}" data-swipe>
+    ${paid
+      ? `<div class="inst-reveal-r unmark" aria-hidden="true"><span class="inst-label">پرداخت‌نشده</span><span class="inst-check">↩</span></div>`
+      : `<div class="inst-reveal" aria-hidden="true"><span class="inst-check">✓</span><span class="inst-label">پرداخت‌شده</span></div><div class="inst-reveal-r" aria-hidden="true"><span class="inst-label">به تعویق انداختن</span><span class="inst-check">⏰</span></div>`}
     <div class="inst-card">
       <div class="inst-text">
         <div class="inst-title">${title}</div>
         <div class="inst-amount num">${faSep(entry.amount)} <span class="inst-unit">تومان</span></div>
-        <div class="inst-date">${dateStr}</div>
+        <div class="inst-date">${dateStr}${entry.postponed ? ' <span class="badge-postponed">به تعویق افتاده</span>' : ''}</div>
       </div>
       <button type="button" class="inst-btn" data-action="${paid?'restore':'pay'}" title="${actionText}" aria-label="${actionText}: ${label}">${paid?'↩':'✓'}</button>
     </div>
   </div>`;
 }
 
-function completeSwipe(wrap, card, cid, idx){
+function completeSwipe(wrap, card, cid, idx, action){
+  action = action || 'pay';
   wrap._swiped = true;
   const key = cid+':'+idx;
   if(swipeBusy.has(key)) return;
   swipeBusy.add(key);
+  const flyRight = action !== 'pay';
   const finish = ()=>{
     swipeBusy.delete(key);
-    setPaid(cid, idx, true, { withUndo:true, moved:true });
+    if(action === 'pay') setPaid(cid, idx, true, { withUndo:true, moved:true });
+    else if(action === 'unpay') setPaid(cid, idx, false, { moved:true });
+    else if(action === 'postpone'){
+      const c = state.commitments.find(x=>x.id===cid);
+      const cur = (c && c.postponeFlags && c.postponeFlags[idx]) || 0;
+      setPostpone(cid, idx, cur + 1, { moved:true });
+    }
   };
   if(prefersReducedMotion()){ finish(); return; }
   const h = wrap.offsetHeight;
   card.style.transition = 'transform .22s ease-in, opacity .22s ease-in';
-  card.style.transform = `translateX(-${wrap.offsetWidth + 20}px)`;
+  card.style.transform = `translateX(${(flyRight ? 1 : -1) * (wrap.offsetWidth + 20)}px)`;
   card.style.opacity = '0';
   setTimeout(()=>{                       // collapse the gap once the card has left
     wrap.style.maxHeight = h + 'px';
@@ -941,16 +994,20 @@ function attachSwipeHandlers(root){
     let startX=0, startY=0, dx=0, tracking=false, locked=false, pid=null;
     // deliberately generous so short swipes / scrolling can't complete by accident
     const threshold = ()=> Math.max(80, Math.min(120, wrap.offsetWidth * 0.35));
-    const paint = (p, ready)=>{
-      wrap.style.setProperty('--p', p.toFixed(3));
-      // interpolate surface (#fff) -> safe-soft (#E1F0E6) as the swipe progresses
-      card.style.background = `rgb(${Math.round(255-30*p)},${Math.round(255-15*p)},${Math.round(255-25*p)})`;
+    const paint = (p, ready, d)=>{
+      const left = d < 0;
+      wrap.style.setProperty('--pL', left ? p.toFixed(3) : '0');
+      wrap.style.setProperty('--pR', left ? '0' : p.toFixed(3));
+      // card tint follows the action: green = pay (left), amber = postpone (right, unpaid), grey = unmark (right, paid)
+      const isPaid = wrap.classList.contains('is-paid');
+      const t = left ? [225,240,230] : (isPaid ? [234,236,221] : [247,243,210]);
+      card.style.background = `rgb(${Math.round(255+(t[0]-255)*p)},${Math.round(255+(t[1]-255)*p)},${Math.round(255+(t[2]-255)*p)})`;
       wrap.classList.toggle('ready', !!ready);
     };
     const resetCard = ()=>{
       card.style.transition = prefersReducedMotion() ? 'none' : 'transform .18s ease-out, background .18s ease-out';
       card.style.transform = '';
-      paint(0, false);
+      paint(0, false, 0);
       wrap.classList.remove('dragging');
     };
     card.addEventListener('pointerdown', e=>{
@@ -971,19 +1028,25 @@ function attachSwipeHandlers(root){
           try{ card.setPointerCapture(pid); }catch(_){}
         } else return;
       }
-      dx = Math.min(0, mx);                       // only leftward movement is tracked
+      dx = wrap.classList.contains('is-paid') ? Math.max(0, mx) : mx;   // paid cards only swipe right (unmark)
       const p = Math.min(1, Math.abs(dx) / threshold());
       card.style.transform = `translateX(${dx}px)`;
-      paint(p, p >= 1);
+      paint(p, p >= 1, dx);
     });
     const end = (e, cancelled)=>{
       if(!tracking || (e && e.pointerId !== pid)) return;
       tracking = false;
       try{ card.releasePointerCapture(pid); }catch(_){}
       if(!locked) return;                          // it was a tap or a vertical scroll — nothing to do
-      const done = !cancelled && Math.abs(dx) >= threshold();
+      const finalDx = dx;
+      const done = !cancelled && Math.abs(finalDx) >= threshold();
       locked = false; dx = 0;
-      if(done) completeSwipe(wrap, card, cid, idx); else resetCard();
+      if(!done){ resetCard(); return; }
+      const isPaid = wrap.classList.contains('is-paid');
+      if(!isPaid && finalDx < 0) completeSwipe(wrap, card, cid, idx, 'pay');
+      else if(!isPaid && finalDx > 0) completeSwipe(wrap, card, cid, idx, 'postpone');
+      else if(isPaid && finalDx > 0) completeSwipe(wrap, card, cid, idx, 'unpay');
+      else resetCard();
     };
     card.addEventListener('pointerup', e=>end(e, false));
     card.addEventListener('pointercancel', e=>end(e, true));
@@ -1840,7 +1903,7 @@ function renderCommitments(){
           </div>`).join('')}
         <div class="hint" style="margin-top:8px;">علامت‌گذاری دستیه و تأیید تراکنش بانکی نیست.</div>
       </div>
-      <div class="section-title">اقساط پرداخت‌نشده · بکش به چپ یا دکمه‌ی ✓</div>
+      <div class="section-title">اقساط پرداخت‌نشده · چپ = پرداخت، راست = عقب انداختن</div>
       <div class="card mb18">
         ${schedule.map((e,idx)=> e.paid ? '' : installmentRowHTML(cm.id, idx, e)).join('') || '<div class="hint" style="margin:8px 0;">همه‌ی اقساط علامت‌گذاری شده‌اند ✅</div>'}
       </div>
@@ -1916,14 +1979,18 @@ function renderCommitments(){
       <div class="info">
         <div class="title">${cm.name}</div>
         <div class="sub">${cm.provider} · قسط ${fa(d.idx+1)} از ${fa(cm.installments)}</div>
-        <div class="sub">سررسید ${fmtJDate(d.entry)} · ${toman(cm.monthly)}</div>
+        <div class="sub">سررسید ${fmtJDate(d.entry)} · ${toman(cm.monthly)}${d.entry.postponed ? ' <span class="badge-postponed">به تعویق افتاده</span>' : ''}</div>
       </div>
-      <button class="cmt-check ${d.hasUnpaid?'':'done'}" data-check="${cm.id}" data-idx="${d.idx}" ${d.hasUnpaid?'':'disabled'}
-        title="${d.hasUnpaid?'علامت‌گذاری این قسط به‌عنوان پرداخت‌شده':'پرداخت‌شده'}">✓</button>
+      <button class="cmt-check ${d.hasUnpaid?'':'done'}" data-check="${cm.id}" data-idx="${d.idx}"
+        title="${d.hasUnpaid?'علامت‌گذاری این قسط به‌عنوان پرداخت‌شده':'بازگردانی به پرداخت‌نشده'}">${d.hasUnpaid?'✓':'↩'}</button>
     </div>`;
-    if(!d.hasUnpaid) return `<div class="inst-wrap cmt-wrap is-paid" role="listitem">${inner}</div>`;
+    if(!d.hasUnpaid) return `<div class="inst-wrap cmt-wrap is-paid" role="listitem" data-cid="${cm.id}" data-idx="${d.idx}" data-swipe>
+      <div class="inst-reveal-r unmark" aria-hidden="true"><span class="inst-label">پرداخت‌نشده</span><span class="inst-check">↩</span></div>
+      ${inner}
+    </div>`;
     return `<div class="inst-wrap cmt-wrap" role="listitem" data-cid="${cm.id}" data-idx="${d.idx}" data-swipe>
       <div class="inst-reveal" aria-hidden="true"><span class="inst-check">✓</span><span class="inst-label">پرداخت شد</span></div>
+      <div class="inst-reveal-r" aria-hidden="true"><span class="inst-label">به تعویق انداختن</span><span class="inst-check">⏰</span></div>
       ${inner}
     </div>`;
   };
@@ -1959,7 +2026,7 @@ function renderCommitments(){
       <div class="cmt-grid mb18">${g.rows.map(rowHTML).join('')}</div>`;
     }).join('') : ''}
     ${!filtered.length ? `<div class="muted" style="text-align:center; padding:40px 0; font-size:13px;">${shown.length===0 ? (commitMonthOffset===0 ? `قسطی در ${MONTH_NAMES[t.jm]} نداری` : 'قسطی نداری') : 'تعهدی در این دسته نیست'}</div>` : ''}
-    <div class="hint" style="margin-top:14px;">برای ثبت پرداخت، روی ✓ کنار هر قسط بزن یا ردیف رو بکش. پرداخت ثبت‌شده فقط با علامت‌گذاری برگردانده می‌شود.</div>
+    <div class="hint" style="margin-top:14px;">برای ثبت پرداخت، روی ✓ بزن یا ردیف رو به چپ بکش؛ برای عقب انداختن، به راست بکش. قسط پرداخت‌شده رو با کشیدن به راست یا زدن ↩ برمی‌گردونی.</div>
   `;
 
   document.getElementById('cm-new').onclick = ()=>{ commitEditTarget='new'; renderCommitments(); };
@@ -1995,7 +2062,9 @@ function renderCommitments(){
   }));
   document.querySelectorAll('[data-check]').forEach(b=>b.addEventListener('click', ev=>{
     ev.stopPropagation();
-    setPaid(b.dataset.check, parseInt(b.dataset.idx, 10), true, { withUndo:true, moved:true });
+    const cid = b.dataset.check, idx = parseInt(b.dataset.idx, 10);
+    if(b.classList.contains('done')) setPaid(cid, idx, false, { moved:true });
+    else setPaid(cid, idx, true, { withUndo:true, moved:true });
   }));
   document.getElementById('screen-commitments').scrollTop = prevScroll;
 }
