@@ -996,10 +996,17 @@ function attachSwipeHandlers(root){
       const left = d < 0;
       wrap.style.setProperty('--pL', left ? p.toFixed(3) : '0');
       wrap.style.setProperty('--pR', left ? '0' : p.toFixed(3));
-      // card tint follows the action: green = pay (left), amber = postpone (right, unpaid), grey = unmark (right, paid)
-      const isPaid = wrap.classList.contains('is-paid');
-      const t = left ? [225,240,230] : (isPaid ? [234,236,221] : [247,243,210]);
-      card.style.background = `rgb(${Math.round(255+(t[0]-255)*p)},${Math.round(255+(t[1]-255)*p)},${Math.round(255+(t[2]-255)*p)})`;
+      if(p === 0){
+        // No inline tint: let the card's own class decide (paid = safe-soft,
+        // unpaid = default). Setting white here would stick after a cancelled
+        // swipe and make a paid card look unpaid.
+        card.style.background = '';
+      } else {
+        // card tint follows the action: green = pay (left), amber = postpone (right, unpaid), grey = unmark (right, paid)
+        const isPaid = wrap.classList.contains('is-paid');
+        const t = left ? [225,240,230] : (isPaid ? [234,236,221] : [247,243,210]);
+        card.style.background = `rgb(${Math.round(255+(t[0]-255)*p)},${Math.round(255+(t[1]-255)*p)},${Math.round(255+(t[2]-255)*p)})`;
+      }
       wrap.classList.toggle('ready', !!ready);
     };
     const resetCard = ()=>{
