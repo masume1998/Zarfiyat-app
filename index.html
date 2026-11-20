@@ -303,8 +303,12 @@
     touch-action:pan-y; user-select:none; -webkit-user-select:none; cursor:grab; }
   .inst-wrap.dragging .inst-card{ cursor:grabbing; }
   .inst-text{ flex:1; min-width:0; }
-  .inst-title{ font-size:13px; font-weight:700; line-height:1.6; }
-  .inst-amount{ font-size:13px; font-weight:800; white-space:nowrap; }
+  .inst-title{ font-size:21px; font-weight:800; line-height:1.5; }
+  .inst-amount{ font-size:21px; font-weight:800; color:var(--ink); line-height:1.4; margin-top:8px;
+    letter-spacing:.01em; white-space:nowrap; }
+  .inst-amount .num-sep{ font-size:1.15em; padding:0 1px; }
+  .inst-unit{ font-size:13px; font-weight:700; color:var(--muted); }
+  .inst-date{ font-size:13px; color:var(--muted); margin-top:4px; line-height:1.6; }
   .inst-btn{ width:32px; height:32px; border-radius:50%; flex:0 0 auto; border:1.5px solid var(--line);
     background:var(--surface); color:var(--muted); font-size:13px; cursor:pointer; font-family:inherit;
     display:flex; align-items:center; justify-content:center; }
@@ -486,6 +490,8 @@ function jWeekdayName(j){
 }
 
 function fa(n){ return Math.round(n).toLocaleString('fa-IR'); }
+/* like fa(), but the thousands separator is wrapped so it can be bolder/larger */
+function faSep(n){ return fa(n).replace(/٬/g, '<span class="num-sep">٬</span>'); }
 function faM(n){ return fa(Math.round(n / 1000000)); } // میلیون تومان، برای جدول و نمودار جریان نقدی
 function toman(n){ return fa(n) + ' تومان'; }
 // compact money for tight hero/stat spots: میلیون with 1 decimal when >= 1M, else full تومان
@@ -885,13 +891,18 @@ function setPaid(commitmentId, idx, value, opts){
 function installmentRowHTML(cid, idx, entry, opts){
   opts = opts || {};
   const paid = !!opts.paid;
-  const label = opts.label || `قسط ${fa(idx+1)} — ${fmtJDate(entry)}`;
+  const title = opts.title || `قسط ${fa(idx+1)}`;
+  const dateStr = opts.date || fmtJDate(entry);
+  const label = opts.label || `${title} — ${dateStr}`;
   const actionText = paid ? 'بازگردانی به پرداخت‌نشده' : 'علامت‌گذاری به‌عنوان پرداخت‌شده';
   return `<div class="inst-wrap ${paid?'is-paid':''}" role="listitem" data-cid="${cid}" data-idx="${idx}" ${paid?'':'data-swipe'}>
     ${paid ? '' : `<div class="inst-reveal" aria-hidden="true"><span class="inst-check">✓</span><span class="inst-label">پرداخت‌شده</span></div>`}
     <div class="inst-card">
-      <div class="inst-text"><div class="inst-title">${label}</div></div>
-      <div class="inst-amount num">${toman(entry.amount)}</div>
+      <div class="inst-text">
+        <div class="inst-title">${title}</div>
+        <div class="inst-amount num">${faSep(entry.amount)} <span class="inst-unit">تومان</span></div>
+        <div class="inst-date">${dateStr}</div>
+      </div>
       <button type="button" class="inst-btn" data-action="${paid?'restore':'pay'}" title="${actionText}" aria-label="${actionText}: ${label}">${paid?'↩':'✓'}</button>
     </div>
   </div>`;
@@ -1617,7 +1628,7 @@ function renderHome(){
       <div class="eyebrow">پرداخت‌نشده‌های ${MONTH_NAMES[m.jm]} · ${fa(unpaid.length)} قسط</div>
         ${unpaid.length ? `
           <div id="home-due-list" role="list">
-            ${unpaid.slice(0,4).map(d=>installmentRowHTML(d.commitment.id, d.index, d.entry, { label: `${d.commitment.name} — ${fmtJDateShort(d.entry)}` })).join('')}
+            ${unpaid.slice(0,4).map(d=>installmentRowHTML(d.commitment.id, d.index, d.entry, { title: d.commitment.name, date: fmtJDateShort(d.entry) })).join('')}
           </div>
           <div style="text-align:center; margin-top:10px;"><span class="link" data-nav="commitments" style="font-size:13px; font-weight:700; color:var(--safe); cursor:pointer;">همه اقساط ←</span></div>
         ` : `<div class="muted" style="font-size:13px; padding:10px 0;">قسط پرداخت‌نشده‌ای نداری</div>`}
