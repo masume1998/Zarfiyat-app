@@ -1,4 +1,4 @@
-const CACHE_NAME = 'zarfiyat-v35';
+const CACHE_NAME = 'zarfiyat-v36';
 const APP_SHELL = [
   './',
   './index.html',
@@ -9,8 +9,13 @@ const APP_SHELL = [
 ];
 
 self.addEventListener('install', (event) => {
+  // Cache the shell file-by-file: one failed file must not block the whole
+  // install (cache.addAll rejects if any single file fails), or updates
+  // would get stuck on the old version.
   event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => cache.addAll(APP_SHELL))
+    caches.open(CACHE_NAME).then((cache) =>
+      Promise.allSettled(APP_SHELL.map((url) => cache.add(url)))
+    )
   );
   self.skipWaiting();
 });

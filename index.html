@@ -104,7 +104,10 @@
   .cmt-thumb{ width:56px; height:72px; border-radius:12px; background:var(--paper-deep);
     display:flex; align-items:center; justify-content:center; font-size:21px; flex:0 0 auto; }
   .cmt-row .info{ flex:1; min-width:0; }
-  .cmt-row .title{ font-size:13px; font-weight:800; }
+  .cmt-row .title{ font-size:21px; font-weight:800; line-height:1.5; }
+  .cmt-row .cmt-amount{ font-size:21px; font-weight:800; color:var(--ink); line-height:1.4; margin-top:8px;
+    letter-spacing:.01em; white-space:nowrap; }
+  .cmt-row .cmt-amount .num-sep{ font-size:1.15em; padding:0 1px; }
   .cmt-row .sub{ font-size:13px; color:var(--muted); margin-top:2px; }
   .cmt-check{ width:38px; height:38px; border-radius:50%; border:2px solid var(--line);
     background:var(--surface); color:var(--muted); font-size:13px; cursor:pointer; font-family:inherit;
@@ -315,12 +318,9 @@
     touch-action:pan-y; user-select:none; -webkit-user-select:none; cursor:grab; }
   .inst-wrap.dragging .inst-card{ cursor:grabbing; }
   .inst-text{ flex:1; min-width:0; }
-  .inst-title{ font-size:21px; font-weight:800; line-height:1.5; }
-  .inst-amount{ font-size:21px; font-weight:800; color:var(--ink); line-height:1.4; margin-top:8px;
-    letter-spacing:.01em; white-space:nowrap; }
-  .inst-amount .num-sep{ font-size:1.15em; padding:0 1px; }
+  .inst-title{ font-size:13px; font-weight:700; line-height:1.6; }
+  .inst-amount{ font-size:13px; font-weight:800; white-space:nowrap; }
   .inst-unit{ font-size:13px; font-weight:700; color:var(--muted); }
-  .inst-date{ font-size:13px; color:var(--muted); margin-top:4px; line-height:1.6; }
   .inst-btn{ width:32px; height:32px; border-radius:50%; flex:0 0 auto; border:1.5px solid var(--line);
     background:var(--surface); color:var(--muted); font-size:13px; cursor:pointer; font-family:inherit;
     display:flex; align-items:center; justify-content:center; }
@@ -919,6 +919,9 @@ function setPostpone(commitmentId, idx, months, opts){
   }
   const cur = c.postponeFlags[idx] || 0;
   if(cur === months) return false;
+  // A paid installment can't be postponed further; restoring an earlier
+  // shift (e.g. from the undo toast) is still allowed.
+  if(months > cur && c.paidFlags && c.paidFlags[idx]) return false;
   c.postponeFlags[idx] = months;
   saveState();
   if(opts.moved) lastMovedInstallment = { cid: commitmentId, idx };
@@ -934,20 +937,15 @@ function setPostpone(commitmentId, idx, months, opts){
 function installmentRowHTML(cid, idx, entry, opts){
   opts = opts || {};
   const paid = !!opts.paid;
-  const title = opts.title || `قسط ${fa(idx+1)}`;
-  const dateStr = opts.date || fmtJDate(entry);
-  const label = opts.label || `${title} — ${dateStr}`;
+  const label = opts.label || `قسط ${fa(idx+1)} — ${fmtJDate(entry)}`;
   const actionText = paid ? 'بازگردانی به پرداخت‌نشده' : 'علامت‌گذاری به‌عنوان پرداخت‌شده';
   return `<div class="inst-wrap ${paid?'is-paid':''}" role="listitem" data-cid="${cid}" data-idx="${idx}" data-swipe>
     ${paid
       ? `<div class="inst-reveal-r unmark" aria-hidden="true"><span class="inst-label">پرداخت‌نشده</span><span class="inst-check">↩</span></div>`
       : `<div class="inst-reveal" aria-hidden="true"><span class="inst-check">✓</span><span class="inst-label">پرداخت‌شده</span></div><div class="inst-reveal-r" aria-hidden="true"><span class="inst-label">به تعویق انداختن</span><span class="inst-check">⏰</span></div>`}
     <div class="inst-card">
-      <div class="inst-text">
-        <div class="inst-title">${title}</div>
-        <div class="inst-amount num">${faSep(entry.amount)} <span class="inst-unit">تومان</span></div>
-        <div class="inst-date">${dateStr}${entry.postponed ? ' <span class="badge-postponed">به تعویق افتاده</span>' : ''}</div>
-      </div>
+      <div class="inst-text"><div class="inst-title">${label}${entry.postponed ? ' <span class="badge-postponed">به تعویق افتاده</span>' : ''}</div></div>
+      <div class="inst-amount num">${toman(entry.amount)}</div>
       <button type="button" class="inst-btn" data-action="${paid?'restore':'pay'}" title="${actionText}" aria-label="${actionText}: ${label}">${paid?'↩':'✓'}</button>
     </div>
   </div>`;
@@ -1691,7 +1689,7 @@ function renderHome(){
       <div class="eyebrow">پرداخت‌نشده‌های ${MONTH_NAMES[m.jm]} · ${fa(unpaid.length)} قسط</div>
         ${unpaid.length ? `
           <div id="home-due-list" role="list">
-            ${unpaid.slice(0,4).map(d=>installmentRowHTML(d.commitment.id, d.index, d.entry, { title: d.commitment.name, date: fmtJDateShort(d.entry) })).join('')}
+            ${unpaid.slice(0,4).map(d=>installmentRowHTML(d.commitment.id, d.index, d.entry, { label: `${d.commitment.name} — ${fmtJDateShort(d.entry)}` })).join('')}
           </div>
           <div style="text-align:center; margin-top:10px;"><span class="link" data-nav="commitments" style="font-size:13px; font-weight:700; color:var(--safe); cursor:pointer;">همه اقساط ←</span></div>
         ` : `<div class="muted" style="font-size:13px; padding:10px 0;">قسط پرداخت‌نشده‌ای نداری</div>`}
@@ -1978,8 +1976,9 @@ function renderCommitments(){
       <div class="cmt-thumb">${d.hasUnpaid?typeInfo.emoji:'✅'}</div>
       <div class="info">
         <div class="title">${cm.name}</div>
+        <div class="cmt-amount num">${faSep(cm.monthly)} <span class="inst-unit">تومان</span></div>
         <div class="sub">${cm.provider} · قسط ${fa(d.idx+1)} از ${fa(cm.installments)}</div>
-        <div class="sub">سررسید ${fmtJDate(d.entry)} · ${toman(cm.monthly)}${d.entry.postponed ? ' <span class="badge-postponed">به تعویق افتاده</span>' : ''}</div>
+        <div class="sub">سررسید ${fmtJDate(d.entry)}${d.entry.postponed ? ' <span class="badge-postponed">به تعویق افتاده</span>' : ''}</div>
       </div>
       <button class="cmt-check ${d.hasUnpaid?'':'done'}" data-check="${cm.id}" data-idx="${d.idx}"
         title="${d.hasUnpaid?'علامت‌گذاری این قسط به‌عنوان پرداخت‌شده':'بازگردانی به پرداخت‌نشده'}">${d.hasUnpaid?'✓':'↩'}</button>
@@ -2395,6 +2394,9 @@ function renderProfile(){
       <div class="list-row" id="pf-motion-row"><div class="emoji-badge">♿</div>
         <div class="info"><div class="title">دسترس‌پذیری</div><div class="sub">خوانایی و کاهش حرکت</div></div>
         <span style="font-size:13px; font-weight:700; color:${state.reduceMotion ? 'var(--safe)' : 'var(--muted)'};">${state.reduceMotion ? 'کاهش حرکت روشن' : 'خاموش'}</span></div>
+      <div class="list-row" id="pf-update-row"><div class="emoji-badge">🔄</div>
+        <div class="info"><div class="title">بررسی به‌روزرسانی</div><div class="sub">اگه نسخه‌ی جدید اومده باشه، نصب و باز می‌شه</div></div>
+        <span style="color:var(--muted);">‹</span></div>
     </div>
 
     <div class="note"><span class="note-ic">ⓘ</span><span>پرداخت‌ها خوداظهاری هستند. برای تطبیق مالی، رسیدها و گردش حساب بانکی خود را جداگانه بررسی کنید.</span></div>
@@ -2418,6 +2420,10 @@ function renderProfile(){
     state.reduceMotion = !state.reduceMotion;
     document.body.classList.toggle('reduce-motion', state.reduceMotion);
     saveState(); renderProfile();
+  };
+  document.getElementById('pf-update-row').onclick = ()=>{
+    if(window.checkForAppUpdate) window.checkForAppUpdate(true);
+    else showToast('بررسی به‌روزرسانی در این نسخه نیست');
   };
   document.getElementById('pf-export').onclick = exportState;
   document.getElementById('pf-export2').onclick = exportState;
@@ -3202,25 +3208,48 @@ if(state.onboarded){
   renderOnboarding();
 }
 
+// App update check: fetch the live service worker (bypassing caches) and,
+// if its cache name is newer than anything installed, ask the browser to
+// install it. Defined at top level so it's always available (e.g. the
+// Profile button), even where service workers aren't supported.
+function checkForAppUpdate(showResult){
+  if(!('serviceWorker' in navigator) || !navigator.serviceWorker.controller){
+    if(showResult) showToast('به‌روزرسانی در این مرورگر پشتیبانی نمی‌شه');
+    return Promise.resolve(false);
+  }
+  return fetch('./service-worker.js?v=' + Date.now(), { cache: 'no-store' }).then(r=>r.text()).then(txt=>{
+    const m = txt.match(/CACHE_NAME = '([^']+)'/);
+    if(!m) return false;
+    return caches.keys().then(keys=>{
+      if(keys.length && !keys.includes(m[1])){
+        return navigator.serviceWorker.getRegistration().then(reg=>{
+          if(reg) reg.update();
+          if(showResult) showToast('نسخه‌ی جدید پیدا شد، در حال به‌روزرسانی…');
+          return true;
+        });
+      }
+      if(showResult) showToast('آخرین نسخه رو داری ✅');
+      return false;
+    });
+  }).catch(()=>{ if(showResult) showToast('بررسی به‌روزرسانی ممکن نشد؛ اینترنت رو چک کن'); return false; });
+}
+window.checkForAppUpdate = checkForAppUpdate;
+
 if ('serviceWorker' in navigator) {
+  let reloading = false;
+  navigator.serviceWorker.addEventListener('controllerchange', ()=>{
+    if(reloading) return; reloading = true; location.reload();
+  });
+  // Check on launch and whenever the app comes back to the foreground, so an
+  // update is picked up even if the app was only backgrounded, not closed.
   window.addEventListener('load', () => {
     navigator.serviceWorker.register('service-worker.js').then(reg=>{
       if(!reg.active) return; // first install: nothing to update from
-      // If a newer version is live, install it and reload once it takes over,
-      // so updates stop getting stuck on the old cache.
-      let reloading = false;
-      navigator.serviceWorker.addEventListener('controllerchange', ()=>{
-        if(reloading) return; reloading = true; location.reload();
-      });
-      fetch('./service-worker.js?v=' + Date.now(), { cache: 'no-store' }).then(r=>r.text()).then(txt=>{
-        const m = txt.match(/CACHE_NAME = '([^']+)'/);
-        if(!m) return;
-        caches.keys().then(keys=>{
-          if(keys.length && !keys.includes(m[1])) reg.update();
-        });
-      }).catch(()=>{});
+      checkForAppUpdate(false);
     }).catch(() => {});
   });
+  document.addEventListener('visibilitychange', ()=>{ if(!document.hidden) checkForAppUpdate(false); });
+  window.addEventListener('focus', ()=> checkForAppUpdate(false));
 }
 </script>
 </body>
