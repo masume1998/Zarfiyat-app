@@ -1902,11 +1902,11 @@ function renderCommitments(){
       <div class="card mb18">
         ${schedule.map((e,idx)=>`
           <div style="display:flex; align-items:center; gap:10px; padding:10px 0; ${idx>0?'border-top:1px dashed var(--line);':''}">
-            <span style="width:26px; height:26px; border-radius:50%; flex:0 0 auto; display:flex; align-items:center; justify-content:center; font-size:13px; font-weight:800; ${e.paid?'background:var(--safe); color:#fff;':'border:2px solid var(--line); color:var(--muted);'}">${e.paid?'✓':''}</span>
+            <button type="button" data-sched-toggle="${idx}" aria-label="${e.paid?'برگردوندن قسط به پرداخت‌نشده':'علامت‌گذاری قسط به‌عنوان پرداخت‌شده'}: ${fmtJDate(e)}" style="width:26px; height:26px; border-radius:50%; flex:0 0 auto; display:flex; align-items:center; justify-content:center; font-size:13px; font-weight:800; cursor:pointer; padding:0; font-family:inherit; ${e.paid?'background:var(--safe); color:#fff; border:none;':'background:transparent; border:2px solid var(--line); color:var(--muted);'}">${e.paid?'✓':''}</button>
             <span style="flex:1; font-size:13px; font-weight:600;">${fmtJDate(e)}${idx===nextIdx?' · سررسید بعدی':''}</span>
             <span class="num" style="font-size:13px; font-weight:800; ${e.paid?'color:var(--muted); text-decoration:line-through;':''}">${toman(e.amount)}</span>
           </div>`).join('')}
-        <div class="hint" style="margin-top:8px;">علامت‌گذاری دستیه و تأیید تراکنش بانکی نیست.</div>
+        <div class="hint" style="margin-top:8px;">روی دایره‌ی هر قسط بزن تا تیکش عوض بشه — علامت‌گذاری دستیه و تأیید تراکنش بانکی نیست.</div>
       </div>
       <div class="section-title">اقساط پرداخت‌نشده · چپ = پرداخت، راست = عقب انداختن</div>
       <div class="card mb18">
@@ -1930,6 +1930,15 @@ function renderCommitments(){
     };
     const markBtn = document.getElementById('cm-mark-next');
     if(markBtn) markBtn.onclick = ()=> setPaid(cm.id, nextIdx, true);
+    el.querySelectorAll('[data-sched-toggle]').forEach(btn=>{
+      btn.onclick = ()=>{
+        const i = parseInt(btn.dataset.schedToggle, 10);
+        const entry = schedule[i];
+        if(!entry) return;
+        if(entry.paid) setPaid(cm.id, i, false, { moved:true });
+        else setPaid(cm.id, i, true, { withUndo:true, moved:true });
+      };
+    });
     wireInstallmentRows(el);
     animateMovedInstallment(el);
     document.getElementById('screen-commitments').scrollTop = prevScroll;
