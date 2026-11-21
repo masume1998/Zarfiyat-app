@@ -312,7 +312,7 @@
   .inst-wrap.ready .inst-reveal-r .inst-check{ background:#fff; color:var(--caution); }
   .inst-wrap.ready .inst-reveal-r.unmark .inst-check{ background:#fff; color:var(--muted); }
   .inst-reveal-r .inst-label{ opacity:var(--pR,0); }
-  .badge-postponed{ font-size:10px; font-weight:800; padding:2px 8px; border-radius:100px; background:var(--caution-soft); color:var(--caution); }
+  .badge-postponed{ font-size:10px; font-weight:800; padding:2px 8px; border-radius:100px; background:var(--caution-soft); color:var(--caution); border:none; cursor:pointer; font-family:inherit; display:inline-flex; align-items:center; gap:2px; }
   .inst-card{ position:relative; z-index:1; display:flex; align-items:center; gap:10px; padding:10px 12px;
     background:var(--surface); border:1px solid var(--line); border-radius:12px;
     touch-action:pan-y; user-select:none; -webkit-user-select:none; cursor:grab; }
@@ -944,7 +944,7 @@ function installmentRowHTML(cid, idx, entry, opts){
       ? `<div class="inst-reveal-r unmark" aria-hidden="true"><span class="inst-label">پرداخت‌نشده</span><span class="inst-check">↩</span></div>`
       : `<div class="inst-reveal" aria-hidden="true"><span class="inst-check">✓</span><span class="inst-label">پرداخت‌شده</span></div><div class="inst-reveal-r" aria-hidden="true"><span class="inst-label">به تعویق انداختن</span><span class="inst-check">⏰</span></div>`}
     <div class="inst-card">
-      <div class="inst-text"><div class="inst-title">${label}${entry.postponed ? ' <span class="badge-postponed">به تعویق افتاده</span>' : ''}</div></div>
+      <div class="inst-text"><div class="inst-title">${label}${entry.postponed ? ` <button type="button" class="badge-postponed" data-unpostpone data-cid="${cid}" data-idx="${idx}" aria-label="برگردوندن قسط به تاریخ اصلی">به تعویق افتاده ↩</button>` : ''}</div></div>
       <div class="inst-amount num">${toman(entry.amount)}</div>
       <button type="button" class="inst-btn" data-action="${paid?'restore':'pay'}" title="${actionText}" aria-label="${actionText}: ${label}">${paid?'↩':'✓'}</button>
     </div>
@@ -1017,7 +1017,7 @@ function attachSwipeHandlers(root){
     };
     card.addEventListener('pointerdown', e=>{
       if(e.pointerType === 'mouse' && e.button !== 0) return;
-      if(e.target.closest && e.target.closest('.inst-btn, .cmt-check')) return;   // the button has its own action
+      if(e.target.closest && e.target.closest('.inst-btn, .cmt-check, .badge-postponed')) return;   // the button has its own action
       if(swipeBusy.has(cid+':'+idx)) return;
       tracking = true; locked = false; dx = 0; pid = e.pointerId;
       startX = e.clientX; startY = e.clientY;
@@ -1070,6 +1070,19 @@ function wireInstallmentRows(root){
       const cid = wrap.dataset.cid, idx = parseInt(wrap.dataset.idx,10);
       if(btn.dataset.action === 'pay') completeSwipe(wrap, wrap.querySelector('.inst-card'), cid, idx);
       else setPaid(cid, idx, false, { moved:true });
+    });
+  });
+  // the "postponed" badge is a button: tapping it returns the installment to
+  // its original date (persistent fix for an accidental postpone, not just
+  // the few seconds the undo toast is visible)
+  root.querySelectorAll('.badge-postponed[data-unpostpone]').forEach(btn=>{
+    if(btn._bound) return;
+    btn._bound = true;
+    btn.addEventListener('click', ev=>{
+      ev.stopPropagation();
+      const cid = btn.dataset.cid, idx = parseInt(btn.dataset.idx, 10);
+      if(!cid || isNaN(idx)) return;
+      setPostpone(cid, idx, 0, { moved:true });
     });
   });
 }
@@ -1994,7 +2007,7 @@ function renderCommitments(){
         <div class="title">${cm.name}</div>
         <div class="cmt-amount num">${faSep(cm.monthly)} <span class="inst-unit">تومان</span></div>
         <div class="sub">${cm.provider} · قسط ${fa(d.idx+1)} از ${fa(cm.installments)}</div>
-        <div class="sub">سررسید ${fmtJDate(d.entry)}${d.entry.postponed ? ' <span class="badge-postponed">به تعویق افتاده</span>' : ''}</div>
+        <div class="sub">سررسید ${fmtJDate(d.entry)}${d.entry.postponed ? ` <button type="button" class="badge-postponed" data-unpostpone data-cid="${cm.id}" data-idx="${d.idx}" aria-label="برگردوندن قسط به تاریخ اصلی">به تعویق افتاده ↩</button>` : ''}</div>
       </div>
       <button class="cmt-check ${d.hasUnpaid?'':'done'}" data-check="${cm.id}" data-idx="${d.idx}"
         title="${d.hasUnpaid?'علامت‌گذاری این قسط به‌عنوان پرداخت‌شده':'بازگردانی به پرداخت‌نشده'}">${d.hasUnpaid?'✓':'↩'}</button>
