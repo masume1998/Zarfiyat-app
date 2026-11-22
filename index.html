@@ -901,9 +901,9 @@ function setPaid(commitmentId, idx, value, opts){
   if(opts.moved) lastMovedInstallment = { cid: commitmentId, idx };
   refreshAfterPaidChange();
   if(value && opts.withUndo){
-    showUndoToast('قسط به‌عنوان پرداخت‌شده علامت خورد', ()=> setPaid(commitmentId, idx, false, { moved:true }));
+    showUndoToast(jokeToast(c.providerKey, 'paid') || 'قسط به‌عنوان پرداخت‌شده علامت خورد', ()=> setPaid(commitmentId, idx, false, { moved:true }));
   } else {
-    showToast(value ? 'قسط به‌عنوان پرداخت‌شده علامت خورد' : 'قسط به پرداخت‌نشده برگشت');
+    showToast(jokeToast(c.providerKey, value ? 'paid' : 'unpaid') || (value ? 'قسط به‌عنوان پرداخت‌شده علامت خورد' : 'قسط به پرداخت‌نشده برگشت'));
   }
   return true;
 }
@@ -927,9 +927,9 @@ function setPostpone(commitmentId, idx, months, opts){
   if(opts.moved) lastMovedInstallment = { cid: commitmentId, idx };
   refreshAfterPaidChange();
   if(months > cur){
-    showUndoToast('قسط به ماه بعد موکول شد', ()=> setPostpone(commitmentId, idx, cur, { moved:true }));
+    showUndoToast(jokeToast(c.providerKey, 'postponed') || 'قسط به ماه بعد موکول شد', ()=> setPostpone(commitmentId, idx, cur, { moved:true }));
   } else {
-    showToast('قسط به تاریخ اصلی برگشت');
+    showToast(jokeToast(c.providerKey, 'restored') || 'قسط به تاریخ اصلی برگشت');
   }
   return true;
 }
@@ -1097,6 +1097,29 @@ function animateMovedInstallment(root){
 }
 
 let toastTimer;
+// Funny Instagram-style toast messages for SnapPay / DigiPay installments.
+// Only these two providers get jokes; the rest keep the plain messages.
+// Each action has a few variants — one is picked at random so it stays fresh.
+const JOKE_TOASTS = {
+  snapppay: {
+    paid: ['اسنپ‌پی: یه قسط دیگه هم پرید! 🎉', 'اسنپ‌پی راضی شد… تا ماه بعد 😌', 'پرداخت شد؛ کیف پول یه نفس کشید 😮‍💨'],
+    unpaid: ['اسنپ‌پی: دوباره برگشت تو صف 😅'],
+    postponed: ['اسنپ‌پی: باشه، ماه بعد می‌بینمت 😅', 'قسط رفت ماه بعد، اسنپ‌پی صبر کرد 😌'],
+    restored: ['اسنپ‌پی: برگشت سر جاش 😎']
+  },
+  digipay: {
+    paid: ['دیجی‌پی: تسویه! یه قسط خط خورد ✅', 'دیجی‌پی: آفرین، سر وقت پرداختی 🙌'],
+    unpaid: ['دیجی‌پی: دوباره برگشت تو صف 😅'],
+    postponed: ['دیجی‌پی: عجله نکن، ماه بعد هم هست 😅', 'دیجی‌پی گفت باشه، یه ماه دیگه 😌'],
+    restored: ['دیجی‌پی: برگشت سر جاش 🎉']
+  }
+};
+function jokeToast(provider, action){
+  const list = JOKE_TOASTS[provider] && JOKE_TOASTS[provider][action];
+  if(!list || !list.length) return null;
+  return list[Math.floor(Math.random() * list.length)];
+}
+
 function showToast(msg, duration){
   const t = document.getElementById('toast');
   t.classList.remove('has-action');
