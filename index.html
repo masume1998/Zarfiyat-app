@@ -254,7 +254,7 @@
 
   .toast{ position:absolute; bottom:100px; left:50%; transform:translateX(-50%) translateY(20px);
     background:var(--ink); color:#fff; padding:12px 20px; border-radius:100px; font-size:13px; font-weight:700;
-    opacity:0; pointer-events:none; transition:.25s; z-index:50; white-space:nowrap; }
+    opacity:0; pointer-events:none; transition:opacity .25s ease, transform .25s cubic-bezier(.22,1,.36,1); z-index:50; white-space:nowrap; }
   .toast.show{ opacity:1; transform:translateX(-50%) translateY(0); }
   .toast.has-action{ display:flex; align-items:center; gap:14px; white-space:normal; max-width:calc(100% - 24px); }
   .toast.show.has-action{ pointer-events:auto; }
@@ -814,7 +814,7 @@ function gaugeSVG(percent, trackColor, color){
   return `<svg viewBox="0 0 200 108">
     <path d="M22 96 A ${r} ${r} 0 0 1 178 96" fill="none" stroke="${trackColor}" stroke-width="13" stroke-linecap="round"/>
     <path d="M22 96 A ${r} ${r} 0 0 1 178 96" fill="none" stroke="${color}" stroke-width="13" stroke-linecap="round"
-      stroke-dasharray="${len}" stroke-dashoffset="${offset}" style="transition:stroke-dashoffset .5s ease"/>
+      stroke-dasharray="${len}" stroke-dashoffset="${offset}" style="transition:stroke-dashoffset .5s cubic-bezier(.22,1,.36,1)"/>
   </svg>`;
 }
 
@@ -832,7 +832,7 @@ function ringSVG(pct, color){
   return `<svg viewBox="0 0 148 148" role="img" aria-label="ظرفیت اقساط ${fa(Math.round(pct))} درصد">
     <circle cx="74" cy="74" r="${R}" fill="none" stroke="rgba(255,255,255,.15)" stroke-width="12"/>
     <circle cx="74" cy="74" r="${R}" fill="none" stroke="${color || '#74C365'}" stroke-width="12" stroke-linecap="round"
-      stroke-dasharray="${dash(main)}" transform="rotate(-90 74 74)" style="transition:stroke-dasharray .5s ease"/>
+      stroke-dasharray="${dash(main)}" transform="rotate(-90 74 74)" style="transition:stroke-dasharray .5s cubic-bezier(.22,1,.36,1)"/>
     ${over > 0 ? `<circle cx="74" cy="74" r="${R}" fill="none" stroke="#FF5A4E" stroke-width="12" stroke-linecap="round"
       stroke-dasharray="${dash(over)}" transform="rotate(-90 74 74)"/>` : ''}
   </svg>`;
@@ -970,7 +970,7 @@ function completeSwipe(wrap, card, cid, idx, action){
   };
   if(prefersReducedMotion()){ finish(); return; }
   const h = wrap.offsetHeight;
-  card.style.transition = 'transform .22s ease-in, opacity .22s ease-in';
+  card.style.transition = 'transform .22s cubic-bezier(.22,1,.36,1), opacity .22s cubic-bezier(.22,1,.36,1)';
   card.style.transform = `translateX(${(flyRight ? 1 : -1) * (wrap.offsetWidth + 20)}px)`;
   card.style.opacity = '0';
   setTimeout(()=>{                       // collapse the gap once the card has left
