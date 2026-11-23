@@ -57,6 +57,19 @@
     .screen{ padding:64px 48px 120px; }
   }
 
+  /* ---- mobile: give the navbar, filter row and detail actions room ---- */
+  @media (max-width:767px){
+    .bottom-nav{ padding:10px 12px; gap:4px; }
+    .bottom-nav .nav-btn{ padding:10px 10px; }
+    .nav-fab{ width:48px; height:48px; }
+    .filter-row{ flex-wrap:wrap; overflow-x:visible; }
+    .sort-select{ flex:1 1 auto; min-width:140px; margin-inline-start:0; }
+    .step-actions.detail-actions{ flex-wrap:wrap; }
+    .step-actions.detail-actions #cm-back2{ flex:1 1 100%; }
+    .step-actions.detail-actions #cm-edit,
+    .step-actions.detail-actions #cm-del{ flex:1 1 0; max-width:none; }
+  }
+
   .card{ background:var(--surface); border-radius:22px; padding:20px; border:none;
     box-shadow:0 1px 3px rgba(0,31,63,.05); }
   .card + .card{ margin-top:14px; }
@@ -149,6 +162,7 @@
   .step-sub{ font-size:13px; color:var(--muted); margin-bottom:24px; line-height:1.7; }
   .step-actions{ position:sticky; bottom:0; z-index:10; background:var(--paper);
     padding:16px 0 calc(12px + env(safe-area-inset-bottom, 0px)); display:flex; gap:10px; }
+  #cm-edit, #cm-del{ max-width:110px; }
 
   .gauge-wrap{ display:flex; flex-direction:column; align-items:center; margin:10px 0 2px; position:relative; }
   .gauge-figure{ position:relative; width:200px; }
@@ -1860,7 +1874,7 @@ function renderHome(){
 
 let commitFilter = 'all';
 let commitMonthOffset = 0; // 0 = this month, 1 = all upcoming months
-let commitSort = 'due'; // 'due' = nearest first (month groups), 'new' = newest commitment first
+let commitSort = 'due'; // 'due' = nearest first (month groups), 'new' = newest commitment first, 'platform' = group by provider
 let commitEditTarget = null;
 let commitDetailTarget = null;
 
@@ -1950,10 +1964,10 @@ function renderCommitments(){
       </div>
       ${next ? `<button class="btn btn-primary mb14" id="cm-mark-next">علامت‌گذاری قسط ${MONTH_NAMES[next.jm]} به‌عنوان پرداخت‌شده</button>` : ''}
       <div class="note"><span class="note-ic">ⓘ</span><span>این فقط ثبت شخصی پرداخت است؛ وجهی منتقل یا پرداخت بانکی تأیید نمی‌شود.</span></div>
-      <div class="step-actions">
+      <div class="step-actions detail-actions">
         <button class="btn btn-ghost" id="cm-back2">بازگشت به اقساط</button>
-        <button class="btn btn-ghost" id="cm-edit" style="max-width:110px;">ویرایش</button>
-        <button class="btn btn-outline-danger" id="cm-del" style="max-width:110px;">حذف</button>
+        <button class="btn btn-ghost" id="cm-edit">ویرایش</button>
+        <button class="btn btn-outline-danger" id="cm-del">حذف</button>
       </div>
     `;
     document.getElementById('cm-back').onclick = ()=>{ commitDetailTarget=null; renderCommitments(); };
@@ -1997,11 +2011,14 @@ function renderCommitments(){
       const overdue = past && !thisMonth;
       const monthKey = overdue ? 'overdue' : `${e.jy}-${e.jm}`;
       // 'due' groups by month (nearest first); 'new' groups by commitment,
-      // newest commitment first (state.commitments is newest-first).
+      // newest commitment first (state.commitments is newest-first);
+      // 'platform' groups by provider (SnapPay, DigiPay, ...), in PROVIDERS
+      // order, and the group title shows that platform's total (below).
+      const pIdx = PROVIDERS.findIndex(p=>p.key===cm.providerKey);
       entries.push({ cm, idx, entry: e, hasUnpaid: !e.paid, monthKey,
-        groupKey: commitSort === 'new' ? cm.id : monthKey,
-        groupTitle: commitSort === 'new' ? cm.name : (overdue ? 'عقب‌افتاده' : `${MONTH_NAMES[e.jm]} ${fa(e.jy)}`),
-        groupOrder: commitSort === 'new' ? ci : (overdue ? -1 : e.jy * 12 + e.jm),
+        groupKey: commitSort === 'new' ? cm.id : commitSort === 'platform' ? cm.providerKey : monthKey,
+        groupTitle: commitSort === 'new' ? cm.name : commitSort === 'platform' ? cm.provider : (overdue ? 'عقب‌افتاده' : `${MONTH_NAMES[e.jm]} ${fa(e.jy)}`),
+        groupOrder: commitSort === 'new' ? ci : commitSort === 'platform' ? pIdx : (overdue ? -1 : e.jy * 12 + e.jm),
         jdn: j2d(e.jy, e.jm, e.jd) });
     });
   });
@@ -2067,6 +2084,7 @@ function renderCommitments(){
       <select id="cm-sort" class="sort-select" aria-label="مرتب‌سازی">
         <option value="due" ${commitSort==='due'?'selected':''}>نزدیک‌ترین</option>
         <option value="new" ${commitSort==='new'?'selected':''}>جدیدترین</option>
+        <option value="platform" ${commitSort==='platform'?'selected':''}>پلتفرم</option>
       </select>
     </div>
     </div>
