@@ -175,8 +175,8 @@
   .ring-wrap{ position:relative; width:148px; height:148px; flex:0 0 auto; }
   .ring-wrap svg{ width:100%; height:100%; display:block; }
   .ring-center{ position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; }
-  .ring-center .big{ font-size:34px; font-weight:800; color:#fff; line-height:1.1; }
-  .ring-center .small{ font-size:10px; color:rgba(255,255,255,.65); }
+  .ring-center .big{ font-size:34px; font-weight:800; color:var(--ink); line-height:1.1; }
+  .ring-center .small{ font-size:10px; color:var(--muted); }
 
   .status-chip{ font-size:10px; font-weight:700; padding:5px 11px; border-radius:100px; display:inline-flex; align-items:center; gap:5px; }
   .status-chip.safe{ background:var(--safe-soft); color:var(--safe); }
@@ -228,7 +228,7 @@
   .alloc-row.total .r{ font-size:13px; }
   .tbl-row.total{ border-top:2px solid var(--ink); }
   .tbl-row.total .c{ font-size:13px; font-weight:800; }
-  .hero .hero-row.total{ border-top:2px solid rgba(255,255,255,.35); }
+  .hero .hero-row.total{ border-top:2px solid var(--line); }
   .hero .hero-row.total .r{ font-size:13px; }
   .alloc-dot{ width:10px; height:10px; border-radius:3px; flex:0 0 auto; }
 
@@ -251,10 +251,11 @@
   /* calendar month grid */
   .cal-grid{ display:grid; grid-template-columns:repeat(7,1fr); gap:4px; text-align:center; }
   .cal-grid .wd{ font-size:10px; color:var(--muted); font-weight:700; padding:6px 0; }
-  .cal-grid .day{ font-size:13px; font-weight:600; padding:9px 0 7px; border-radius:12px; cursor:pointer; position:relative; }
+  .cal-grid .day{ font-size:13px; font-weight:600; border-radius:50%; cursor:pointer; position:relative;
+    display:flex; flex-direction:column; align-items:center; justify-content:center; aspect-ratio:1; }
   .cal-grid .day .dot{ width:5px; height:5px; border-radius:50%; background:var(--accent2); margin:3px auto 0; }
   .cal-grid .day .dot.paid{ background:var(--safe); }
-  .cal-grid .day.sel{ background:var(--ink); color:#fff; }
+  .cal-grid .day.sel{ background:var(--accent-soft); color:var(--accent); }
   .cal-grid .day.sel .dot{ background:var(--accent); }
   .cal-grid .day.today{ outline:2px solid var(--accent2); }
 
@@ -277,7 +278,9 @@
     border:1px solid var(--line); box-shadow:0 12px 32px -8px rgba(35,39,43,.25);
     opacity:0; pointer-events:none; transition:opacity .25s ease, transform .25s cubic-bezier(.22,1,.36,1); z-index:50; white-space:nowrap; }
   .toast.show{ opacity:1; transform:translateX(-50%) translateY(0); }
-  .toast.has-action{ display:flex; align-items:center; gap:14px; white-space:normal; max-width:calc(100% - 24px); }
+  .toast.has-action{ display:flex; align-items:center; gap:12px; white-space:normal; max-width:calc(100% - 24px);
+    border-radius:18px; padding:14px 16px; text-align:start; }
+  .toast .toast-msg{ flex:1 1 auto; min-width:0; line-height:1.6; }
   .toast.show.has-action{ pointer-events:auto; }
   .toast .toast-undo{ background:var(--accent); color:#fff; border:none; border-radius:100px; padding:6px 14px;
     font-family:inherit; font-size:13px; font-weight:800; cursor:pointer; flex:0 0 auto; }
@@ -306,6 +309,11 @@
   .page-head .sub{ font-size:13px; color:var(--muted); margin-top:4px; }
   .icon-btn{ width:34px; height:34px; border-radius:50%; background:var(--surface); border:1px solid var(--line);
     display:flex; align-items:center; justify-content:center; cursor:pointer; flex:0 0 auto; }
+  .icon-btn.active{ background:var(--accent-soft); border-color:var(--accent); color:var(--accent); }
+  /* ---- filter panel: the installments filters live behind one icon button ---- */
+  .filter-panel{ background:var(--surface); border:1px solid var(--line); border-radius:18px;
+    box-shadow:var(--shadow); padding:14px; margin-top:12px; }
+  .filter-panel .filter-row{ margin-bottom:0; }
   .badge-necessity{ font-size:10px; font-weight:700; padding:3px 9px; border-radius:100px; }
   .badge-necessity.req{ background:var(--safe-soft); color:var(--safe); }
   .badge-necessity.semi{ background:var(--caution-soft); color:var(--caution); }
@@ -1386,7 +1394,7 @@ function renderOnboarding(){
       <div class="step-sub">سقف، سهمی از بودجه‌ی نیازهاست (نیازها ${fa(obDraft.technique.p.needs)}٪)؛ خودت می‌تونی تغییرش بدی.</div>
       <div class="hero mb18">
         <div class="hero-label">سقف پیشنهادی اقساط ماهانه</div>
-        <div class="hero-num num" id="ob-cap-amount">${(()=>{ const s = moneyShort(reliable * obDraft.capPercent / 100); return s.num + ' <span style="font-size:13px; color:rgba(255,255,255,.7);">' + s.unit + '</span>'; })()}</div>
+        <div class="hero-num num" id="ob-cap-amount">${(()=>{ const s = moneyShort(reliable * obDraft.capPercent / 100); return s.num + ' <span style="font-size:13px; color:var(--muted);">' + s.unit + '</span>'; })()}</div>
         <div class="hero-sub">پایه محاسبه: ${toman(reliable)} · <span id="ob-cap-pct">${fa(obDraft.capPercent)}٪</span> از درآمد قابل‌اتکا</div>
         <input type="range" min="5" max="${Math.max(5, obDraft.technique.p.needs)}" step="5" value="${Math.min(obDraft.capPercent, obDraft.technique.p.needs)}" id="ob-cap-slider" style="margin-top:14px;">
         <div class="hero-sub" style="margin-top:8px;">درصد سقف دلخواه</div>
@@ -1408,7 +1416,7 @@ function renderOnboarding(){
         <button class="btn btn-primary" id="ob-finish">ورود به داشبورد من</button>
       </div>`;
     function updateObCap(){
-      document.getElementById('ob-cap-amount').innerHTML = (()=>{ const s = moneyShort(reliable * obDraft.capPercent / 100); return s.num + ' <span style="font-size:13px; color:rgba(255,255,255,.7);">' + s.unit + '</span>'; })();
+      document.getElementById('ob-cap-amount').innerHTML = (()=>{ const s = moneyShort(reliable * obDraft.capPercent / 100); return s.num + ' <span style="font-size:13px; color:var(--muted);">' + s.unit + '</span>'; })();
       document.getElementById('ob-cap-pct').textContent = fa(obDraft.capPercent) + '٪';
     }
     document.getElementById('ob-cap-slider').addEventListener('input', e=>{
@@ -1814,21 +1822,21 @@ function renderHome(){
           <div class="hero-sub">${freeS.unit} در ماه · ${fa(Math.max(0, 100 - x.pct))}٪ از سقف، هنوز آزاد است</div>
         </div>
       </div>
-      <div style="display:flex; margin-top:18px; border-top:1px solid rgba(255,255,255,.14); padding-top:14px;">
+      <div style="display:flex; margin-top:18px; border-top:1px solid var(--line); padding-top:14px;">
         <div style="flex:1; min-width:0; text-align:center;">
           <div class="hero-label">اقساط ${MONTH_NAMES[x.m.jm]}</div>
           <div class="num" style="font-size:13px; font-weight:800; margin-top:2px;">${valS.num}</div>
-          <div style="font-size:10px; color:rgba(255,255,255,.65);">${valS.unit}</div>
+          <div style="font-size:10px; color:var(--muted);">${valS.unit}</div>
         </div>
-        <div style="flex:1; min-width:0; text-align:center; border-inline-start:1px solid rgba(255,255,255,.14);">
+        <div style="flex:1; min-width:0; text-align:center; border-inline-start:1px solid var(--line);">
           <div class="hero-label">سقف</div>
           <div class="num" style="font-size:13px; font-weight:800; margin-top:2px;">${capS.num}</div>
-          <div style="font-size:10px; color:rgba(255,255,255,.65);">${capS.unit}</div>
+          <div style="font-size:10px; color:var(--muted);">${capS.unit}</div>
         </div>
-        <div style="flex:1; min-width:0; text-align:center; border-inline-start:1px solid rgba(255,255,255,.14);">
+        <div style="flex:1; min-width:0; text-align:center; border-inline-start:1px solid var(--line);">
           <div class="hero-label">پرداخت‌نشده</div>
           <div class="num" style="font-size:13px; font-weight:800; margin-top:2px;">${unS.num}</div>
-          <div style="font-size:10px; color:rgba(255,255,255,.65);">${unS.unit}</div>
+          <div style="font-size:10px; color:var(--muted);">${unS.unit}</div>
         </div>
       </div>
     </div>`;
@@ -1899,6 +1907,7 @@ function renderHome(){
 }
 
 let commitFilter = 'all';
+let commitFilterOpen = false; // filter panel open/closed (icon button, top-left)
 let commitMonthOffset = 0; // 0 = this month, 1 = all upcoming months
 let commitSort = 'due'; // 'due' = nearest first (month groups), 'new' = newest commitment first, 'platform' = group by provider
 let commitEditTarget = null;
@@ -1962,11 +1971,11 @@ function renderCommitments(){
       <div class="muted" style="font-size:13px; margin-bottom:12px;">${cm.provider}</div>
       <div class="hero mb18">
         <div class="hero-label">مبلغ هر قسط</div>
-        <div class="hero-num num">${(()=>{ const s = moneyShort(cm.monthly); return s.num + ' <span style="font-size:13px; color:rgba(255,255,255,.7);">' + s.unit + '</span>'; })()}</div>
+        <div class="hero-num num">${(()=>{ const s = moneyShort(cm.monthly); return s.num + ' <span style="font-size:13px; color:var(--muted);">' + s.unit + '</span>'; })()}</div>
         <div class="hero-row"><span class="l">کل بازپرداخت</span><span class="r num">${toman(totalRepay)}</span></div>
         <div class="hero-row"><span class="l">پیشرفت پرداخت</span><span class="r num">${fa(paidCount)} از ${fa(cm.installments)} قسط · ${fa(pctPaid)}٪</span></div>
         <div class="hero-row total"><span class="l">مانده این تعهد</span><span class="r num">${toman(unpaidSum)}</span></div>
-        <div style="height:8px; border-radius:100px; background:rgba(255,255,255,.14); overflow:hidden; margin-top:12px;">
+        <div style="height:8px; border-radius:100px; background:var(--track); overflow:hidden; margin-top:12px;">
           <div style="height:100%; border-radius:100px; width:${pctPaid}%; background:var(--bar-blue);"></div>
         </div>
         <div style="display:flex; gap:8px; margin-top:12px;">
@@ -2048,7 +2057,10 @@ function renderCommitments(){
         jdn: j2d(e.jy, e.jm, e.jd) });
     });
   });
-  entries.sort((a,b)=> a.groupOrder - b.groupOrder || a.jdn - b.jdn);
+  // Within a group, unpaid installments come first (by due date) and paid
+  // ones sink to the end of their section, so what is still due stays visible.
+  entries.sort((a,b)=> a.groupOrder - b.groupOrder
+    || (a.hasUnpaid === b.hasUnpaid ? a.jdn - b.jdn : (a.hasUnpaid ? -1 : 1)));
 
   const shown = commitMonthOffset === 0
     ? entries.filter(d=> d.monthKey === 'overdue' || d.monthKey === `${t.jy}-${t.jm}`)
@@ -2102,16 +2114,21 @@ function renderCommitments(){
       <button class="icon-btn" id="cm-new" aria-label="افزودن قسط یا تعهد" title="افزودن قسط یا تعهد">
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="#23272B" stroke-width="2.4" stroke-linecap="round"/></svg>
       </button>
+      <button class="icon-btn ${commitFilter!=='all' || commitSort!=='due' ? 'active' : ''}" id="cm-filter-btn" aria-label="فیلترها" title="فیلترها">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>
+      </button>
     </div>
-    <div class="filter-row" id="commit-filters">
-      <div class="filter-chip ${commitFilter==='all'?'selected':''}" data-f="all">همه</div>
-      <div class="filter-chip ${commitFilter==='unpaid'?'selected':''}" data-f="unpaid">پرداخت‌نشده</div>
-      <div class="filter-chip ${commitFilter==='paid'?'selected':''}" data-f="paid">پرداخت‌شده</div>
-      <select id="cm-sort" class="sort-select" aria-label="مرتب‌سازی">
-        <option value="due" ${commitSort==='due'?'selected':''}>نزدیک‌ترین</option>
-        <option value="new" ${commitSort==='new'?'selected':''}>جدیدترین</option>
-        <option value="platform" ${commitSort==='platform'?'selected':''}>پلتفرم</option>
-      </select>
+    <div class="filter-panel" id="commit-filter-panel" ${commitFilterOpen?'':'hidden'}>
+      <div class="filter-row" id="commit-filters">
+        <div class="filter-chip ${commitFilter==='all'?'selected':''}" data-f="all">همه</div>
+        <div class="filter-chip ${commitFilter==='unpaid'?'selected':''}" data-f="unpaid">پرداخت‌نشده</div>
+        <div class="filter-chip ${commitFilter==='paid'?'selected':''}" data-f="paid">پرداخت‌شده</div>
+        <select id="cm-sort" class="sort-select" aria-label="مرتب‌سازی">
+          <option value="due" ${commitSort==='due'?'selected':''}>نزدیک‌ترین</option>
+          <option value="new" ${commitSort==='new'?'selected':''}>جدیدترین</option>
+          <option value="platform" ${commitSort==='platform'?'selected':''}>پلتفرم</option>
+        </select>
+      </div>
     </div>
     </div>
     ${groups.length ? groups.map(g=>{
@@ -2145,10 +2162,11 @@ function renderCommitments(){
       sc.scrollTo({ top: 0, behavior: smooth });
     }
   };
+  document.getElementById('cm-filter-btn').onclick = ()=>{ commitFilterOpen = !commitFilterOpen; renderCommitments(); };
   document.querySelectorAll('#commit-filters [data-f]').forEach(chip=>chip.onclick=()=>{
-    commitFilter = chip.dataset.f; renderCommitments();
+    commitFilter = chip.dataset.f; commitFilterOpen = false; renderCommitments();
   });
-  document.getElementById('cm-sort').onchange = (e)=>{ commitSort = e.target.value; renderCommitments(); };
+  document.getElementById('cm-sort').onchange = (e)=>{ commitSort = e.target.value; commitFilterOpen = false; renderCommitments(); };
   wireInstallmentRows(el);
   document.querySelectorAll('[data-detail]').forEach(row=>row.addEventListener('click', ()=>{
     const wrap = row.closest('.inst-wrap');
@@ -2258,7 +2276,7 @@ function renderPlanCalendar(){
         ${wds.map(w=>`<div class="wd">${w}</div>`).join('')}
         ${cells}
       </div>
-      <div class="hint" style="margin-top:10px;">نقطه سبز: پرداخت‌شده · نقطه آبی: سررسید</div>
+      <div class="hint" style="margin-top:10px;">نقطه آبی روشن: سررسید · نقطه آبی تیره: پرداخت‌شده</div>
     </div>
     <div class="section-title">${jWeekdayName(selDate)}، ${fa(selDate.jd)} ${MONTH_NAMES[selDate.jm]} ${fa(selDate.jy)}</div>
     <div class="card">
@@ -2332,7 +2350,7 @@ function renderPlanCashflow(){
   document.getElementById('plan-cashflow').innerHTML = `
     <div class="hero mb18">
       <div class="hero-label">مانده ماهانه برای روزمره</div>
-      <div class="hero-num num">${faM(minFree)} تا ${faM(maxFree)} <span style="font-size:13px; color:rgba(255,255,255,.7);">میلیون تومان</span></div>
+      <div class="hero-num num">${faM(minFree)} تا ${faM(maxFree)} <span style="font-size:13px; color:var(--muted);">میلیون تومان</span></div>
       <div class="hero-sub">پس از هزینه ثابت، اقساط و پس‌انداز برنامه‌ریزی‌شده</div>
       <div class="bars">
         ${rows.map((r,idx)=>`
@@ -3136,7 +3154,7 @@ function renderSimResult(){
       <div class="muted" style="font-size:13px; margin-bottom:18px;">حالت مستقل · هنوز درآمد قابل‌اتکا ندارید.</div>
       <div class="hero mb18" style="text-align:center;">
         <div class="ring-wrap" style="margin:0 auto 12px;">
-          <svg viewBox="0 0 148 148"><circle cx="74" cy="74" r="62" fill="none" stroke="rgba(255,255,255,.14)" stroke-width="13"/></svg>
+          <svg viewBox="0 0 148 148"><circle cx="74" cy="74" r="62" fill="none" stroke="#DDE3EA" stroke-width="13"/></svg>
           <div class="ring-center"><div class="big">؟</div><div class="small">وضعیت نامشخص</div></div>
         </div>
         <div style="font-size:21px; font-weight:800; margin-bottom:6px;">هنوز نمی‌توانیم ظرفیت را بسنجیم</div>
