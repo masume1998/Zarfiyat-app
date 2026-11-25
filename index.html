@@ -6,7 +6,7 @@
 <title>ظرفیت | دستیار تصمیم‌گیری مالی شخصی</title>
 
 <link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#001F3F">
+<meta name="theme-color" content="#F6F2E9">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -19,14 +19,14 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/yekan-font@1.0.0/css/yekan-font.min.css">
 <style>
   :root{
-    --ink:#001F3F; --ink-soft:#2C4A6B; --muted:#6E7C8C;
-    --paper:#F6F7ED; --paper-deep:#EAECDD; --surface:#FFFFFF; --line:#DEE1D2;
-    --safe:#00804C; --safe-soft:#E1F0E6; --safe-ink:#00603A;
-    --caution:#8A7200; --caution-soft:#F7F3D2;
-    --danger:#B3402A; --danger-soft:#F6E4DF;
-    --accent:#DBE64C; --accent2:#1E488F; --green-bar:#74C365;
-    --track:#E3E6D6;
-    --shadow: 0 18px 40px -18px rgba(0,31,63,.28);
+    --ink:#23272B; --ink-soft:#4A4F54; --muted:#7C8187;
+    --paper:#F6F2E9; --paper-deep:#ECE7DB; --surface:#FFFFFF; --line:#DDE3EA;
+    --safe:#1F9D63; --safe-soft:#E2F3E8; --safe-ink:#157347;
+    --caution:#A16207; --caution-soft:#F7EDD3;
+    --danger:#C2412D; --danger-soft:#FBE9E5;
+    --accent:#1D4ED8; --accent2:#60A5FA; --accent-soft:#E3ECFD; --green-bar:#2FA36B;
+    --track:#DDE3EA;
+    --shadow: 0 1px 3px rgba(35,39,43,.06), 0 12px 32px -12px rgba(35,39,43,.14);
   }
   *{box-sizing:border-box; margin:0; padding:0;}
   html,body{height:100%;}
@@ -71,7 +71,7 @@
   }
 
   .card{ background:var(--surface); border-radius:22px; padding:20px; border:none;
-    box-shadow:0 1px 3px rgba(0,31,63,.05); }
+    box-shadow:0 1px 3px rgba(35,39,43,.05); }
   .card + .card{ margin-top:14px; }
   .section-title{ font-size:13px; font-weight:700; margin:26px 0 8px; display:flex; align-items:center; justify-content:space-between; }
   .section-title span.link{ font-size:13px; font-weight:600; color:var(--safe); cursor:pointer; }
@@ -85,7 +85,7 @@
   .btn{ display:flex; align-items:center; justify-content:center; gap:8px; width:100%; padding:15px;
     border-radius:100px; border:none; font-family:inherit; font-size:13px; font-weight:700; cursor:pointer; }
   .btn:active{ transform:scale(.97); }
-  .btn-primary{ background:var(--accent); color:var(--ink); }
+  .btn-primary{ background:var(--accent); color:#fff; }
   .btn-ghost{ background:var(--surface); color:var(--ink); border:1px solid var(--line); }
   .btn-outline-danger{ background:transparent; color:var(--danger); border:1px solid rgba(179,64,42,.35); }
   .btn[disabled]{ opacity:.4; pointer-events:none; }
@@ -130,7 +130,7 @@
   .list-section-title{ font-size:21px; font-weight:800; margin:22px 0 10px; }
   .inst-wrap.cmt-wrap{ margin:0 0 10px; border-radius:18px; }
   .inst-wrap.cmt-wrap .inst-card{ border:none; border-radius:18px; padding:12px;
-    box-shadow:0 1px 3px rgba(0,31,63,.05); }
+    box-shadow:0 1px 3px rgba(35,39,43,.05); }
   /* ---- dashboard hero slider dots ---- */
   .hero-dot{ width:6px; height:6px; border-radius:100px; background:var(--line); cursor:pointer;
     transition:width .2s ease, background .2s ease; }
@@ -188,21 +188,21 @@
   .hero{ background:var(--ink); border-radius:22px; padding:22px;
     color:#fff; border:none; }
   .hero .hero-label{ font-size:13px; color:rgba(255,255,255,.65); }
-  .hero .hero-num{ font-size:34px; font-weight:800; color:var(--accent); line-height:1.25; }
+  .hero .hero-num{ font-size:34px; font-weight:800; color:var(--accent2); line-height:1.25; }
   .hero .hero-sub{ font-size:13px; color:rgba(255,255,255,.65); line-height:1.7; }
   .hero .hero-row{ display:flex; justify-content:space-between; gap:10px; padding:9px 0; font-size:13px; }
   .hero .hero-row .l{ color:rgba(255,255,255,.65); }
   .hero .hero-row .r{ font-weight:800; }
   .hero-chip{ font-size:10px; font-weight:700; padding:5px 12px; border-radius:100px; display:inline-flex; align-items:center; gap:6px; }
-  .hero-chip.safe{ background:rgba(0,128,76,.9); color:#fff; }
-  .hero-chip.caution{ background:var(--accent); color:var(--ink); }
-  .hero-chip.danger{ background:#B3402A; color:#fff; }
+  .hero-chip.safe{ background:rgba(31,157,99,.9); color:#fff; }
+  .hero-chip.caution{ background:var(--accent); color:#fff; }
+  .hero-chip.danger{ background:var(--danger); color:#fff; }
 
 
   .segmented{ display:flex; background:var(--paper-deep); border-radius:100px; padding:3px; margin-bottom:18px; }
   .segmented button{ flex:1; border:none; background:transparent; padding:9px 6px; border-radius:100px;
     font-family:inherit; font-size:13px; font-weight:700; color:var(--muted); cursor:pointer; }
-  .segmented button.active{ background:var(--surface); color:var(--ink); box-shadow:0 2px 6px rgba(0,31,63,.1); }
+  .segmented button.active{ background:var(--surface); color:var(--ink); box-shadow:0 2px 6px rgba(35,39,43,.1); }
 
   .waterfall-row{ display:flex; align-items:center; justify-content:space-between; padding:11px 0; gap:10px; }
   .waterfall-row .l{ font-size:13px; font-weight:600; color:var(--ink-soft); display:flex; align-items:center; gap:8px;}
@@ -272,24 +272,24 @@
   .toast.show{ opacity:1; transform:translateX(-50%) translateY(0); }
   .toast.has-action{ display:flex; align-items:center; gap:14px; white-space:normal; max-width:calc(100% - 24px); }
   .toast.show.has-action{ pointer-events:auto; }
-  .toast .toast-undo{ background:var(--accent); color:var(--ink); border:none; border-radius:100px; padding:6px 14px;
+  .toast .toast-undo{ background:var(--accent); color:#fff; border:none; border-radius:100px; padding:6px 14px;
     font-family:inherit; font-size:13px; font-weight:800; cursor:pointer; flex:0 0 auto; }
   .toast .toast-undo:focus-visible{ outline:2px solid #fff; outline-offset:2px; }
 
   .bottom-nav{ position:absolute; left:50%; transform:translateX(-50%); bottom:calc(14px + env(safe-area-inset-bottom)); z-index:20;
     width:min(430px, calc(100% - 32px));
-    background:var(--ink); border-radius:100px; padding:10px 18px;
-    box-shadow:0 16px 40px -12px rgba(0,31,63,.45);
+    background:var(--surface); border-radius:100px; padding:10px 18px;
+    box-shadow:0 16px 40px -12px rgba(35,39,43,.18);
     display:flex; align-items:center; justify-content:space-between; gap:6px; }
-  .bottom-nav .nav-btn{ color:rgba(255,255,255,.65); padding:10px 14px; border-radius:100px;
+  .bottom-nav .nav-btn{ color:var(--muted); padding:10px 14px; border-radius:100px;
     transition:background .3s cubic-bezier(.22,1,.36,1), color .3s cubic-bezier(.22,1,.36,1); }
-  .bottom-nav .nav-btn.active{ background:var(--accent); color:var(--ink); }
+  .bottom-nav .nav-btn.active{ background:var(--accent-soft); color:var(--accent); }
   .nav-btn{ background:none; border:none; display:flex; flex-direction:column; align-items:center; gap:4px;
     font-family:inherit; font-size:10px; font-weight:700; color:var(--muted); cursor:pointer; padding:6px 10px; }
   .nav-btn .nav-label{ display:none; }
   .nav-btn svg{ width:22px; height:22px; }
-  .nav-btn.active{ color:var(--safe-ink); background:var(--accent); border-radius:12px; }
-  .nav-fab{ width:52px; height:52px; border-radius:50%; background:var(--accent); color:var(--ink); display:flex;
+  .nav-btn.active{ color:var(--accent); background:var(--accent-soft); border-radius:12px; }
+  .nav-fab{ width:52px; height:52px; border-radius:50%; background:var(--accent); color:#fff; display:flex;
     align-items:center; justify-content:center; border:none; margin-top:-30px; cursor:pointer; }
   .nav-fab svg{ width:22px; height:22px; }
 
@@ -353,7 +353,7 @@
 
   input[type="range"]{ -webkit-appearance:none; width:100%; height:6px; border-radius:100px; background:var(--track); outline:none; }
   input[type="range"]::-webkit-slider-thumb{ -webkit-appearance:none; width:20px; height:20px; border-radius:50%;
-    background:var(--safe); border:4px solid #fff; box-shadow:0 2px 8px rgba(0,128,76,.4); cursor:pointer; }
+    background:var(--safe); border:4px solid #fff; box-shadow:0 2px 8px rgba(31,157,99,.4); cursor:pointer; }
 
   /* ---- purchase advisor (local-only, no server / no API) ---- */
   .advisor-alt-title{ font-size:13px; font-weight:800; margin:12px 0 8px; }
@@ -422,7 +422,7 @@
       <span class="nav-label">اقساط</span>
     </button>
     <button class="nav-fab" data-nav="sim" aria-label="شبیه‌ساز">
-      <svg viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="#001F3F" stroke-width="2.4" stroke-linecap="round"/></svg>
+      <svg viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="#23272B" stroke-width="2.4" stroke-linecap="round"/></svg>
     </button>
     <button class="nav-btn" data-nav="plan" aria-label="برنامه مالی">
       <svg viewBox="0 0 24 24" fill="none"><rect x="4" y="5" width="16" height="15" rx="3" stroke="currentColor" stroke-width="1.8"/><path d="M4 10h16M8 3v4M16 3v4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
@@ -824,7 +824,7 @@ function gaugeSVG(percent, trackColor, color){
   const p = Math.max(0, Math.min(100, percent));
   const r = 76, len = Math.PI*r;
   const offset = len * (1 - p/100);
-  color = color || '#3FBE85';
+  color = color || '#2FA36B';
   return `<svg viewBox="0 0 200 108">
     <path d="M22 96 A ${r} ${r} 0 0 1 178 96" fill="none" stroke="${trackColor}" stroke-width="13" stroke-linecap="round"/>
     <path d="M22 96 A ${r} ${r} 0 0 1 178 96" fill="none" stroke="${color}" stroke-width="13" stroke-linecap="round"
@@ -845,9 +845,9 @@ function ringSVG(pct, color){
   const dash = v => `${v.toFixed(1)} ${(C - v).toFixed(1)}`;
   return `<svg viewBox="0 0 148 148" role="img" aria-label="ظرفیت اقساط ${fa(Math.round(pct))} درصد">
     <circle cx="74" cy="74" r="${R}" fill="none" stroke="rgba(255,255,255,.15)" stroke-width="12"/>
-    <circle cx="74" cy="74" r="${R}" fill="none" stroke="${color || '#74C365'}" stroke-width="12" stroke-linecap="round"
+    <circle cx="74" cy="74" r="${R}" fill="none" stroke="${color || '#2FA36B'}" stroke-width="12" stroke-linecap="round"
       stroke-dasharray="${dash(main)}" transform="rotate(-90 74 74)" style="transition:stroke-dasharray .5s cubic-bezier(.22,1,.36,1)"/>
-    ${over > 0 ? `<circle cx="74" cy="74" r="${R}" fill="none" stroke="#FF5A4E" stroke-width="12" stroke-linecap="round"
+    ${over > 0 ? `<circle cx="74" cy="74" r="${R}" fill="none" stroke="#C2412D" stroke-width="12" stroke-linecap="round"
       stroke-dasharray="${dash(over)}" transform="rotate(-90 74 74)"/>` : ''}
   </svg>`;
 }
@@ -1018,7 +1018,7 @@ function attachSwipeHandlers(root){
       } else {
         // card tint follows the action: green = pay (left), amber = postpone (right, unpaid), grey = unmark (right, paid)
         const isPaid = wrap.classList.contains('is-paid');
-        const t = left ? [225,240,230] : (isPaid ? [234,236,221] : [247,243,210]);
+        const t = left ? [226,243,232] : (isPaid ? [236,231,219] : [247,237,211]);
         card.style.background = `rgb(${Math.round(255+(t[0]-255)*p)},${Math.round(255+(t[1]-255)*p)},${Math.round(255+(t[2]-255)*p)})`;
       }
       wrap.classList.toggle('ready', !!ready);
@@ -1367,7 +1367,7 @@ function renderOnboarding(){
       </div>
       <button type="button" class="card mb18" id="ob-add-cm" style="display:flex; align-items:center; gap:12px; padding:16px; width:100%; text-align:start; cursor:pointer; border:none; font-family:inherit; color:inherit;">
         <span style="width:48px; height:48px; border-radius:14px; background:var(--accent); display:flex; align-items:center; justify-content:center; flex:0 0 48px;">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><rect x="3" y="4" width="18" height="18" rx="3" stroke="#001F3F" stroke-width="1.8"/><path d="M16 2v4M8 2v4M3 10h18" stroke="#001F3F" stroke-width="1.8" stroke-linecap="round"/><path d="m9 16 2 2 4-4" stroke="#001F3F" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><rect x="3" y="4" width="18" height="18" rx="3" stroke="#FFFFFF" stroke-width="1.8"/><path d="M16 2v4M8 2v4M3 10h18" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round"/><path d="m9 16 2 2 4-4" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </span>
         <span style="flex:1; min-width:0;">
           <span style="display:block; font-size:13px; font-weight:800;">اقساط فعلیت رو ثبت کن</span>
@@ -1769,7 +1769,7 @@ function renderHome(){
   // «over the cap» wording on the dashboard.
   const heroHTML = x=>{
     const smx = statusMeta(x.st);
-    const ringColor = x.st==='safe' ? '#74C365' : x.st==='caution' ? '#DBE64C' : '#F3A28E';
+    const ringColor = x.st==='safe' ? '#2FA36B' : x.st==='caution' ? '#D97706' : '#C2412D';
     const freeS = moneyShort(x.free), valS = moneyShort(x.val), capS = moneyShort(c), unS = moneyShort(x.unpaid);
     return `
     <div class="hero mb18">
@@ -1780,7 +1780,7 @@ function renderHome(){
       <div style="display:flex; align-items:center; gap:18px;">
         <div class="ring-wrap">
           ${ringSVG(x.pct, ringColor)}
-          <div class="ring-center"><div class="big" style="color:${x.pct>100?'#FF8A7A':''};">${fa(x.pct)}٪</div><div class="small">از سقف اقساط</div></div>
+          <div class="ring-center"><div class="big" style="color:${x.pct>100?'#C2412D':''};">${fa(x.pct)}٪</div><div class="small">از سقف اقساط</div></div>
         </div>
         <div style="flex:1; min-width:0;">
           <div class="hero-label">ظرفیت آزاد برای قسط جدید</div>
@@ -1816,7 +1816,7 @@ function renderHome(){
         <div class="muted" style="font-size:13px; margin-top:3px;">${jWeekdayName(t)} ${fa(t.jd)} ${MONTH_NAMES[t.jm]} ${fa(t.jy)} · نمای ماهانه</div>
       </div>
       <div class="icon-btn" data-nav="profile">
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9" stroke="#001F3F" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M13.7 21a2 2 0 0 1-3.4 0" stroke="#001F3F" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9" stroke="#23272B" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M13.7 21a2 2 0 0 1-3.4 0" stroke="#23272B" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
       </div>
     </div>
 
@@ -1828,7 +1828,7 @@ function renderHome(){
     <div id="home-month-detail">${monthDetailHTML(months6[homeHeroSel].m)}</div>
 
     <button class="btn btn-primary" id="home-cta">
-      <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="#001F3F" stroke-width="2.4" stroke-linecap="round"/></svg>
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="#23272B" stroke-width="2.4" stroke-linecap="round"/></svg>
       بررسی ظرفیت خرید جدید در شبیه‌ساز
     </button>
   `;
@@ -1886,7 +1886,7 @@ function renderCommitments(){
     const isEdit = commitEditTarget !== 'new';
     el.innerHTML = `
       <div class="topbar">
-        <div class="icon-btn" id="cm-back"><svg width="13" height="13" viewBox="0 0 24 24" fill="none"><path d="M9 6l6 6-6 6" stroke="#001F3F" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        <div class="icon-btn" id="cm-back"><svg width="13" height="13" viewBox="0 0 24 24" fill="none"><path d="M9 6l6 6-6 6" stroke="#23272B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
         <h2 style="font-size:21px;">${isEdit ? 'ویرایش تعهد' : 'تعهد جدید'}</h2>
       </div>
       <div id="cm-edit-form"></div>
@@ -1931,7 +1931,7 @@ function renderCommitments(){
     el.innerHTML = `
       <div class="topbar" style="margin-top:10px; margin-bottom:0;">
         <h2 style="font-size:21px; line-height:1.3;">${cm.name}</h2>
-        <div class="icon-btn" id="cm-back"><svg width="13" height="13" viewBox="0 0 24 24" fill="none"><path d="M9 6l6 6-6 6" stroke="#001F3F" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        <div class="icon-btn" id="cm-back"><svg width="13" height="13" viewBox="0 0 24 24" fill="none"><path d="M9 6l6 6-6 6" stroke="#23272B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
       </div>
       <div class="muted" style="font-size:13px; margin-bottom:12px;">${cm.provider}</div>
       <div class="hero mb18">
@@ -2067,14 +2067,14 @@ function renderCommitments(){
     <div class="cm-sticky">
     <div class="page-head" style="display:flex; align-items:flex-start; justify-content:space-between; gap:10px;">
       <button class="icon-btn" id="cm-month-toggle" aria-label="نمایش ماه‌های آینده" title="ماه‌های آینده" style="${commitMonthOffset===1?'border-color:var(--ink); box-shadow:0 0 0 2px var(--ink);':''}">
-        <svg width="17" height="17" viewBox="0 0 24 24" fill="none"><rect x="3" y="4" width="18" height="18" rx="3" stroke="#001F3F" stroke-width="1.8"/><path d="M16 2v4M8 2v4M3 10h18" stroke="#001F3F" stroke-width="1.8" stroke-linecap="round"/></svg>
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none"><rect x="3" y="4" width="18" height="18" rx="3" stroke="#23272B" stroke-width="1.8"/><path d="M16 2v4M8 2v4M3 10h18" stroke="#23272B" stroke-width="1.8" stroke-linecap="round"/></svg>
       </button>
       <div style="flex:1; text-align:center;">
         <h1>اقساط من</h1>
         <div class="sub">${commitMonthOffset===0 ? `${MONTH_NAMES[t.jm]} ${fa(t.jy)}` : `${MONTH_NAMES[t.jm]} ${fa(t.jy)} به بعد`} · ${fa(shown.length)} قسط</div>
       </div>
       <button class="icon-btn" id="cm-new" aria-label="افزودن قسط یا تعهد" title="افزودن قسط یا تعهد">
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="#001F3F" stroke-width="2.4" stroke-linecap="round"/></svg>
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="#23272B" stroke-width="2.4" stroke-linecap="round"/></svg>
       </button>
     </div>
     <div class="filter-row" id="commit-filters">
@@ -2174,11 +2174,11 @@ function renderPlanTechnique(){
       <div class="eyebrow">بودجه قابل تخصیص</div>
       <div class="kpi-num num" style="font-size:34px; color:var(--accent2);">${fa(income)}</div>
       <div class="muted" style="font-size:13px;">تومان · فقط درآمد قابل‌اتکا؛ درآمد متغیر کنار گذاشته شده است</div>
-      <div class="alloc-bar">${seg(fixed, '#1E488F')}${seg(installments, '#001F3F')}${seg(daily, '#74C365')}${seg(savings, '#DBE64C')}</div>
-      <div class="alloc-row"><span class="l"><span class="alloc-dot" style="background:#1E488F;"></span>هزینه‌های ثابت</span><span class="r num"><span style="font-weight:400; color:var(--muted); font-size:13px;">${fa(pctOf(fixed))}٪</span> ${toman(fixed)}</span></div>
-      <div class="alloc-row"><span class="l"><span class="alloc-dot" style="background:#001F3F;"></span>اقساط برنامه‌ریزی‌شده</span><span class="r num"><span style="font-weight:400; color:var(--muted); font-size:13px;">${fa(pctOf(installments))}٪</span> ${toman(installments)}</span></div>
-      <div class="alloc-row"><span class="l"><span class="alloc-dot" style="background:#74C365;"></span>روزمره و خواسته‌ها</span><span class="r num"><span style="font-weight:400; color:var(--muted); font-size:13px;">${fa(pctOf(daily))}٪</span> ${toman(daily)}</span></div>
-      <div class="alloc-row"><span class="l"><span class="alloc-dot" style="background:#DBE64C;"></span>پس‌انداز اختیاری</span><span class="r num"><span style="font-weight:400; color:var(--muted); font-size:13px;">${fa(pctOf(savings))}٪</span> ${toman(savings)}</span></div>
+      <div class="alloc-bar">${seg(fixed, '#1D4ED8')}${seg(installments, '#23272B')}${seg(daily, '#60A5FA')}${seg(savings, '#2FA36B')}</div>
+      <div class="alloc-row"><span class="l"><span class="alloc-dot" style="background:#1D4ED8;"></span>هزینه‌های ثابت</span><span class="r num"><span style="font-weight:400; color:var(--muted); font-size:13px;">${fa(pctOf(fixed))}٪</span> ${toman(fixed)}</span></div>
+      <div class="alloc-row"><span class="l"><span class="alloc-dot" style="background:#23272B;"></span>اقساط برنامه‌ریزی‌شده</span><span class="r num"><span style="font-weight:400; color:var(--muted); font-size:13px;">${fa(pctOf(installments))}٪</span> ${toman(installments)}</span></div>
+      <div class="alloc-row"><span class="l"><span class="alloc-dot" style="background:#60A5FA;"></span>روزمره و خواسته‌ها</span><span class="r num"><span style="font-weight:400; color:var(--muted); font-size:13px;">${fa(pctOf(daily))}٪</span> ${toman(daily)}</span></div>
+      <div class="alloc-row"><span class="l"><span class="alloc-dot" style="background:#2FA36B;"></span>پس‌انداز اختیاری</span><span class="r num"><span style="font-weight:400; color:var(--muted); font-size:13px;">${fa(pctOf(savings))}٪</span> ${toman(savings)}</span></div>
       <div class="alloc-row total"><span class="l">تخصیص‌یافته</span><span class="r num">${toman(allocated)}</span></div>
       <div class="alloc-row"><span class="l">تخصیص‌نیافته</span><span class="r num">${toman(unallocated)}</span></div>
     </div>
@@ -2433,7 +2433,7 @@ function renderProfile(){
     </div>
     <div class="hero mb18">
       <div style="display:flex; align-items:center; gap:14px;">
-        <div style="width:56px; height:56px; border-radius:50%; background:var(--accent); color:var(--ink); display:flex; align-items:center; justify-content:center; font-size:21px; flex:0 0 auto;">👤</div>
+        <div style="width:56px; height:56px; border-radius:50%; background:var(--accent-soft); color:var(--ink); display:flex; align-items:center; justify-content:center; font-size:21px; flex:0 0 auto;">👤</div>
         <div>
           <div style="font-size:21px; font-weight:800;">${state.name || 'ظرفیت'}</div>
           <div class="hero-sub">واحد پول: تومان · تقویم: جلالی · زبان: فارسی</div>
@@ -2513,7 +2513,7 @@ function renderProfileIncome(el){
   const t = jToday();
   el.innerHTML = `
     <div class="topbar">
-      <div class="icon-btn" id="pf-back"><svg width="13" height="13" viewBox="0 0 24 24" fill="none"><path d="M9 6l6 6-6 6" stroke="#001F3F" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      <div class="icon-btn" id="pf-back"><svg width="13" height="13" viewBox="0 0 24 24" fill="none"><path d="M9 6l6 6-6 6" stroke="#23272B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
       <h2 style="font-size:21px;">پایه محاسبات شما</h2>
     </div>
     <div class="muted" style="font-size:13px; margin-bottom:18px;">معادل ماهانه · مبالغ به تومان</div>
@@ -2660,7 +2660,7 @@ function renderProfileIncome(el){
 function renderProfileCap(el){
   el.innerHTML = `
     <div class="topbar">
-      <div class="icon-btn" id="pf-back"><svg width="13" height="13" viewBox="0 0 24 24" fill="none"><path d="M9 6l6 6-6 6" stroke="#001F3F" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      <div class="icon-btn" id="pf-back"><svg width="13" height="13" viewBox="0 0 24 24" fill="none"><path d="M9 6l6 6-6 6" stroke="#23272B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
       <h2 style="font-size:21px;">سقف اقساط</h2>
     </div>
     <div class="muted" style="font-size:13px; margin-bottom:18px;">یک مرز روشن برای خرید</div>
@@ -2699,7 +2699,7 @@ function renderProfileCap(el){
 function renderProfileTech(el){
   el.innerHTML = `
     <div class="topbar">
-      <div class="icon-btn" id="pf-back"><svg width="13" height="13" viewBox="0 0 24 24" fill="none"><path d="M9 6l6 6-6 6" stroke="#001F3F" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      <div class="icon-btn" id="pf-back"><svg width="13" height="13" viewBox="0 0 24 24" fill="none"><path d="M9 6l6 6-6 6" stroke="#23272B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
       <h2 style="font-size:21px;">تکنیک بودجه‌بندی</h2>
     </div>
     <div class="muted" style="font-size:13px; margin-bottom:18px;">روش بودجه‌بندی را بعداً هم می‌تونی عوض کنی.</div>
@@ -2768,7 +2768,7 @@ function renderSimStart(){
   el.innerHTML = `
     <div class="topbar">
       <h2 style="font-size:21px;">این خرید، چقدر جا می‌خواهد؟</h2>
-      <div class="icon-btn" data-nav="home"><svg width="13" height="13" viewBox="0 0 24 24" fill="none"><path d="M6 6l12 12M18 6L6 18" stroke="#001F3F" stroke-width="2" stroke-linecap="round"/></svg></div>
+      <div class="icon-btn" data-nav="home"><svg width="13" height="13" viewBox="0 0 24 24" fill="none"><path d="M6 6l12 12M18 6L6 18" stroke="#23272B" stroke-width="2" stroke-linecap="round"/></svg></div>
     </div>
     <div class="muted" style="font-size:13px; margin-bottom:18px;">قبل از تعهد، ارزش آن را ببینید.</div>
 
@@ -3106,7 +3106,7 @@ function renderSimResult(){
   if(!incomeR || !c){
     el.innerHTML = `
       <div class="topbar">
-        <div class="icon-btn" id="sm-back"><svg width="13" height="13" viewBox="0 0 24 24" fill="none"><path d="M9 6l6 6-6 6" stroke="#001F3F" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        <div class="icon-btn" id="sm-back"><svg width="13" height="13" viewBox="0 0 24 24" fill="none"><path d="M9 6l6 6-6 6" stroke="#23272B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
         <h2 style="font-size:21px;">برای ارزیابی، یک پایه لازم است</h2>
       </div>
       <div class="muted" style="font-size:13px; margin-bottom:18px;">حالت مستقل · هنوز درآمد قابل‌اتکا ندارید.</div>
@@ -3163,7 +3163,7 @@ function renderSimResult(){
 
   el.innerHTML = `
     <div class="topbar">
-      <div class="icon-btn" id="sm-back"><svg width="13" height="13" viewBox="0 0 24 24" fill="none"><path d="M9 6l6 6-6 6" stroke="#001F3F" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      <div class="icon-btn" id="sm-back"><svg width="13" height="13" viewBox="0 0 24 24" fill="none"><path d="M9 6l6 6-6 6" stroke="#23272B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
       <h2 style="font-size:21px;">${heroTitle}</h2>
     </div>
     <div class="muted" style="font-size:13px; margin-bottom:18px;">${p.name} · ${p.provider} · ${fa(p.installments)} قسط</div>
@@ -3177,7 +3177,7 @@ function renderSimResult(){
       <div class="hero-num num">${fa(worstShare)}٪</div>
       <div class="hero-row"><span class="l">اقساط قبلی + قسط جدید ${toman(p.monthly)}</span><span class="r num">${toman(worst.val)}</span></div>
       ${overCap > 0
-        ? `<div class="hero-row"><span class="l">بیش از سقف ${toman(c)}</span><span class="r num" style="color:#F3A28E;">${toman(overCap)}</span></div>`
+        ? `<div class="hero-row"><span class="l">بیش از سقف ${toman(c)}</span><span class="r num" style="color:#C2412D;">${toman(overCap)}</span></div>`
         : `<div class="hero-row"><span class="l">ظرفیت آزاد از سقف</span><span class="r num">${toman(Math.max(0, c - worst.val))}</span></div>`}
     </div>
 
