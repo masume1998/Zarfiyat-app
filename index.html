@@ -21,10 +21,10 @@
   :root{
     --ink:#23272B; --ink-soft:#4A4F54; --muted:#7C8187;
     --paper:#F6F2E9; --paper-deep:#ECE7DB; --surface:#FFFFFF; --line:#DDE3EA;
-    --safe:#1F9D63; --safe-soft:#E2F3E8; --safe-ink:#157347;
+    --safe:#1D4ED8; --safe-soft:#E3ECFD; --safe-ink:#1E40AF;
     --caution:#A16207; --caution-soft:#F7EDD3;
     --danger:#C2412D; --danger-soft:#FBE9E5;
-    --accent:#1D4ED8; --accent2:#60A5FA; --accent-soft:#E3ECFD; --green-bar:#2FA36B;
+    --accent:#1D4ED8; --accent2:#60A5FA; --accent-soft:#E3ECFD; --bar-blue:#60A5FA;
     --track:#DDE3EA;
     --shadow: 0 1px 3px rgba(35,39,43,.06), 0 12px 32px -12px rgba(35,39,43,.14);
   }
@@ -85,8 +85,8 @@
   .btn{ display:flex; align-items:center; justify-content:center; gap:8px; width:100%; padding:15px;
     border-radius:100px; border:none; font-family:inherit; font-size:13px; font-weight:700; cursor:pointer; }
   .btn:active{ transform:scale(.97); }
-  .btn-primary{ background:var(--accent); color:#fff; }
-  .btn-ghost{ background:var(--surface); color:var(--ink); border:1px solid var(--line); }
+  .btn-primary{ background:var(--accent); color:#fff; box-shadow:0 8px 20px -6px rgba(29,78,216,.45); }
+  .btn-ghost{ background:var(--surface); color:var(--ink); border:1px solid var(--line); box-shadow:0 4px 14px -6px rgba(35,39,43,.18); }
   .btn-outline-danger{ background:transparent; color:var(--danger); border:1px solid rgba(179,64,42,.35); }
   .btn[disabled]{ opacity:.4; pointer-events:none; }
 
@@ -184,17 +184,17 @@
   .status-chip.danger{ background:var(--danger-soft); color:var(--danger); }
   .status-chip .dot{ width:6px; height:6px; border-radius:50%; background:currentColor; }
 
-  /* dark hero card */
-  .hero{ background:var(--ink); border-radius:22px; padding:22px;
-    color:#fff; border:none; }
-  .hero .hero-label{ font-size:13px; color:rgba(255,255,255,.65); }
-  .hero .hero-num{ font-size:34px; font-weight:800; color:var(--accent2); line-height:1.25; }
-  .hero .hero-sub{ font-size:13px; color:rgba(255,255,255,.65); line-height:1.7; }
+  /* hero card (light — charcoal is for text only, never for frames) */
+  .hero{ background:var(--surface); border-radius:22px; padding:22px;
+    color:var(--ink); border:1px solid var(--line); box-shadow:var(--shadow); }
+  .hero .hero-label{ font-size:13px; color:var(--muted); }
+  .hero .hero-num{ font-size:34px; font-weight:800; color:var(--accent); line-height:1.25; }
+  .hero .hero-sub{ font-size:13px; color:var(--muted); line-height:1.7; }
   .hero .hero-row{ display:flex; justify-content:space-between; gap:10px; padding:9px 0; font-size:13px; }
-  .hero .hero-row .l{ color:rgba(255,255,255,.65); }
+  .hero .hero-row .l{ color:var(--muted); }
   .hero .hero-row .r{ font-weight:800; }
   .hero-chip{ font-size:10px; font-weight:700; padding:5px 12px; border-radius:100px; display:inline-flex; align-items:center; gap:6px; }
-  .hero-chip.safe{ background:rgba(31,157,99,.9); color:#fff; }
+  .hero-chip.safe{ background:rgba(29,78,216,.9); color:#fff; }
   .hero-chip.caution{ background:var(--accent); color:#fff; }
   .hero-chip.danger{ background:var(--danger); color:#fff; }
 
@@ -202,7 +202,13 @@
   .segmented{ display:flex; background:var(--paper-deep); border-radius:100px; padding:3px; margin-bottom:18px; }
   .segmented button{ flex:1; border:none; background:transparent; padding:9px 6px; border-radius:100px;
     font-family:inherit; font-size:13px; font-weight:700; color:var(--muted); cursor:pointer; }
-  .segmented button.active{ background:var(--surface); color:var(--ink); box-shadow:0 2px 6px rgba(35,39,43,.1); }
+  .segmented button.active{ background:var(--surface); color:var(--accent); box-shadow:0 2px 6px rgba(35,39,43,.1); }
+
+  /* ---- toggle switch (SOFT/SYSTEM: cobalt when on, grey when off, white knob) ---- */
+  .switch{ width:48px; height:28px; border-radius:100px; background:var(--line); position:relative; flex:0 0 auto; border:none; padding:0; transition:background .25s cubic-bezier(.22,1,.36,1); }
+  .switch::after{ content:''; position:absolute; top:3px; inset-inline-start:3px; width:22px; height:22px; border-radius:50%; background:#fff; box-shadow:0 2px 6px rgba(35,39,43,.25); transition:transform .25s cubic-bezier(.22,1,.36,1); }
+  .switch.on{ background:var(--accent); }
+  .switch.on::after{ transform:translateX(-20px); }
 
   .waterfall-row{ display:flex; align-items:center; justify-content:space-between; padding:11px 0; gap:10px; }
   .waterfall-row .l{ font-size:13px; font-weight:600; color:var(--ink-soft); display:flex; align-items:center; gap:8px;}
@@ -230,7 +236,7 @@
   .bars{ display:flex; align-items:flex-end; gap:8px; height:150px; padding-top:10px; }
   .bars .bar-col{ flex:1; display:flex; flex-direction:column; align-items:center; gap:6px; min-width:0; }
   .bars .bar-val{ font-size:10px; font-weight:800; color:rgba(255,255,255,.85); }
-  .bars .bar{ width:100%; max-width:38px; border-radius:6px 6px 0 0; background:var(--green-bar); }
+  .bars .bar{ width:100%; max-width:38px; border-radius:6px 6px 0 0; background:var(--bar-blue); }
   .bars .bar.last{ background:var(--accent); }
   .bars .bar-lab{ font-size:10px; color:rgba(255,255,255,.6); }
 
@@ -264,17 +270,18 @@
     color:var(--ink-soft); cursor:pointer; }
   .filter-chip{ padding:8px 14px; border-radius:100px; font-size:13px; font-weight:700; border:1px solid var(--line);
     background:var(--surface); color:var(--ink-soft); cursor:pointer; white-space:nowrap; }
-  .filter-chip.selected{ background:var(--ink); color:#fff; border-color:var(--ink); }
+  .filter-chip.selected{ background:var(--accent); color:#fff; border-color:var(--accent); }
 
   .toast{ position:absolute; bottom:100px; left:50%; transform:translateX(-50%) translateY(20px);
-    background:var(--ink); color:#fff; padding:12px 20px; border-radius:100px; font-size:13px; font-weight:700;
+    background:var(--surface); color:var(--ink); padding:12px 20px; border-radius:100px; font-size:13px; font-weight:700;
+    border:1px solid var(--line); box-shadow:0 12px 32px -8px rgba(35,39,43,.25);
     opacity:0; pointer-events:none; transition:opacity .25s ease, transform .25s cubic-bezier(.22,1,.36,1); z-index:50; white-space:nowrap; }
   .toast.show{ opacity:1; transform:translateX(-50%) translateY(0); }
   .toast.has-action{ display:flex; align-items:center; gap:14px; white-space:normal; max-width:calc(100% - 24px); }
   .toast.show.has-action{ pointer-events:auto; }
   .toast .toast-undo{ background:var(--accent); color:#fff; border:none; border-radius:100px; padding:6px 14px;
     font-family:inherit; font-size:13px; font-weight:800; cursor:pointer; flex:0 0 auto; }
-  .toast .toast-undo:focus-visible{ outline:2px solid #fff; outline-offset:2px; }
+  .toast .toast-undo:focus-visible{ outline:2px solid var(--accent); outline-offset:2px; }
 
   .bottom-nav{ position:absolute; left:50%; transform:translateX(-50%); bottom:calc(14px + env(safe-area-inset-bottom)); z-index:20;
     width:min(430px, calc(100% - 32px));
@@ -353,7 +360,7 @@
 
   input[type="range"]{ -webkit-appearance:none; width:100%; height:6px; border-radius:100px; background:var(--track); outline:none; }
   input[type="range"]::-webkit-slider-thumb{ -webkit-appearance:none; width:20px; height:20px; border-radius:50%;
-    background:var(--safe); border:4px solid #fff; box-shadow:0 2px 8px rgba(31,157,99,.4); cursor:pointer; }
+    background:#fff; border:3px solid var(--accent); box-shadow:0 2px 8px rgba(29,78,216,.3); cursor:pointer; }
 
   /* ---- purchase advisor (local-only, no server / no API) ---- */
   .advisor-alt-title{ font-size:13px; font-weight:800; margin:12px 0 8px; }
@@ -422,7 +429,7 @@
       <span class="nav-label">اقساط</span>
     </button>
     <button class="nav-fab" data-nav="sim" aria-label="شبیه‌ساز">
-      <svg viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="#23272B" stroke-width="2.4" stroke-linecap="round"/></svg>
+      <svg viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="#FFFFFF" stroke-width="2.4" stroke-linecap="round"/></svg>
     </button>
     <button class="nav-btn" data-nav="plan" aria-label="برنامه مالی">
       <svg viewBox="0 0 24 24" fill="none"><rect x="4" y="5" width="16" height="15" rx="3" stroke="currentColor" stroke-width="1.8"/><path d="M4 10h16M8 3v4M16 3v4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
@@ -683,19 +690,38 @@ function migrateCommitment(c){
   if(typeof c.interestAmount !== 'number') c.interestAmount = Math.round((c.total||0) * (c.interestPercent||0) / 100);
   return c;
 }
+const BACKUP_KEY = STORAGE_KEY + '-backup';
+let recoveredFromBackup = false;
 function saveState(){
-  try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }catch(e){}
+  try{
+    const json = JSON.stringify(state);
+    localStorage.setItem(STORAGE_KEY, json);
+    try{ localStorage.setItem(BACKUP_KEY, json); }catch(e){}
+  }catch(e){}
+}
+function parseStoredState(raw){
+  if(!raw) return null;
+  try{
+    const data = JSON.parse(raw);
+    if(!data || typeof data !== 'object') return null;
+    const s = Object.assign(defaultState(), data);
+    s.installmentCapPercent = clampCap(s.installmentCapPercent);
+    s.commitments = (s.commitments||[]).filter(c=>c && typeof c === 'object').map(c=>{
+      try{ return migrateCommitment(c); }catch(e){ return null; }
+    }).filter(Boolean);
+    if(!Array.isArray(s.savedProposals)) s.savedProposals = [];
+    if(!s.savingsLog) s.savingsLog = {};
+    return s;
+  }catch(e){ return null; }
 }
 function loadState(){
-  try{
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if(raw){
-      state = Object.assign(defaultState(), JSON.parse(raw));
-      state.installmentCapPercent = clampCap(state.installmentCapPercent);
-      state.commitments = (state.commitments||[]).map(migrateCommitment);
-      if(!Array.isArray(state.savedProposals)) state.savedProposals = [];
-    }
-  }catch(e){ state = defaultState(); }
+  // try the main copy first, then the automatic on-device backup; a broken
+  // value never wipes the data — the raw copy stays in storage for recovery
+  const main = parseStoredState(localStorage.getItem(STORAGE_KEY));
+  if(main){ state = main; return; }
+  const backup = parseStoredState(localStorage.getItem(BACKUP_KEY));
+  if(backup){ state = backup; recoveredFromBackup = true; return; }
+  state = defaultState();
 }
 
 function scheduleEntryAt(purchaseJ, offset, ruleType, intervalDays, amount){
@@ -824,7 +850,7 @@ function gaugeSVG(percent, trackColor, color){
   const p = Math.max(0, Math.min(100, percent));
   const r = 76, len = Math.PI*r;
   const offset = len * (1 - p/100);
-  color = color || '#2FA36B';
+  color = color || '#1D4ED8';
   return `<svg viewBox="0 0 200 108">
     <path d="M22 96 A ${r} ${r} 0 0 1 178 96" fill="none" stroke="${trackColor}" stroke-width="13" stroke-linecap="round"/>
     <path d="M22 96 A ${r} ${r} 0 0 1 178 96" fill="none" stroke="${color}" stroke-width="13" stroke-linecap="round"
@@ -844,8 +870,8 @@ function ringSVG(pct, color){
   const over = pct > 100 ? Math.min(pct - 100, 100) / 100 * C : 0;
   const dash = v => `${v.toFixed(1)} ${(C - v).toFixed(1)}`;
   return `<svg viewBox="0 0 148 148" role="img" aria-label="ظرفیت اقساط ${fa(Math.round(pct))} درصد">
-    <circle cx="74" cy="74" r="${R}" fill="none" stroke="rgba(255,255,255,.15)" stroke-width="12"/>
-    <circle cx="74" cy="74" r="${R}" fill="none" stroke="${color || '#2FA36B'}" stroke-width="12" stroke-linecap="round"
+    <circle cx="74" cy="74" r="${R}" fill="none" stroke="#DDE3EA" stroke-width="12"/>
+    <circle cx="74" cy="74" r="${R}" fill="none" stroke="${color || '#1D4ED8'}" stroke-width="12" stroke-linecap="round"
       stroke-dasharray="${dash(main)}" transform="rotate(-90 74 74)" style="transition:stroke-dasharray .5s cubic-bezier(.22,1,.36,1)"/>
     ${over > 0 ? `<circle cx="74" cy="74" r="${R}" fill="none" stroke="#C2412D" stroke-width="12" stroke-linecap="round"
       stroke-dasharray="${dash(over)}" transform="rotate(-90 74 74)"/>` : ''}
@@ -1018,7 +1044,7 @@ function attachSwipeHandlers(root){
       } else {
         // card tint follows the action: green = pay (left), amber = postpone (right, unpaid), grey = unmark (right, paid)
         const isPaid = wrap.classList.contains('is-paid');
-        const t = left ? [226,243,232] : (isPaid ? [236,231,219] : [247,237,211]);
+        const t = left ? [227,236,253] : (isPaid ? [236,231,219] : [247,237,211]);
         card.style.background = `rgb(${Math.round(255+(t[0]-255)*p)},${Math.round(255+(t[1]-255)*p)},${Math.round(255+(t[2]-255)*p)})`;
       }
       wrap.classList.toggle('ready', !!ready);
@@ -1249,7 +1275,7 @@ function renderOnboarding(){
         </div>
         <div class="field-label">ثابت است یا متغیر؟</div>
         <div class="chip-grid mb14">
-          <div class="chip selected" data-fixed="1">✅ ثابت / قابل‌اتکا</div>
+          <div class="chip selected" data-fixed="1">☑️ ثابت / قابل‌اتکا</div>
           <div class="chip" data-fixed="0">🎲 متغیر</div>
         </div>
         <div class="hint mb14">درآمد ثابت پایه‌ی سقف اقساطته؛ درآمد متغیر فقط برای اطلاعه، روش حساب نمی‌شه</div>
@@ -1271,7 +1297,7 @@ function renderOnboarding(){
       document.getElementById('inc-list').innerHTML = obDraft.incomeSources.map(s=>{
         const f = FREQUENCIES.find(x=>x.key===s.frequency);
         return `<div class="list-row">
-          <div class="emoji-badge">${s.fixed?'✅':'🎲'}</div>
+          <div class="emoji-badge">${s.fixed?'☑️':'🎲'}</div>
           <div class="info"><div class="title">${s.name}</div><div class="sub">${f.label} · ${s.fixed?'ثابت':'متغیر'}</div></div>
           <div class="amount num">${toman(s.amount)}</div>
           <button class="row-del" data-del="${s.id}">✕</button>
@@ -1769,7 +1795,7 @@ function renderHome(){
   // «over the cap» wording on the dashboard.
   const heroHTML = x=>{
     const smx = statusMeta(x.st);
-    const ringColor = x.st==='safe' ? '#2FA36B' : x.st==='caution' ? '#D97706' : '#C2412D';
+    const ringColor = x.st==='safe' ? '#1D4ED8' : x.st==='caution' ? '#D97706' : '#C2412D';
     const freeS = moneyShort(x.free), valS = moneyShort(x.val), capS = moneyShort(c), unS = moneyShort(x.unpaid);
     return `
     <div class="hero mb18">
@@ -1941,7 +1967,7 @@ function renderCommitments(){
         <div class="hero-row"><span class="l">پیشرفت پرداخت</span><span class="r num">${fa(paidCount)} از ${fa(cm.installments)} قسط · ${fa(pctPaid)}٪</span></div>
         <div class="hero-row total"><span class="l">مانده این تعهد</span><span class="r num">${toman(unpaidSum)}</span></div>
         <div style="height:8px; border-radius:100px; background:rgba(255,255,255,.14); overflow:hidden; margin-top:12px;">
-          <div style="height:100%; border-radius:100px; width:${pctPaid}%; background:var(--green-bar);"></div>
+          <div style="height:100%; border-radius:100px; width:${pctPaid}%; background:var(--bar-blue);"></div>
         </div>
         <div style="display:flex; gap:8px; margin-top:12px;">
           <span class="badge-necessity ${necClass}">${nec.label}</span>
@@ -1960,7 +1986,7 @@ function renderCommitments(){
       </div>
       <div class="section-title">اقساط پرداخت‌نشده · چپ = پرداخت، راست = عقب انداختن</div>
       <div class="card mb18">
-        ${schedule.map((e,idx)=> e.paid ? '' : installmentRowHTML(cm.id, idx, e)).join('') || '<div class="hint" style="margin:8px 0;">همه‌ی اقساط علامت‌گذاری شده‌اند ✅</div>'}
+        ${schedule.map((e,idx)=> e.paid ? '' : installmentRowHTML(cm.id, idx, e)).join('') || '<div class="hint" style="margin:8px 0;">همه‌ی اقساط علامت‌گذاری شده‌اند ☑️</div>'}
       </div>
       ${next ? `<button class="btn btn-primary mb14" id="cm-mark-next">علامت‌گذاری قسط ${MONTH_NAMES[next.jm]} به‌عنوان پرداخت‌شده</button>` : ''}
       <div class="note"><span class="note-ic">ⓘ</span><span>این فقط ثبت شخصی پرداخت است؛ وجهی منتقل یا پرداخت بانکی تأیید نمی‌شود.</span></div>
@@ -2042,7 +2068,7 @@ function renderCommitments(){
     const cm = d.cm;
     const typeInfo = COMMITMENT_TYPES.find(x=>x.key===cm.type);
     const inner = `<div class="cmt-row inst-card" data-detail="${cm.id}">
-      <div class="cmt-thumb">${d.hasUnpaid?typeInfo.emoji:'✅'}</div>
+      <div class="cmt-thumb">${d.hasUnpaid?typeInfo.emoji:'☑️'}</div>
       <div class="info">
         <div class="title">${cm.name}</div>
         <div class="cmt-amount num">${faSep(cm.monthly)} <span class="inst-unit">تومان</span></div>
@@ -2174,11 +2200,11 @@ function renderPlanTechnique(){
       <div class="eyebrow">بودجه قابل تخصیص</div>
       <div class="kpi-num num" style="font-size:34px; color:var(--accent2);">${fa(income)}</div>
       <div class="muted" style="font-size:13px;">تومان · فقط درآمد قابل‌اتکا؛ درآمد متغیر کنار گذاشته شده است</div>
-      <div class="alloc-bar">${seg(fixed, '#1D4ED8')}${seg(installments, '#23272B')}${seg(daily, '#60A5FA')}${seg(savings, '#2FA36B')}</div>
+      <div class="alloc-bar">${seg(fixed, '#1D4ED8')}${seg(installments, '#3B82F6')}${seg(daily, '#60A5FA')}${seg(savings, '#93C5FD')}</div>
       <div class="alloc-row"><span class="l"><span class="alloc-dot" style="background:#1D4ED8;"></span>هزینه‌های ثابت</span><span class="r num"><span style="font-weight:400; color:var(--muted); font-size:13px;">${fa(pctOf(fixed))}٪</span> ${toman(fixed)}</span></div>
-      <div class="alloc-row"><span class="l"><span class="alloc-dot" style="background:#23272B;"></span>اقساط برنامه‌ریزی‌شده</span><span class="r num"><span style="font-weight:400; color:var(--muted); font-size:13px;">${fa(pctOf(installments))}٪</span> ${toman(installments)}</span></div>
+      <div class="alloc-row"><span class="l"><span class="alloc-dot" style="background:#3B82F6;"></span>اقساط برنامه‌ریزی‌شده</span><span class="r num"><span style="font-weight:400; color:var(--muted); font-size:13px;">${fa(pctOf(installments))}٪</span> ${toman(installments)}</span></div>
       <div class="alloc-row"><span class="l"><span class="alloc-dot" style="background:#60A5FA;"></span>روزمره و خواسته‌ها</span><span class="r num"><span style="font-weight:400; color:var(--muted); font-size:13px;">${fa(pctOf(daily))}٪</span> ${toman(daily)}</span></div>
-      <div class="alloc-row"><span class="l"><span class="alloc-dot" style="background:#2FA36B;"></span>پس‌انداز اختیاری</span><span class="r num"><span style="font-weight:400; color:var(--muted); font-size:13px;">${fa(pctOf(savings))}٪</span> ${toman(savings)}</span></div>
+      <div class="alloc-row"><span class="l"><span class="alloc-dot" style="background:#93C5FD;"></span>پس‌انداز اختیاری</span><span class="r num"><span style="font-weight:400; color:var(--muted); font-size:13px;">${fa(pctOf(savings))}٪</span> ${toman(savings)}</span></div>
       <div class="alloc-row total"><span class="l">تخصیص‌یافته</span><span class="r num">${toman(allocated)}</span></div>
       <div class="alloc-row"><span class="l">تخصیص‌نیافته</span><span class="r num">${toman(unallocated)}</span></div>
     </div>
@@ -2403,11 +2429,9 @@ function importState(file, onDone){
       const data = JSON.parse(reader.result);
       if(!data || typeof data !== 'object' || (!Array.isArray(data.commitments) && !Array.isArray(data.incomeSources))) throw new Error('bad backup');
       if(!confirm('اطلاعات فعلی با نسخه پشتیبان جایگزین بشه؟')) return;
-      state = Object.assign(defaultState(), data);
-      state.installmentCapPercent = clampCap(state.installmentCapPercent);
-      state.commitments = (state.commitments||[]).map(migrateCommitment);
-      if(!Array.isArray(state.savedProposals)) state.savedProposals = [];
-      if(!state.savingsLog) state.savingsLog = {};
+      const parsed = parseStoredState(JSON.stringify(data));
+      if(!parsed) throw new Error('bad backup');
+      state = parsed;
       saveState();
       showToast('نسخه پشتیبان بازگردانی شد ✅');
       if(onDone){ onDone(); return; }
@@ -2451,7 +2475,7 @@ function renderProfile(){
         <div class="info"><div class="title">تکنیک بودجه‌بندی</div><div class="sub">${tech.label}</div></div><span style="color:var(--muted);">‹</span></div>
       <div class="list-row" id="pf-notif-row"><div class="emoji-badge">🔔</div>
         <div class="info"><div class="title">یادآوری سررسید</div><div class="sub">${state.notificationsEnabled ? 'فعال · ۳ روز پیش از سررسید' : 'غیرفعال'}</div></div>
-        <span style="font-size:13px; font-weight:700; color:${state.notificationsEnabled ? 'var(--safe)' : 'var(--muted)'};">${state.notificationsEnabled ? 'فعال' : 'غیرفعال'}</span></div>
+        <span class="switch ${state.notificationsEnabled ? 'on' : ''}" aria-hidden="true"></span></div>
     </div>
 
     <div class="section-title">داده و حریم خصوصی</div>
@@ -2460,10 +2484,10 @@ function renderProfile(){
         <div class="info"><div class="title">بکاپ گرفتن از داده‌ها</div><div class="sub">اشتراک‌گذاری یا دانلود فایل بکاپ</div></div><span style="color:var(--muted);">‹</span></div>
       <div class="list-row" id="pf-import"><div class="emoji-badge">📥</div>
         <div class="info"><div class="title">آپلود کردن داده‌ها</div><div class="sub">آپلود فایل بکاپ و جایگزینی اطلاعات</div></div><span style="color:var(--muted);">‹</span></div>
-      <input type="file" id="pf-import-file" accept="application/json,.json" style="display:none;">
+      <input type="file" id="pf-import-file" accept=".json,application/json" style="position:fixed; left:-9999px; top:0; width:1px; height:1px; opacity:0; pointer-events:none;" aria-hidden="true" tabindex="-1">
       <div class="list-row" id="pf-motion-row"><div class="emoji-badge">♿</div>
         <div class="info"><div class="title">دسترس‌پذیری</div><div class="sub">خوانایی و کاهش حرکت</div></div>
-        <span style="font-size:13px; font-weight:700; color:${state.reduceMotion ? 'var(--safe)' : 'var(--muted)'};">${state.reduceMotion ? 'کاهش حرکت روشن' : 'خاموش'}</span></div>
+        <span class="switch ${state.reduceMotion ? 'on' : ''}" aria-hidden="true"></span></div>
       <div class="list-row" id="pf-update-row"><div class="emoji-badge">🔄</div>
         <div class="info"><div class="title">بررسی به‌روزرسانی</div><div class="sub">اگه نسخه‌ی جدید اومده باشه، نصب و باز می‌شه</div></div>
         <span style="color:var(--muted);">‹</span></div>
@@ -2504,7 +2528,7 @@ function renderProfile(){
   importFile.onchange = ()=>{ if(importFile.files && importFile.files[0]) importState(importFile.files[0]); };
   document.getElementById('pf-reset').onclick = ()=>{
     if(!confirm('همه‌ی اطلاعات پاک بشه و از اول شروع کنیم؟')) return;
-    try{ localStorage.removeItem(STORAGE_KEY); }catch(e){}
+    try{ localStorage.removeItem(STORAGE_KEY); localStorage.removeItem(BACKUP_KEY); }catch(e){}
     location.reload();
   };
 }
@@ -2546,7 +2570,7 @@ function renderProfileIncome(el){
   function renderIncomeList(){
     document.getElementById('pf-income-list').innerHTML = state.incomeSources.map(s=>{
       const f = FREQUENCIES.find(x=>x.key===s.frequency);
-      return `<div class="list-row" data-editinc="${s.id}"><div class="emoji-badge">${s.fixed?'✅':'🎲'}</div>
+      return `<div class="list-row" data-editinc="${s.id}"><div class="emoji-badge">${s.fixed?'☑️':'🎲'}</div>
         <div class="info"><div class="title">${s.name}</div><div class="sub">${f.label} · ${s.fixed?'ثابت':'متغیر'}</div></div>
         <div class="amount num">${toman(s.amount)}</div>
         <button class="row-del" data-delinc="${s.id}">✕</button></div>`;
@@ -2575,7 +2599,7 @@ function renderProfileIncome(el){
         <div><div class="field-label">دوره</div><select class="input" id="if-freq">${FREQUENCIES.map(f=>`<option value="${f.key}" ${s.frequency===f.key?'selected':''}>${f.label}</option>`).join('')}</select></div>
       </div>
       <div class="chip-grid mb14" id="if-fixed">
-        <div class="chip ${s.fixed?'selected':''}" data-fixed="1">✅ ثابت</div>
+        <div class="chip ${s.fixed?'selected':''}" data-fixed="1">☑️ ثابت</div>
         <div class="chip ${!s.fixed?'selected':''}" data-fixed="0">🎲 متغیر</div>
       </div>
       <div class="row-2">
@@ -3277,6 +3301,7 @@ if(state.onboarded){
 } else {
   renderOnboarding();
 }
+if(recoveredFromBackup) setTimeout(()=>showToast('داده‌ها از نسخه پشتیبان خودکار بازیابی شد'), 600);
 
 // App update check: fetch the live service worker (bypassing caches) and,
 // if its cache name is newer than anything installed, ask the browser to
